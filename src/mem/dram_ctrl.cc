@@ -1395,7 +1395,7 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         //Per request memory access time
         if (((uint64_t)0x01 << dram_pkt->bank) & reservedBankMask) {
             DPRINTF(KU, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
-	    }
+        }
 
         if (dram_pkt->bank == 0)
             totMemAccLatBank0 += dram_pkt->readyTime - dram_pkt->entryTime;
@@ -1529,8 +1529,8 @@ DRAMCtrl::processNextReqEvent()
             //	Fixme: issue commands to reserved banks
             if (writeQueue.size() > writeHighThreshold) {
 #ifdef MEDUSA
-	       	    if (!isRequestToReservedBank(readQueue))
-		            switch_to_writes = true;
+                    if (!isRequestToReservedBank(readQueue))
+                            switch_to_writes = true;
 #else
                     switch_to_writes = true;
 #endif
@@ -1572,7 +1572,7 @@ DRAMCtrl::processNextReqEvent()
             (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
              !drainManager) ||
             (!readQueue.empty() && writesThisTime >= minWritesPerSwitch) ||
-	        isRequestToReservedBank(readQueue)) {
+                isRequestToReservedBank(readQueue)) {
             // turn the bus back around for reads again
             busState = WRITE_TO_READ;
             // note that the we switch back to reads also in the idle
