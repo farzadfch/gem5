@@ -70,21 +70,36 @@ def config_cache(options, system):
         system.l2 = l2_cache_class(clk_domain=system.cpu_clk_domain,
                                    size=options.l2_size,
                                    assoc=options.l2_assoc)
+#        system.monitor = CommMonitor(trace_file = "monitor.ptrc.gz",
+#                                     trace_enable = True)
 
         system.tol2bus = CoherentXBar(clk_domain = system.cpu_clk_domain,
-                                      width = 32)
+                                      width = 256)
         system.l2.cpu_side = system.tol2bus.master
         system.l2.mem_side = system.membus.slave
+        #system.l2.mem_side = system.monitor.slave
+        #system.monitor.master = system.membus.slave
+
 
     for i in xrange(options.num_cpus):
         if options.caches:
             icache = icache_class(size=options.l1i_size,
                                   assoc=options.l1i_assoc)
-            dcache = dcache_class(size=options.l1d_size,
-                                  assoc=options.l1d_assoc)
-
+            if i == 0:
+                dcache = dcache_class(size=options.l1d_size,
+                                  assoc=options.l1d_assoc,cpu_id=0,is_dcache='true')
+            elif i == 1:
+                dcache = dcache_class(size=options.l1d_size,
+                                  assoc=options.l1d_assoc,cpu_id=1,is_dcache='true')
+            elif i==2:
+                dcache = dcache_class(size=options.l1d_size,
+                                  assoc=options.l1d_assoc,cpu_id=2,is_dcache='true')
+            elif i==3:
+                dcache = dcache_class(size=options.l1d_size,
+                                  assoc=options.l1d_assoc,cpu_id=3,is_dcache='true')
             # When connecting the caches, the clock is also inherited
             # from the CPU in question
+
             if buildEnv['TARGET_ISA'] == 'x86':
                 system.cpu[i].addPrivateSplitL1Caches(icache, dcache,
                                                       PageTableWalkerCache(),

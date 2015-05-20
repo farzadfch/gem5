@@ -100,8 +100,8 @@ class O3_ARM_v7a_BP(BranchPredictor):
     instShiftAmt = 2
 
 class O3_ARM_v7a_3(DerivO3CPU):
-    LQEntries = 16
-    SQEntries = 16
+    LQEntries = 255
+    SQEntries = 255
     LSQDepCheckShift = 0
     LFSTSize = 1024
     SSITSize = 1024
@@ -136,8 +136,8 @@ class O3_ARM_v7a_3(DerivO3CPU):
     forwardComSize = 5
     numPhysIntRegs = 128
     numPhysFloatRegs = 192
-    numIQEntries = 32
-    numROBEntries = 40
+    numIQEntries = 256
+    numROBEntries = 300
 
     switched_out = False
     branchPred = O3_ARM_v7a_BP()
@@ -162,6 +162,7 @@ class O3_ARM_v7a_DCache(BaseCache):
     assoc = 2
     write_buffers = 16
     is_top_level = 'true'
+    is_dcache = 'true'
 
 # TLB Cache
 # Use a cache as a L2 TLB
@@ -180,12 +181,12 @@ class O3_ARM_v7aWalkCache(BaseCache):
 class O3_ARM_v7aL2(BaseCache):
     hit_latency = 12
     response_latency = 12
-    mshrs = 16
+    mshrs = 8
     tgts_per_mshr = 8
     size = '1MB'
     assoc = 16
-    write_buffers = 8
-    prefetch_on_access = 'true'
+    write_buffers = 32
+    prefetch_on_access = 'false'
     # Simple stride prefetcher
-    prefetcher = StridePrefetcher(degree=8, latency = 1)
-    tags = RandomRepl()
+#    prefetcher = StridePrefetcher(degree=8, latency = 1)
+#    tags = RandomRepl()
