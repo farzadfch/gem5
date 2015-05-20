@@ -45,13 +45,18 @@
 #include "base/bitfield.hh"
 #include "base/trace.hh"
 #include "debug/DRAM.hh"
+#include "debug/KU.hh"
 #include "debug/DRAMPower.hh"
 #include "debug/DRAMState.hh"
 #include "debug/Drain.hh"
 #include "mem/dram_ctrl.hh"
 #include "sim/system.hh"
-
+#include "arch/arm/stacktrace.hh"
+//#define MEDUSA
 using namespace std;
+
+uint64_t reservedBanks = 1;
+uint64_t reservedBankMask = (uint64_t(1) << reservedBanks) - 1;
 
 DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
     AbstractMemory(p),
@@ -387,6 +392,35 @@ DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
                           size, banks[rank][bank]);
 }
 
+
+uint8_t
+DRAMCtrl::getCpuid(uint8_t bank)
+{
+    if( (bank == 0) || (bank ==1) )
+        return 0;
+    else if( (bank == 2) || (bank ==3) )
+        return 1;
+    else if( (bank == 4) || (bank ==5) )
+        return 2;
+    else
+        return 3;
+}
+
+// Decrement the budget counter and block the cpu
+// when entire budget is utilized.
+void
+DRAMCtrl::memGuard(uint8_t cpu_id)
+{
+
+    system()->memoryBudget[cpu_id]--;
+
+    if( !(system()->memoryBudget[cpu_id]) ) {
+        system()->setMshr(cpu_id,0);
+        DPRINTF(KU, "memory budget = %d\n",system()->memoryBudget[cpu_id]);
+    }
+}
+
+
 void
 DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
 {
@@ -405,6 +439,7 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
     Addr addr = pkt->getAddr();
     unsigned pktsServicedByWrQ = 0;
     BurstHelper* burst_helper = NULL;
+    uint8_t cpu_id;
     for (int cnt = 0; cnt < pktCount; ++cnt) {
         unsigned size = std::min((addr | (burstSize - 1)) + 1,
                         pkt->getAddr() + pkt->getSize()) - addr;
@@ -441,6 +476,16 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
             }
 
             DRAMPacket* dram_pkt = decodeAddr(pkt, addr, size, true);
+            cpu_id = getCpuid(dram_pkt->bank);
+
+
+            if ((system()->use_memguard > 0) && (system()->memoryBudget[cpu_id])) {
+                memGuard(cpu_id);
+            }
+
+                if (dram_pkt->bank == 0)
+                    readBurstsBank0++;
+
             dram_pkt->burstHelper = burst_helper;
 
             assert(!readQueueFull(1));
@@ -452,6 +497,12 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
 
             // Update stats
             avgRdQLen = readQueue.size() + respQueue.size();
+
+                if(dram_pkt->bank == 0){
+                        avgRdQLenBank0 = readQueue.size();
+                        avgRespQLenBank0 = respQueue.size();
+                }
+
         }
 
         // Starting address of next dram pkt (aligend to burstSize boundary)
@@ -482,6 +533,7 @@ DRAMCtrl::addToWriteQueue(PacketPtr pkt, unsigned int pktCount)
     // only add to the write queue here. whenever the request is
     // eventually done, set the readyTime, and call schedule()
     assert(pkt->isWrite());
+    uint8_t cpu_id;
 
     // if the request size is larger than burst size, the pkt is split into
     // multiple DRAM packets
@@ -555,12 +607,18 @@ DRAMCtrl::addToWriteQueue(PacketPtr pkt, unsigned int pktCount)
         // and enqueue it
         if (!merged) {
             DRAMPacket* dram_pkt = decodeAddr(pkt, addr, size, false);
+            cpu_id = getCpuid(dram_pkt->bank);
 
             assert(writeQueue.size() < writeBufferSize);
             wrQLenPdf[writeQueue.size()]++;
 
-            DPRINTF(DRAM, "Adding to write queue\n");
 
+            if ((system()->use_memguard==2) && (system()->memoryBudget[cpu_id])) {
+                memGuard(cpu_id);
+            }
+
+
+            DPRINTF(DRAM, "Adding to write queue\n");
             writeQueue.push_back(dram_pkt);
 
             // Update stats
@@ -744,13 +802,70 @@ DRAMCtrl::chooseNext(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     if (memSchedPolicy == Enums::fcfs) {
         // Do nothing, since the correct request is already head
     } else if (memSchedPolicy == Enums::frfcfs) {
-        reorderQueue(queue, switched_cmd_type);
+#ifdef MEDUSA
+            reorderQueue(queue, switched_cmd_type);
+#else
+            reorderQueueFrfcfs(queue, switched_cmd_type);
+#endif
     } else
         panic("No scheduling policy chosen\n");
 }
+int
+DRAMCtrl::kucheckQueue(std::deque<DRAMPacket*>& queue, bool print)
+{
+    int count=0;
+
+        for (auto i = queue.begin(); i != queue.end() ; ++i) {
+            DRAMPacket* dram_pkt = *i;
+            if ((1 << dram_pkt->bank) & 0x01){
+                if(print)
+                    DPRINTF(KU,"Bank %d request when Qsize is %d\n", dram_pkt->bank, readQueue.size());
+                count++;
+            }
+       }
+       return count;
+}
 
 void
-DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
+DRAMCtrl::overlapRequest(std::deque<DRAMPacket*>& queue, uint64_t banks)
+{
+    uint64_t bankmask = (uint64_t(1) << banks) - 1;
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        const Bank& bank = dram_pkt->bankRef;
+            // Create a bank mask by clearing respecctive bank bits
+        // which are row hits.
+        if (bank.openRow == dram_pkt->row)
+           bankmask = (bankmask) & ~(uint64_t(1) << dram_pkt->bank);
+    }
+
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        Bank& bank = dram_pkt->bankRef;
+
+        if ((bankmask) & (uint64_t(1) << dram_pkt->bank)) {
+
+           if (bank.openRow != Bank::NO_ROW) {
+              prechargeBank(bank, std::max(bank.preAllowedAt, curTick()));
+           }
+
+           // next we need to account for the delay in activating the
+           // page
+           Tick act_tick = std::max(bank.actAllowedAt, curTick());
+
+           // Record the activation and deal with all the global timing
+           // constraints caused be a new activation (tRRD and tXAW)
+           activateBank(bank, act_tick, dram_pkt->row);
+           //clear the bank bit. We do not want to precharge and activate the bank
+               //again for subsequent requests in the queue.
+               bankmask = (bankmask) & ~(uint64_t(1) << dram_pkt->bank);
+            }
+    }
+}
+
+
+void
+DRAMCtrl::reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
 {
     // Only determine this when needed
     uint64_t earliest_banks = 0;
@@ -765,13 +880,14 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
         DRAMPacket* dram_pkt = *i;
         const Bank& bank = dram_pkt->bankRef;
         // Check if it is a row hit
+//        if ( (bank.openRow == dram_pkt->row) && (bank.colAllowedAt - curTick() <= tBURST) ) {
         if (bank.openRow == dram_pkt->row) {
             if (dram_pkt->rank == activeRank || switched_cmd_type) {
                 // FCFS within the hits, giving priority to commands
                 // that access the same rank as the previous burst
                 // to minimize bus turnaround delays
                 // Only give rank prioity when command type is not changing
-                DPRINTF(DRAM, "Row buffer hit\n");
+                //DPRINTF(PK, "Row buffer hit\n");
                 selected_pkt_it = i;
                 break;
             } else if (!found_prepped_diff_rank_pkt) {
@@ -780,6 +896,102 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
                 found_prepped_diff_rank_pkt = true;
             }
         } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt) {
+            // No row hit and
+            // haven't found an entry with a row hit to a new rank
+           if (earliest_banks == 0)
+                // Determine entries with earliest bank prep delay
+                // Function will give priority to commands that access the
+                // same rank as previous burst and can prep the bank seamlessly
+                earliest_banks = minBankPrep(queue, switched_cmd_type);
+
+            // FCFS - Bank is first available bank
+            if (bits(earliest_banks, dram_pkt->bankId, dram_pkt->bankId)) {
+                // Remember the packet to be scheduled to one of the earliest
+                // banks available, FCFS amongst the earliest banks
+                selected_pkt_it = i;
+                found_earliest_pkt = true;
+            }
+        }
+    }
+
+    DRAMPacket* selected_pkt = *selected_pkt_it;
+    queue.erase(selected_pkt_it);
+    queue.push_front(selected_pkt);
+}
+
+void
+DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
+{
+    // Only determine this when needed
+    uint64_t earliest_banks = 0;
+
+    // Search for row hits first, if no row hit is found then schedule the
+    // packet to one of the earliest banks available
+    bool found_earliest_pkt = false;
+    bool found_prepped_diff_rank_pkt = false;
+    bool found_row_hit = false;
+    bool found_reserved_diff_bank = false;
+    bool found_reserved_same_bank = false;
+    static uint64_t bankmaskSaved = reservedBankMask;
+    auto selected_pkt_it = queue.begin();
+
+//    overlapRequest(queue, banksPerRank);
+    //Arbitrate Requests in the DRAM queue using two-level
+    //hierarchical scheduler.
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        const Bank& bank = dram_pkt->bankRef;
+    // RR scheduler on reserved banks
+        //resrevedBankMask, stores the mask bits for reserved Banks.
+        //Check if the packet in the DRAM queue targets any of the reserved bank.
+            if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
+            //bankmaskSaved initially has the reservedBankMask bits.
+                if( bankmaskSaved & (0x01 << dram_pkt->bank) ) {
+                selected_pkt_it = i;
+                        found_reserved_diff_bank = true;
+                //once we selected a packet from a particular resrved bank,
+                //we will clear that bank bit, inorder to ensure that the
+                //next request slected is from a deifferent reserved bank.
+                //Hence forcing RR.
+                    bankmaskSaved &= ~(0x01 << dram_pkt->bank);
+                //Once we choose each packet from reserved banks,
+                //Reset the bankmaskSaved to reservedBankMask to start
+                //next round.
+                if(!bankmaskSaved)
+                            bankmaskSaved = reservedBankMask;
+                        break;
+                }
+                else {
+                //While iterating the DRAM queue, we also store
+                //the FirstCome DRAM packet to one of the already
+                //selected  reserved banks.This is incase, DRAM controller
+                //doesn't has any requests queued to other reserved banks, this
+                //packet will be serviced.
+                        if (!found_reserved_same_bank) {
+                            selected_pkt_it = i;
+                            found_reserved_same_bank = true;
+                }
+                }
+            }
+
+    //Else, FR-FCFS scheduler on shared banks
+        // Check if it is a row hit
+        // else if ( (bank.openRow == dram_pkt->row) & (bank.colAllowedAt - curTick() <= tBURST) & (!found_reserved_same_bank) & (!found_row_hit)) {
+        else if ( (bank.openRow == dram_pkt->row) &  (!found_reserved_same_bank) & (!found_row_hit)) {
+            if (dram_pkt->rank == activeRank || switched_cmd_type) {
+                // FCFS within the hits, giving priority to commands
+                // that access the same rank as the previous burst
+                // to minimize bus turnaround delays
+                // Only give rank prioity when command type is not changing
+                DPRINTF(DRAM, "Row buffer hit\n");
+                selected_pkt_it = i;
+                        found_row_hit = true;
+            } else if (!found_prepped_diff_rank_pkt) {
+                // found row hit for command on different rank than prev burst
+                selected_pkt_it = i;
+                found_prepped_diff_rank_pkt = true;
+            }
+        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt & !found_row_hit & !found_reserved_same_bank ) {
             // No row hit and
             // haven't found an entry with a row hit to a new rank
             if (earliest_banks == 0)
@@ -799,6 +1011,9 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     }
 
     DRAMPacket* selected_pkt = *selected_pkt_it;
+    //Reset round robin bank mask, if the queue doesn't have anymore requests from different banks
+    if (!found_reserved_diff_bank & found_reserved_same_bank)
+            bankmaskSaved = (reservedBankMask) & ~(0x01 << selected_pkt->bank);
     queue.erase(selected_pkt_it);
     queue.push_front(selected_pkt);
 }
@@ -1177,6 +1392,14 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         totMemAccLat += dram_pkt->readyTime - dram_pkt->entryTime;
         totBusLat += tBURST;
         totQLat += cmd_at - dram_pkt->entryTime;
+        //Per request memory access time
+        if (((uint64_t)0x01 << dram_pkt->bank) & reservedBankMask) {
+            DPRINTF(KU, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
+	    }
+
+        if (dram_pkt->bank == 0)
+            totMemAccLatBank0 += dram_pkt->readyTime - dram_pkt->entryTime;
+
     } else {
         ++writesThisTime;
         if (row_hit)
@@ -1184,6 +1407,18 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         bytesWritten += burstSize;
         perBankWrBursts[dram_pkt->bankId]++;
     }
+}
+
+bool
+DRAMCtrl::isRequestToReservedBank(std::deque<DRAMPacket*>& queue)
+{
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+            if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
+                return true;
+            }
+    }
+    return false;
 }
 
 void
@@ -1195,9 +1430,6 @@ DRAMCtrl::processNextReqEvent()
     if (busState == READ_TO_WRITE) {
         DPRINTF(DRAM, "Switching to writes after %d reads with %d reads "
                 "waiting\n", readsThisTime, readQueue.size());
-
-        // sample and reset the read-related stats as we are now
-        // transitioning to writes, and all reads are done
         rdPerTurnAround.sample(readsThisTime);
         readsThisTime = 0;
 
@@ -1294,11 +1526,16 @@ DRAMCtrl::processNextReqEvent()
             respQueue.push_back(dram_pkt);
 
             // we have so many writes that we have to transition
+            //	Fixme: issue commands to reserved banks
             if (writeQueue.size() > writeHighThreshold) {
-                switch_to_writes = true;
+#ifdef MEDUSA
+	       	    if (!isRequestToReservedBank(readQueue))
+		            switch_to_writes = true;
+#else
+                    switch_to_writes = true;
+#endif
             }
         }
-
         // switching to writes, either because the read queue is empty
         // and the writes have passed the low threshold (or we are
         // draining), or because the writes hit the hight threshold
@@ -1325,22 +1562,38 @@ DRAMCtrl::processNextReqEvent()
         writeQueue.pop_front();
         delete dram_pkt;
 
+
         // If we emptied the write queue, or got sufficiently below the
         // threshold (using the minWritesPerSwitch as the hysteresis) and
         // are not draining, or we have reads waiting and have done enough
         // writes, then switch to reads.
+#ifdef MEDUSA
         if (writeQueue.empty() ||
             (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
              !drainManager) ||
-            (!readQueue.empty() && writesThisTime >= minWritesPerSwitch)) {
+            (!readQueue.empty() && writesThisTime >= minWritesPerSwitch) ||
+	        isRequestToReservedBank(readQueue)) {
             // turn the bus back around for reads again
             busState = WRITE_TO_READ;
-
             // note that the we switch back to reads also in the idle
             // case, which eventually will check for any draining and
             // also pause any further scheduling if there is really
             // nothing to do
         }
+#else
+        if (writeQueue.empty() ||
+            (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
+             !drainManager) ||
+            (!readQueue.empty() && writesThisTime >= minWritesPerSwitch)){
+            // turn the bus back around for reads again
+            busState = WRITE_TO_READ;
+            // note that the we switch back to reads also in the idle
+            // case, which eventually will check for any draining and
+            // also pause any further scheduling if there is really
+            // nothing to do
+        }
+#endif
+
     }
 
     schedule(nextReqEvent, std::max(nextReqTime, curTick()));
@@ -1697,6 +1950,16 @@ DRAMCtrl::regStats()
         .desc("Average read queue length when enqueuing")
         .precision(2);
 
+    avgRdQLenBank0
+        .name(name() + ".avgRdQLenBank0")
+        .desc("Average read queue length to reserved banks when enqueuing bank0 request")
+        .precision(2);
+
+    avgRespQLenBank0
+        .name(name() + ".avgRespQLenBank0")
+        .desc("Average response queue length when enqueuing bank0 request")
+        .precision(2);
+
     avgWrQLen
         .name(name() + ".avgWrQLen")
         .desc("Average write queue length when enqueuing")
@@ -1712,6 +1975,16 @@ DRAMCtrl::regStats()
 
     totMemAccLat
         .name(name() + ".totMemAccLat")
+        .desc("Total ticks spent from burst creation until serviced "
+              "by the DRAM");
+
+    totMemAccLatBank0
+        .name(name() + ".totMemAccLatBank0")
+        .desc("Total ticks spent from burst creation until serviced "
+              "by the DRAM");
+
+    totMemAccLatCore0
+        .name(name() + ".totMemAccLatCore0")
         .desc("Total ticks spent from burst creation until serviced "
               "by the DRAM");
 
@@ -1735,6 +2008,21 @@ DRAMCtrl::regStats()
         .precision(2);
 
     avgMemAccLat = totMemAccLat / (readBursts - servicedByWrQ);
+
+
+    avgMemAccLatBank0
+        .name(name() + ".avgMemAccLatBank0")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatBank0 = totMemAccLatBank0 / (readBurstsBank0);
+
+    avgMemAccLatCore0
+        .name(name() + ".avgMemAccLatCore0")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatCore0 = totMemAccLatCore0 / (readBurstsCore0);
 
     numRdRetry
         .name(name() + ".numRdRetry")

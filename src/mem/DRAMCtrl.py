@@ -73,35 +73,44 @@ class DRAMCtrl(AbstractMemory):
 
     # the basic configuration of the controller architecture
     write_buffer_size = Param.Unsigned(64, "Number of write queue entries")
-    read_buffer_size = Param.Unsigned(32, "Number of read queue entries")
+    #write_buffer_size = Param.Unsigned(4, "Number of write queue entries")
+    read_buffer_size = Param.Unsigned(64, "Number of read queue entries")
 
     # threshold in percent for when to forcefully trigger writes and
     # start emptying the write buffer
     write_high_thresh_perc = Param.Percent(85, "Threshold to force writes")
+    #write_high_thresh_perc = Param.Percent(50, "Threshold to force writes")
 
     # threshold in percentage for when to start writes if the read
     # queue is empty
+    #write_low_thresh_perc = Param.Percent(25, "Threshold to start writes")
     write_low_thresh_perc = Param.Percent(50, "Threshold to start writes")
 
     # minimum write bursts to schedule before switching back to reads
-    min_writes_per_switch = Param.Unsigned(16, "Minimum write bursts before "
+    #min_writes_per_switch = Param.Unsigned(18, "Minimum write bursts before "
+    min_writes_per_switch = Param.Unsigned(1, "Minimum write bursts before "
                                            "switching to reads")
 
     # scheduler, address map and page policy
     mem_sched_policy = Param.MemSched('frfcfs', "Memory scheduling policy")
     addr_mapping = Param.AddrMap('RoRaBaChCo', "Address mapping policy")
     page_policy = Param.PageManage('open_adaptive', "Page management policy")
+#    page_policy = Param.PageManage('open', "Page management policy")
 
     # enforce a limit on the number of accesses per row
-    max_accesses_per_row = Param.Unsigned(16, "Max accesses per row before "
-                                          "closing");
+    max_accesses_per_row = Param.Unsigned(1024, "Max accesses per row before "
+                                         "closing");
+    #max_accesses_per_row = Param.Unsigned(16, "Max accesses per row before "
+    #                                      "closing");
 
     # pipeline latency of the controller and PHY, split into a
     # frontend part and a backend part, with reads and writes serviced
     # by the queues only seeing the frontend contribution, and reads
     # serviced by the memory seeing the sum of the two
-    static_frontend_latency = Param.Latency("10ns", "Static frontend latency")
-    static_backend_latency = Param.Latency("10ns", "Static backend latency")
+    #static_frontend_latency = Param.Latency("10ns", "Static frontend latency")
+    #static_backend_latency = Param.Latency("10ns", "Static backend latency")
+    static_frontend_latency = Param.Latency("0ns", "Static frontend latency")
+    static_backend_latency = Param.Latency("0ns", "Static backend latency")
 
     # the physical organisation of the DRAM
     device_bus_width = Param.Unsigned("data bus width in bits for each DRAM "\
@@ -372,7 +381,7 @@ class DDR3_1333_x64_DRAMSim2(DRAMCtrl):
     devices_per_rank = 8
 
     # Use two ranks
-    ranks_per_channel = 2
+    ranks_per_channel = 1
 
     # DDR3 has 8 banks in all configurations
     banks_per_rank = 8
@@ -423,10 +432,10 @@ class LPDDR2_S4_1066_x32(DRAMCtrl):
 
     # Each device has a page (row buffer) size of 1KB
     # (this depends on the memory density)
-    device_rowbuffer_size = '1kB'
+    device_rowbuffer_size = '2kB'
 
     # 1x32 configuration, so 1 device
-    devices_per_rank = 1
+    devices_per_rank = 2
 
     # Use a single rank
     ranks_per_channel = 1
@@ -460,7 +469,8 @@ class LPDDR2_S4_1066_x32(DRAMCtrl):
 
     # LPDDR2-S4, 4 Gbit
     tRFC = '130ns'
-    tREFI = '3.9us'
+    #tREFI = '3.9us'
+    tREFI = '3600s'
 
     # Irrespective of speed grade, tWTR is 7.5 ns
     tWTR = '7.5ns'

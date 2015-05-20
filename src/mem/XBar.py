@@ -51,8 +51,8 @@ class BaseXBar(MemObject):
     cxx_header = "mem/xbar.hh"
     slave = VectorSlavePort("vector port for connecting masters")
     master = VectorMasterPort("vector port for connecting slaves")
-    header_cycles = Param.Cycles(1, "cycles of overhead per transaction")
-    width = Param.Unsigned(8, "xbar width (bytes)")
+    header_cycles = Param.Cycles(0, "cycles of overhead per transaction")
+    width = Param.Unsigned(64, "xbar width (bytes)")
 
     # The default port can be left unconnected, or be used to connect
     # a default slave port

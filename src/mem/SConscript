@@ -85,11 +85,13 @@ CompoundFlag('XBar', ['BaseXBar', 'CoherentXBar', 'NoncoherentXBar',
 DebugFlag('Bridge')
 DebugFlag('CommMonitor')
 DebugFlag('DRAM')
+DebugFlag('PK')
 DebugFlag('DRAMPower')
 DebugFlag('DRAMState')
 DebugFlag('LLSC')
 DebugFlag('MMU')
 DebugFlag('MemoryAccess')
 DebugFlag('PacketQueue')
+DebugFlag('KU')
 
 DebugFlag("DRAMSim2")

@@ -122,6 +122,7 @@ class DRAMCtrl : public AbstractMemory
      */
     bool retryRdReq;
     bool retryWrReq;
+//    bool guard[4];
 
     /**
      * Bus state used to control the read/write switching and drive
@@ -387,6 +388,18 @@ class DRAMCtrl : public AbstractMemory
      * @param switched_cmd_type Command type is changing
      */
     void reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
+    void reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
+    int kucheckQueue(std::deque<DRAMPacket*>& queue, bool print);
+    //void overlapRequest(std::deque<DRAMPacket*>& queue, uint8_t bankmask);
+    void overlapRequest(std::deque<DRAMPacket*>& queue, uint64_t banks);
+    bool isRequestToReservedBank(std::deque<DRAMPacket*>& queue);
+
+    /**
+     * MemGuard Functions
+     */
+
+     uint8_t getCpuid(uint8_t bank);
+     void memGuard(uint8_t cpu_id);
 
     /**
      * Find which are the earliest banks ready to issue an activate
@@ -620,6 +633,8 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar readReqs;
     Stats::Scalar writeReqs;
     Stats::Scalar readBursts;
+    Stats::Scalar readBurstsBank0;
+    Stats::Scalar readBurstsCore0;
     Stats::Scalar writeBursts;
     Stats::Scalar bytesReadDRAM;
     Stats::Scalar bytesReadWrQ;
@@ -645,12 +660,16 @@ class DRAMCtrl : public AbstractMemory
     // Latencies summed over all requests
     Stats::Scalar totQLat;
     Stats::Scalar totMemAccLat;
+    Stats::Scalar totMemAccLatBank0;
+    Stats::Scalar totMemAccLatCore0;
     Stats::Scalar totBusLat;
 
     // Average latencies per request
     Stats::Formula avgQLat;
     Stats::Formula avgBusLat;
     Stats::Formula avgMemAccLat;
+    Stats::Formula avgMemAccLatBank0;
+    Stats::Formula avgMemAccLatCore0;
 
     // Average bandwidth
     Stats::Formula avgRdBW;
@@ -665,6 +684,8 @@ class DRAMCtrl : public AbstractMemory
     // Average queue lengths
     Stats::Average avgRdQLen;
     Stats::Average avgWrQLen;
+    Stats::Average avgRdQLenBank0;
+    Stats::Average avgRespQLenBank0;
 
     // Row hit count and rate
     Stats::Scalar readRowHits;
