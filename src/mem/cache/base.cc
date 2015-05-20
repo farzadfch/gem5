@@ -105,7 +105,7 @@ BaseCache::CacheSlavePort::setBlocked()
 void
 BaseCache::CacheSlavePort::clearBlocked()
 {
-//    assert(blocked);
+    assert(blocked);
     DPRINTF(CachePort, "Cache port %s accepting new requests\n", name());
     blocked = false;
     if (mustSendRetry) {

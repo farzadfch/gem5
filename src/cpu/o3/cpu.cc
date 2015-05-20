@@ -547,7 +547,6 @@ FullO3CPU<Impl>::tick()
             system->cycleInit[cpuId()] = curCycle();
             if(dcachePort.unblockCache())
                 DPRINTF(O3KU,"Unblocked Cache");
-            // unblock Dcache.. done.
          }
      }
 

@@ -172,7 +172,6 @@ class BaseCache : public MemObject
         void clearBlocked();
 
         bool isBlocked() const { return blocked; }
-//        class  ClockedObject co;
 
       protected:
 
