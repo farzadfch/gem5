@@ -563,4 +563,77 @@ let {{
     header_output += BasicDeclare.subst(m5workendIop)
     decoder_output += BasicConstructor.subst(m5workendIop)
     exec_output += PredOpExecute.subst(m5workendIop)
+
+    m5setmshr_code = '''
+        PseudoInst::setmshr(xc->tcBase(), join32to64(R1, R0), join32to64(R3, R2));
+    '''
+
+    m5setmshr_code64 = '''
+        PseudoInst::setmshr(xc->tcBase(), X0, X1);
+    '''
+
+    m5setmshrIop = InstObjParams("m5setmshr", "M5setmshr", "PredOp",
+                                   { "code":  m5setmshr_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5setmshrIop)
+    decoder_output += BasicConstructor.subst(m5setmshrIop)
+    exec_output += PredOpExecute.subst(m5setmshrIop)
+
+    m5setmshrIop = InstObjParams("m5setmshr", "M5setmshr64", "PredOp",
+                                   { "code":  m5setmshr_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5setmshrIop)
+    decoder_output += BasicConstructor.subst(m5setmshrIop)
+    exec_output += PredOpExecute.subst(m5setmshrIop)
+
+
+    m5setmembudget_code = '''
+        PseudoInst::setmembudget(xc->tcBase(), join32to64(R1, R0), join32to64(R3, R2));
+    '''
+
+    m5setmembudget_code64 = '''
+        PseudoInst::setmembudget(xc->tcBase(), X0, X1);
+    '''
+
+    m5setmembudgetIop = InstObjParams("m5setmembudget", "M5setmembudget", "PredOp",
+                                   { "code":  m5setmembudget_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5setmembudgetIop)
+    decoder_output += BasicConstructor.subst(m5setmembudgetIop)
+    exec_output += PredOpExecute.subst(m5setmembudgetIop)
+
+    m5setmembudgetIop = InstObjParams("m5setmembudget", "M5setmembudget64", "PredOp",
+                                   { "code":  m5setmembudget_code64,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5setmembudgetIop)
+    decoder_output += BasicConstructor.subst(m5setmembudgetIop)
+    exec_output += PredOpExecute.subst(m5setmembudgetIop)
+
+    m5enablememguard_code = '''
+        PseudoInst::enablememguard(xc->tcBase(), join32to64(R1, R0));
+    '''
+
+    m5enablememguard_code64 = '''
+        PseudoInst::enablememguard(xc->tcBase(), X0);
+    '''
+
+    m5enablememguardIop = InstObjParams("m5enablememguard", "M5enablememguard", "PredOp",
+                                   { "code":  m5enablememguard_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5enablememguardIop)
+    decoder_output += BasicConstructor.subst(m5enablememguardIop)
+    exec_output += PredOpExecute.subst(m5enablememguardIop)
+
+    m5enablememguardIop = InstObjParams("m5enablememguard", "M5enablememguard64", "PredOp",
+                                   { "code":  m5enablememguard_code64,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5enablememguardIop)
+    decoder_output += BasicConstructor.subst(m5enablememguardIop)
+    exec_output += PredOpExecute.subst(m5enablememguardIop)
 }};

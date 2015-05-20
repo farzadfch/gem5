@@ -2008,6 +2008,9 @@ namespace Aarch64
           case 0x54: return new M5panic(machInst);
           case 0x5a: return new M5workbegin64(machInst);
           case 0x5b: return new M5workend64(machInst);
+          case 0x56: return new M5setmshr64(machInst);
+          case 0x57: return new M5setmembudget64(machInst);
+          case 0x58: return new M5enablememguard64(machInst);
           default: return new Unknown64(machInst);
         }
     }

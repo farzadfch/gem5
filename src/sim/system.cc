@@ -55,6 +55,8 @@
 #include "config/the_isa.hh"
 #include "cpu/thread_context.hh"
 #include "debug/Loader.hh"
+#include "debug/MSHRInst.hh"
+#include "debug/PseudoInst.hh"
 #include "debug/WorkItems.hh"
 #include "kern/kernel_stats.hh"
 #include "mem/abstract_mem.hh"
@@ -85,10 +87,17 @@ System::System(Params *p)
       nextPID(0),
       physmem(name() + ".physmem", p->memories),
       memoryMode(p->mem_mode),
+      mshrCount{-1,-1,-1,-1},
       _cacheLineSize(p->cache_line_size),
       workItemsBegin(0),
       workItemsEnd(0),
       numWorkIds(p->num_work_ids),
+      memoryBudget{0,0,0,0},
+      budgetInit{0,0,0,0},
+      cycleInit{0,0,0,0},
+      //cycleInit(0),
+      guard{false,false,false,false},
+      use_memguard(0),
       _params(p),
       totalNumInsts(0),
       instEventQueue("system instruction-based event queue")
@@ -188,6 +197,49 @@ System::setMemoryMode(Enums::MemoryMode mode)
 {
     assert(getDrainState() == Drainable::Drained);
     memoryMode = mode;
+}
+
+void
+System::setMshr(uint8_t cpu_id, int mshrcount)
+{
+    DPRINTF(MSHRInst,"In system, value of cpu_id = %d and mshrcount =%d\n",cpu_id, mshrcount);
+    mshrCount[cpu_id] = mshrcount;
+}
+
+int
+System::getmshrCount(uint8_t cpu_id) {
+        return mshrCount[cpu_id];
+}
+
+
+void
+System::setMemBudget(uint8_t cpu_id, uint64_t budget)
+{
+
+    DPRINTF(MSHRInst,"In system, value of cpu_id = %d and budget =%d\n",cpu_id, budget);
+    memoryBudget[cpu_id] = budget;
+    budgetInit[cpu_id] = budget;
+
+}
+
+void
+System::enableMemGuard(int use) {
+    use_memguard = use;
+}
+void
+System::resetMemBudget(uint8_t cpu_id) {
+    DPRINTF(MSHRInst,"For cpu_id %d, budget left = %d\n",cpu_id, memoryBudget[cpu_id]);
+    memoryBudget[cpu_id] = budgetInit[cpu_id];
+    setMshr(cpu_id, -1);
+}
+
+bool
+System::isGuarded()
+{
+    if(guard[0] || guard[1] || guard[2] || guard[3])
+        return true;
+    else
+        return false;
 }
 
 bool System::breakpoint()

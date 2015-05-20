@@ -60,6 +60,7 @@
 #include "cpu/thread_context.hh"
 #include "debug/Loader.hh"
 #include "debug/PseudoInst.hh"
+#include "debug/MSHRInst.hh"
 #include "debug/Quiesce.hh"
 #include "debug/WorkItems.hh"
 #include "params/BaseCPU.hh"
@@ -192,8 +193,14 @@ pseudoInst(ThreadContext *tc, uint8_t func, uint8_t subfunc)
 
       case 0x55: // annotate_func
       case 0x56: // reserved2_func
+       setmshr(tc, args[0], args[1]);
+       break;
       case 0x57: // reserved3_func
+       setmembudget(tc, args[0], args[1]);
+       break;
       case 0x58: // reserved4_func
+       enablememguard(tc, args[0]);
+       break;
       case 0x59: // reserved5_func
         warn("Unimplemented m5 op (0x%x)\n", func);
         break;
@@ -705,5 +712,26 @@ workend(ThreadContext *tc, uint64_t workid, uint64_t threadid)
         }
     }
 }
+void setmshr(ThreadContext *tc, uint8_t cpu_id, int mshrcount)
+{
+    DPRINTF(MSHRInst, "PseudoInst::setmshr(%i,%i)\n", cpu_id, mshrcount);
+    System *sys = tc->getSystemPtr();
+    sys->setMshr(cpu_id,mshrcount);
+}
+
+void setmembudget(ThreadContext *tc, uint8_t cpu_id, uint64_t budget)
+{
+    DPRINTF(MSHRInst, "PseudoInst::setmemguard(%i,%i)\n", cpu_id, budget);
+    System *sys = tc->getSystemPtr();
+    sys->setMemBudget(cpu_id, budget);
+}
+
+void enablememguard(ThreadContext *tc, int use)
+{
+    DPRINTF(MSHRInst, "PseudoInst::enablememguard(%i)\n", use);
+    System *sys = tc->getSystemPtr();
+    sys->enableMemGuard(use);
+}
+
 
 } // namespace PseudoInst

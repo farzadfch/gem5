@@ -88,6 +88,9 @@ void debugbreak(ThreadContext *tc);
 void switchcpu(ThreadContext *tc);
 void workbegin(ThreadContext *tc, uint64_t workid, uint64_t threadid);
 void workend(ThreadContext *tc, uint64_t workid, uint64_t threadid);
+void setmshr(ThreadContext *tc, uint8_t cpuid, int mshrcount);
+void setmembudget(ThreadContext *tc, uint8_t cpuid, uint64_t budget);
+void enablememguard(ThreadContext *tc, int use);
 
 } // namespace PseudoInst
 

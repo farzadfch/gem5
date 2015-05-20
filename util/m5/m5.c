@@ -255,6 +255,31 @@ do_sw99param(int argc, char *argv[])
            (param >> 12) & 0xfff, (param >> 0) & 0xfff);
 }
 
+void
+do_setmshr(int argc, char *argv[])
+{
+    uint64_t ints[2];
+    parse_int_args(argc, argv, ints, 2);
+    printf("cpuid = 0x%x mshr value = 0x%x\n",ints[0],ints[1]);
+    m5_setmshr(ints[0],ints[1]);
+}
+
+void
+do_setmembudget(int argc, char *argv[])
+{
+    uint64_t ints[2];
+    parse_int_args(argc, argv, ints, 2);
+    m5_setmembudget(ints[0],ints[1]);
+}
+
+void
+do_enablememguard(int argc, char *argv[])
+{
+    uint64_t ints[1];
+    parse_int_args(argc, argv, ints, 1);
+    printf("Enabled:use memguard = 0x%x\n",ints[0]);
+    m5_enablememguard(ints[0]);
+}
 #ifdef linux
 void
 do_pin(int argc, char *argv[])
@@ -300,6 +325,9 @@ struct MainFunc mainfuncs[] = {
     { "loadsymbol",     do_load_symbol,      "<address> <symbol>" },
     { "initparam",      do_initparam,        "" },
     { "sw99param",      do_sw99param,        "" },
+    { "setmshr",        do_setmshr,          "" },
+    { "setmembudget",   do_setmembudget,     "" },
+    { "enablememguard", do_enablememguard,   "" },
 #ifdef linux
     { "pin",            do_pin,              "<cpu> <program> [args ...]" }
 #endif

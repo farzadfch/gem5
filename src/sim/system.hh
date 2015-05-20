@@ -62,6 +62,7 @@
 #include "mem/port_proxy.hh"
 #include "mem/physical.hh"
 #include "params/System.hh"
+#include "debug/MSHRInst.hh"
 
 class BaseCPU;
 class BaseRemoteGDB;
@@ -155,6 +156,10 @@ class System : public MemObject
     bool bypassCaches() const {
         return memoryMode == Enums::atomic_noncaching;
     }
+
+    Cycles getcurCycle() {
+        return curCycle();
+    }
     /** @} */
 
     /** @{ */
@@ -175,6 +180,15 @@ class System : public MemObject
      * @param mode Mode to change to (atomic/timing/...)
      */
     void setMemoryMode(Enums::MemoryMode mode);
+    void setMshr(uint8_t cpu_id, int mshrcount);
+
+    int  getmshrCount(uint8_t cpu_id);
+
+    void  setMemBudget(uint8_t cpu_id, uint64_t budget);
+    uint64_t  getMemBudget(uint8_t cpuid);
+    void  resetMemBudget(uint8_t cpu_id);
+    void enableMemGuard(int use);
+    bool isGuarded();
     /** @} */
 
     /**
@@ -274,7 +288,7 @@ class System : public MemObject
     PhysicalMemory physmem;
 
     Enums::MemoryMode memoryMode;
-
+    int mshrCount[4];
     const unsigned int _cacheLineSize;
 
     uint64_t workItemsBegin;
@@ -299,6 +313,11 @@ class System : public MemObject
      * appropriately name the bins of their per-master stats before the stats
      * are finalized
      */
+    uint64_t memoryBudget[4];
+    uint64_t budgetInit[4];
+    uint64_t cycleInit[4];
+    bool guard[4];
+    int use_memguard;
     MasterID getMasterId(std::string req_name);
 
     /** Get the name of an object for a given request id.

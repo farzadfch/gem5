@@ -68,6 +68,9 @@ def format M5ops() {{
             case 0x54: return new M5panic(machInst);
             case 0x5a: return new M5workbegin(machInst);
             case 0x5b: return new M5workend(machInst);
+            case 0x56: return new M5setmshr(machInst);
+            case 0x57: return new M5setmembudget(machInst);
+            case 0x58: return new M5enablememguard(machInst);
         }
    }
    '''
