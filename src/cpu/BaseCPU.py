@@ -308,7 +308,7 @@ class BaseCPU(MemObject):
         # Set a width of 32 bytes (256-bits), which is four times that
         # of the default bus. The clock of the CPU is inherited by
         # default.
-        self.toL2Bus = CoherentXBar(width = 32)
+        self.toL2Bus = CoherentXBar(width = 256)
         self.connectCachedPorts(self.toL2Bus)
         self.l2cache = l2c
         self.toL2Bus.master = self.l2cache.cpu_side

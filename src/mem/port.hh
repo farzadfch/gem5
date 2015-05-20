@@ -236,6 +236,8 @@ class MasterPort : public BaseMasterPort
     */
     bool sendTimingReq(PacketPtr pkt);
 
+    bool unblockCache();
+
     /**
      * Attempt to send a timing snoop response packet to the slave
      * port by calling its corresponding receive function. If the send
@@ -246,6 +248,8 @@ class MasterPort : public BaseMasterPort
      * @param pkt Packet to send.
      */
     bool sendTimingSnoopResp(PacketPtr pkt);
+
+
 
     /**
      * Send a retry to the slave port that previously attempted a
@@ -447,6 +451,12 @@ class SlavePort : public BaseSlavePort
      * Receive a timing request from the master port.
      */
     virtual bool recvTimingReq(PacketPtr pkt) = 0;
+
+    virtual bool unblockCache()
+    {
+        panic("%s was not expecting to unblock cache\n", name());
+
+    }
 
     /**
      * Receive a timing snoop response from the master port.

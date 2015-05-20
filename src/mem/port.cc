@@ -183,11 +183,18 @@ MasterPort::sendTimingReq(PacketPtr pkt)
 }
 
 bool
+MasterPort::unblockCache()
+{
+    return _slavePort->unblockCache();
+}
+
+bool
 MasterPort::sendTimingSnoopResp(PacketPtr pkt)
 {
     assert(pkt->isResponse());
     return _slavePort->recvTimingSnoopResp(pkt);
 }
+
 
 void
 MasterPort::sendRetry()

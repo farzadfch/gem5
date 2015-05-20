@@ -50,10 +50,10 @@
 using namespace std;
 
 MSHRQueue::MSHRQueue(const std::string &_label,
-                     int num_entries, int reserve, int _index)
+                     int num_entries, int reserve, int _index, bool is_top_level, bool is_dcache, uint8_t cpu_id, System *system)
     : label(_label), numEntries(num_entries + reserve - 1),
       numReserve(reserve), registers(numEntries),
-      drainManager(NULL), allocated(0), inServiceEntries(0), index(_index)
+      drainManager(NULL), allocated(0), inServiceEntries(0), index(_index), is_top_level(is_top_level), is_dcache(is_dcache), cpu_id(cpu_id), system(system)
 {
     for (int i = 0; i < numEntries; ++i) {
         registers[i].queue = this;

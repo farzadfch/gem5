@@ -68,6 +68,7 @@ if 'O3CPU' in env['CPU_MODELS']:
     DebugFlag('LSQUnit')
     DebugFlag('MemDepUnit')
     DebugFlag('O3CPU')
+    DebugFlag('O3KU')
     DebugFlag('ROB')
     DebugFlag('Rename')
     DebugFlag('Scoreboard')

@@ -58,6 +58,7 @@
 #include "debug/Activity.hh"
 #include "debug/Drain.hh"
 #include "debug/O3CPU.hh"
+#include "debug/O3KU.hh"
 #include "debug/Quiesce.hh"
 #include "enums/MemoryMode.hh"
 #include "sim/core.hh"
@@ -534,6 +535,21 @@ FullO3CPU<Impl>::tick()
     assert(getDrainState() != Drainable::Drained);
 
     ++numCycles;
+
+    if (system->use_memguard && system->budgetInit[cpuId()])
+     {
+         if(!(system->cycleInit[cpuId()]))
+             system->cycleInit[cpuId()] = curCycle();
+         if ((curCycle() - system->cycleInit[cpuId()]) >= 1000000)
+         {
+            DPRINTF(O3KU,"cycles elapsed = %d\n", curCycle() - system->cycleInit[cpuId()]);
+            system->resetMemBudget(cpuId());
+            system->cycleInit[cpuId()] = curCycle();
+            if(dcachePort.unblockCache())
+                DPRINTF(O3KU,"Unblocked Cache");
+            // unblock Dcache.. done.
+         }
+     }
 
 //    activity = false;
 

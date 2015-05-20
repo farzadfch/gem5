@@ -697,7 +697,6 @@ Cache<TagStore>::recvTimingReq(PacketPtr pkt)
                     assert(!blk->isWritable());
                     blk->status &= ~BlkReadable;
                 }
-
                 allocateMissBuffer(pkt, time, true);
             }
 
@@ -2049,6 +2048,9 @@ Cache<TagStore>::CpuSidePort::getAddrRanges() const
     return cache->getAddrRanges();
 }
 
+
+
+
 template<class TagStore>
 bool
 Cache<TagStore>::CpuSidePort::recvTimingReq(PacketPtr pkt)
@@ -2074,6 +2076,18 @@ Cache<TagStore>::CpuSidePort::recvTimingReq(PacketPtr pkt)
     // remember if we have to retry
     mustSendRetry = !success;
     return success;
+}
+
+template<class TagStore>
+bool
+Cache<TagStore>::CpuSidePort::unblockCache()
+{
+    if (isBlocked()) {
+        cache->clearBlocked(Blocked_NoMSHRs);
+        return true;
+    }
+    else
+        return false;
 }
 
 template<class TagStore>

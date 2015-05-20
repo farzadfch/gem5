@@ -71,6 +71,7 @@
 #include "sim/full_system.hh"
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
+#include "sim/clocked_object.hh"
 
 class MSHR;
 /**
@@ -93,6 +94,7 @@ class BaseCache : public MemObject
     enum BlockedCause {
         Blocked_NoMSHRs = MSHRQueue_MSHRs,
         Blocked_NoWBBuffers = MSHRQueue_WriteBuffer,
+        Blocked_MemGuard,
         Blocked_NoTargets,
         Blocked_PendingWriteInvalidate,
         NUM_BLOCKED_CAUSES
@@ -170,6 +172,7 @@ class BaseCache : public MemObject
         void clearBlocked();
 
         bool isBlocked() const { return blocked; }
+//        class  ClockedObject co;
 
       protected:
 
@@ -180,8 +183,12 @@ class BaseCache : public MemObject
         SlavePacketQueue queue;
 
         bool blocked;
+        bool core0_blocked;
 
         bool mustSendRetry;
+    public:
+
+        Cycles blockedCycleCore0;
 
       private:
 
@@ -206,7 +213,7 @@ class BaseCache : public MemObject
     MSHR *allocateBufferInternal(MSHRQueue *mq, Addr addr, int size,
                                  PacketPtr pkt, Tick time, bool requestBus)
     {
-        MSHR *mshr = mq->allocate(addr, size, pkt, time, order++);
+         MSHR *mshr = mq->allocate(addr, size, pkt, time, order++);
 
         if (mq->isFull()) {
             setBlocked((BlockedCause)mq->index);
@@ -250,6 +257,8 @@ class BaseCache : public MemObject
 
     /** Block size of this cache */
     const unsigned blkSize;
+
+    uint64_t mshrCount;
 
     /**
      * The latency of a hit in this device.
@@ -307,6 +316,7 @@ class BaseCache : public MemObject
      * @addtogroup CacheStatistics
      * @{
      */
+//    Cycles blockedCycleCore0;
 
     /** Number of hits per thread for each type of command. @sa Packet::Command */
     Stats::Vector hits[MemCmd::NUM_MEM_CMDS];
@@ -355,6 +365,7 @@ class BaseCache : public MemObject
 
     /** The total number of cycles blocked for each blocked cause. */
     Stats::Vector blocked_cycles;
+    Stats::Scalar blocked_cycles_core0;
     /** The number of times this cache blocked for each blocked cause. */
     Stats::Vector blocked_causes;
 
@@ -456,6 +467,7 @@ class BaseCache : public MemObject
                                           PortID idx = InvalidPortID);
     virtual BaseSlavePort &getSlavePort(const std::string &if_name,
                                         PortID idx = InvalidPortID);
+    uint64_t getmshrCount();
 
     /**
      * Query block size of a cache.
@@ -476,6 +488,7 @@ class BaseCache : public MemObject
     MSHR *allocateMissBuffer(PacketPtr pkt, Tick time, bool requestBus)
     {
         assert(!pkt->req->isUncacheable());
+
         return allocateBufferInternal(&mshrQueue,
                                       blockAlign(pkt->getAddr()), blkSize,
                                       pkt, time, requestBus);

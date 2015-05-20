@@ -61,17 +61,18 @@ BaseCache::CacheSlavePort::CacheSlavePort(const std::string &_name,
                                           BaseCache *_cache,
                                           const std::string &_label)
     : QueuedSlavePort(_name, _cache, queue), queue(*_cache, *this, _label),
-      blocked(false), mustSendRetry(false), sendRetryEvent(this)
+      blocked(false), core0_blocked(false),mustSendRetry(false), sendRetryEvent(this)
 {
 }
 
 BaseCache::BaseCache(const Params *p)
     : MemObject(p),
       cpuSidePort(nullptr), memSidePort(nullptr),
-      mshrQueue("MSHRs", p->mshrs, 4, MSHRQueue_MSHRs),
+      mshrQueue("MSHRs", p->mshrs, 4, MSHRQueue_MSHRs, p->is_top_level, p->is_dcache, p->cpu_id, p->system),
       writeBuffer("write buffer", p->write_buffers, p->mshrs+1000,
-                  MSHRQueue_WriteBuffer),
+                  MSHRQueue_WriteBuffer, p->is_top_level, p->is_dcache, p->cpu_id, p->system),
       blkSize(p->system->cacheLineSize()),
+      mshrCount(p->mshrs),
       hitLatency(p->hit_latency),
       responseLatency(p->response_latency),
       numTarget(p->tgts_per_mshr),
@@ -104,7 +105,7 @@ BaseCache::CacheSlavePort::setBlocked()
 void
 BaseCache::CacheSlavePort::clearBlocked()
 {
-    assert(blocked);
+//    assert(blocked);
     DPRINTF(CachePort, "Cache port %s accepting new requests\n", name());
     blocked = false;
     if (mustSendRetry) {
@@ -150,7 +151,13 @@ BaseCache::getSlavePort(const std::string &if_name, PortID idx)
         return MemObject::getSlavePort(if_name, idx);
     }
 }
-
+#if 0
+uint64_t
+BaseCache::getmshrCount()
+{
+        return system->getmshrCount();
+}
+#endif
 void
 BaseCache::regStats()
 {
@@ -392,6 +399,11 @@ BaseCache::regStats()
         .desc("number of cycles access was blocked")
         .subname(Blocked_NoMSHRs, "no_mshrs")
         .subname(Blocked_NoTargets, "no_targets")
+        ;
+
+    blocked_cycles_core0
+        .name(name() + ".blocked_cycles_core0")
+        .desc("number of cycles access was blocked")
         ;
 
 

@@ -53,6 +53,7 @@
 #include "mem/cache/mshr.hh"
 #include "mem/packet.hh"
 #include "sim/drain.hh"
+#include "sim/system.hh"
 
 /**
  * A Class for maintaining a list of pending and allocated memory requests.
@@ -91,6 +92,13 @@ class MSHRQueue : public Drainable
 
     MSHR::Iterator addToReadyList(MSHR *mshr);
 
+    enum MSHRQueueIndex {
+        MSHRQueue_MSHRs,
+        MSHRQueue_WriteBuffer,
+        Blocked_MemGuard,
+    };
+
+    int regulated_mshr_count;
 
   public:
     /** The number of allocated entries. */
@@ -101,6 +109,11 @@ class MSHRQueue : public Drainable
      * buffer). */
     const int index;
 
+    bool is_top_level;
+    bool is_dcache;
+    uint8_t cpu_id;
+    System *system;
+
     /**
      * Create a queue with a given number of entries.
      * @param num_entrys The number of entries in this queue.
@@ -108,7 +121,7 @@ class MSHRQueue : public Drainable
      * any access.
      */
     MSHRQueue(const std::string &_label, int num_entries, int reserve,
-              int index);
+              int index, bool is_top_level, bool is_dcache, uint8_t cpu_id, System *system);
 
     /**
      * Find the first MSHR that matches the provided address.
@@ -212,9 +225,21 @@ class MSHRQueue : public Drainable
      * Returns true if there are no free entries.
      * @return True if this queue is full.
      */
-    bool isFull() const
+    //bool isFull() const
+    bool isFull()
     {
-        return (allocated > numEntries - numReserve);
+        if(is_dcache) {
+            if(index == MSHRQueue_MSHRs) {
+                regulated_mshr_count = (system->getmshrCount(cpu_id) >=0)?system->getmshrCount(cpu_id) + numReserve - 1:numEntries;
+                return (allocated > regulated_mshr_count - numReserve);
+            }
+            else {
+                return (allocated > numEntries - numReserve);
+            }
+        }
+        else {
+                return (allocated > numEntries - numReserve);
+        }
     }
 
     /**

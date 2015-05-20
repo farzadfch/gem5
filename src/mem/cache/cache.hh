@@ -95,11 +95,14 @@ class Cache : public BaseCache
 
         virtual bool recvTimingReq(PacketPtr pkt);
 
+        virtual bool unblockCache();
+
         virtual Tick recvAtomic(PacketPtr pkt);
 
         virtual void recvFunctional(PacketPtr pkt);
 
         virtual AddrRangeList getAddrRanges() const;
+
 
       public:
 
@@ -253,6 +256,8 @@ class Cache : public BaseCache
      * @param pkt The current bus transaction.
      */
     void recvTimingSnoopReq(PacketPtr pkt);
+
+    bool unblockCache();
 
     /**
      * Handle a snoop response.

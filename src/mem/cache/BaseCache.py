@@ -58,10 +58,12 @@ class BaseCache(MemObject):
     forward_snoops = Param.Bool(True,
         "forward snoops from mem side to cpu side")
     is_top_level = Param.Bool(False, "Is this cache at the top level (e.g. L1)")
+    is_dcache = Param.Bool(False, "Is this cache at the top level (e.g. L1)")
     tgts_per_mshr = Param.Int("max number of accesses per MSHR")
     two_queue = Param.Bool(False,
         "whether the lifo should have two queue replacement")
     write_buffers = Param.Int(8, "number of write buffers")
+    cpu_id = Param.Int(0, "number of write buffers")
     prefetch_on_access = Param.Bool(False,
          "notify the hardware prefetcher on every access (not just misses)")
     prefetcher = Param.BasePrefetcher(NULL,"Prefetcher attached to cache")
