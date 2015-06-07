@@ -87,8 +87,8 @@ class DRAMCtrl(AbstractMemory):
     write_low_thresh_perc = Param.Percent(50, "Threshold to start writes")
 
     # minimum write bursts to schedule before switching back to reads
-    #min_writes_per_switch = Param.Unsigned(18, "Minimum write bursts before "
-    min_writes_per_switch = Param.Unsigned(1, "Minimum write bursts before "
+    min_writes_per_switch = Param.Unsigned(18, "Minimum write bursts before "
+    #min_writes_per_switch = Param.Unsigned(1, "Minimum write bursts before "
                                            "switching to reads")
 
     # scheduler, address map and page policy
