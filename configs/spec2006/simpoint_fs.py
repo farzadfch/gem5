@@ -371,7 +371,7 @@ m5.instantiate(checkpoint_dir)
 
 #term_port = test_sys.terminal
 term_port = 3458
-#print "DEBUG: term_port" %  Terminal() 
+#print "DEBUG: term_port" %  Terminal()
 #term_port = Terminal()
 
 print "**** REAL SIMULATION ****"
@@ -432,7 +432,7 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
             while exit_cause != "checkpoint":
                 exit_event = m5.simulate()
                 exit_cause = exit_event.getCause()
-	    
+
             if exit_cause == "checkpoint":
                 mkdir_p(options.checkpoint_dir)
                 m5.checkpoint(os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_')))
@@ -499,7 +499,7 @@ elif options.simpoint_mode == "check_affinity":
     pyterm.close_pyterm(term, inpipe)
     sys.exit(0)
 
-print "maxtick %d and current tick %d" % (maxtick , m5.curTick()) 
+print "maxtick %d and current tick %d" % (maxtick , m5.curTick())
 exit_event = m5.simulate(maxtick - m5.curTick())
 exit_cause = exit_event.getCause()
 
@@ -546,7 +546,7 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
                 inpipe.send("export PID%i=$!\n" % start_count)
                 start_count = start_count + 1
                 print "test1 start_count = %d" %start_count
-        
+
 
         if start_count >= len(sorted_points):
             inpipe.send("/sbin/m5 checkpoint\n")
