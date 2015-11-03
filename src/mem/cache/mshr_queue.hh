@@ -230,7 +230,7 @@ class MSHRQueue : public Drainable
     {
         if(is_dcache) {
             if(index == MSHRQueue_MSHRs) {
-                regulated_mshr_count = (system->getmshrCount(cpu_id) >=0)?system->getmshrCount(cpu_id) + numReserve - 1:numEntries;
+                regulated_mshr_count = (system->getmshrCount(cpu_id) >= 0)?system->getmshrCount(cpu_id) + numReserve - 1:numEntries;
                 return (allocated > regulated_mshr_count - numReserve);
             }
             else {
