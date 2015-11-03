@@ -72,23 +72,21 @@ class DRAMCtrl(AbstractMemory):
     port = SlavePort("Slave port")
 
     # the basic configuration of the controller architecture
+    #unified_buffer_size =  Param.Unsigned(100000, "Number of write queue entries")
+    unified_buffer_size =  Param.Unsigned(128, "Number of write queue entries")
     write_buffer_size = Param.Unsigned(64, "Number of write queue entries")
-    #write_buffer_size = Param.Unsigned(4, "Number of write queue entries")
     read_buffer_size = Param.Unsigned(64, "Number of read queue entries")
 
     # threshold in percent for when to forcefully trigger writes and
     # start emptying the write buffer
     write_high_thresh_perc = Param.Percent(85, "Threshold to force writes")
-    #write_high_thresh_perc = Param.Percent(50, "Threshold to force writes")
 
     # threshold in percentage for when to start writes if the read
     # queue is empty
-    #write_low_thresh_perc = Param.Percent(25, "Threshold to start writes")
     write_low_thresh_perc = Param.Percent(50, "Threshold to start writes")
 
     # minimum write bursts to schedule before switching back to reads
     min_writes_per_switch = Param.Unsigned(18, "Minimum write bursts before "
-    #min_writes_per_switch = Param.Unsigned(1, "Minimum write bursts before "
                                            "switching to reads")
 
     # scheduler, address map and page policy
