@@ -164,6 +164,7 @@ Terminal::listen(int port)
     p1 = name().rfind('.', p2);
     ccprintf(cerr, "Listening for %s connection on port %d\n",
             name().substr(p1+1,p2-p1), port);
+    listen_port = port;
 
     listenEvent = new ListenEvent(this, listener.getfd(), POLLIN);
     pollQueue.schedule(listenEvent);

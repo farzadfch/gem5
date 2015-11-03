@@ -37,3 +37,12 @@ class Terminal(SimObject):
     port = Param.TcpPort(3456, "listen port")
     number = Param.Int(0, "terminal number")
     output = Param.Bool(True, "Enable output dump to file")
+    @classmethod
+    def export_method_cxx_predecls(cls, code):
+        code('#include "dev/terminal.hh"')
+
+    @classmethod
+    def export_methods(cls, code):
+        code('''
+        int getListenPort() const;
+''')

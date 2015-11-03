@@ -101,6 +101,7 @@ class Terminal : public SimObject
     typedef TerminalParams Params;
     Terminal(const Params *p);
     ~Terminal();
+    int getListenPort() const { return listen_port; }
 
   protected:
     ListenSocket listener;
@@ -115,6 +116,7 @@ class Terminal : public SimObject
 #if TRACING_ON == 1
     CircleBuf linebuf;
 #endif
+    int listen_port;
 
   public:
     ///////////////////////
