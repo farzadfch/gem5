@@ -318,6 +318,7 @@ class System : public MemObject
     uint64_t cycleInit[4];
     bool guard[4];
     int use_memguard;
+    bool switched_mshr_count[4];
     MasterID getMasterId(std::string req_name);
 
     /** Get the name of an object for a given request id.

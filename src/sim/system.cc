@@ -98,6 +98,7 @@ System::System(Params *p)
       //cycleInit(0),
       guard{false,false,false,false},
       use_memguard(0),
+      switched_mshr_count{false, false, false, false},
       _params(p),
       totalNumInsts(0),
       instEventQueue("system instruction-based event queue")
@@ -203,6 +204,9 @@ void
 System::setMshr(uint8_t cpu_id, int mshrcount)
 {
     DPRINTF(MSHRInst,"In system, value of cpu_id = %d and mshrcount =%d\n",cpu_id, mshrcount);
+    if (mshrcount == -1 || (mshrCount[cpu_id] != -1 
+                           && mshrcount > mshrCount[cpu_id]) )
+        switched_mshr_count[cpu_id] = true;
     mshrCount[cpu_id] = mshrcount;
 }
 

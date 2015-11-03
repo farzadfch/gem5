@@ -548,7 +548,12 @@ FullO3CPU<Impl>::tick()
             if(dcachePort.unblockCache())
                 DPRINTF(O3KU,"Unblocked Cache");
          }
-     }
+    }
+
+    if ( system->switched_mshr_count[cpuId()] ) {
+            dcachePort.unblockCache();
+            system->switched_mshr_count[cpuId()] = false;
+    }
 
 //    activity = false;
 
