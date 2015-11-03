@@ -46,6 +46,7 @@
 #include "base/trace.hh"
 #include "debug/DRAM.hh"
 #include "debug/KU.hh"
+#include "debug/PK.hh"
 #include "debug/DRAMPower.hh"
 #include "debug/DRAMState.hh"
 #include "debug/Drain.hh"
@@ -53,9 +54,11 @@
 #include "sim/system.hh"
 #include "arch/arm/stacktrace.hh"
 //#define MEDUSA
+//#define MEDUSA_NO_SWITCH
+//#define DCMC
 using namespace std;
 
-uint64_t reservedBanks = 1;
+uint64_t reservedBanks = 4;
 uint64_t reservedBankMask = (uint64_t(1) << reservedBanks) - 1;
 
 DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
@@ -483,8 +486,20 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
                 memGuard(cpu_id);
             }
 
-                if (dram_pkt->bank == 0)
+                if (dram_pkt->bank == 0) {
+                    //DPRINTF(PK, "Bank0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
                     readBurstsBank0++;
+                }
+                //if (system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data")
+                if (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0){
+                //    DPRINTF(PK, "Core0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
+                    readBurstsCore0++;
+                }
+                //if ((system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data") && (dram_pkt->bank!=0))
+                if ( (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0) && (dram_pkt->bank!=0) ) {
+                //    DPRINTF(PK, "Other %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
+                    readBurstsCore0Other++;
+                }
 
             dram_pkt->burstHelper = burst_helper;
 
@@ -802,11 +817,34 @@ DRAMCtrl::chooseNext(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     if (memSchedPolicy == Enums::fcfs) {
         // Do nothing, since the correct request is already head
     } else if (memSchedPolicy == Enums::frfcfs) {
-#ifdef MEDUSA
+#if defined(MEDUSA) || defined(MEDUSA_NO_SWITCH) || defined(DCMC)
             reorderQueue(queue, switched_cmd_type);
 #else
             reorderQueueFrfcfs(queue, switched_cmd_type);
 #endif
+    } else
+        panic("No scheduling policy chosen\n");
+}
+
+
+void
+DRAMCtrl::chooseNextWrite(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
+{
+    // This method does the arbitration between requests. The chosen
+    // packet is simply moved to the head of the queue. The other
+    // methods know that this is the place to look. For example, with
+    // FCFS, this method does nothing
+    assert(!queue.empty());
+
+    if (queue.size() == 1) {
+        DPRINTF(DRAM, "Single request, nothing to do\n");
+        return;
+    }
+
+    if (memSchedPolicy == Enums::fcfs) {
+        // Do nothing, since the correct request is already head
+    } else if (memSchedPolicy == Enums::frfcfs) {
+            reorderQueueFrfcfs(queue, switched_cmd_type);
     } else
         panic("No scheduling policy chosen\n");
 }
@@ -863,7 +901,168 @@ DRAMCtrl::overlapRequest(std::deque<DRAMPacket*>& queue, uint64_t banks)
     }
 }
 
+void
+DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
+{
+    // Only determine this when needed
+    uint64_t earliest_banks = 0;
 
+    // Search for row hits first, if no row hit is found then schedule the
+    // packet to one of the earliest banks available
+    bool found_earliest_pkt = false;
+    bool found_prepped_diff_rank_pkt = false;
+    bool found_row_hit = false;
+    bool found_reserved_diff_bank = false;
+    bool found_reserved_same_bank = false;
+    static uint64_t bankmaskSaved = reservedBankMask;
+    auto selected_pkt_it = queue.begin();
+
+    //overlapRequest(queue, banksPerRank);
+    //Arbitrate Requests in the DRAM queue using two-level
+    //hierarchical scheduler.
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        const Bank& bank = dram_pkt->bankRef;
+        // RR scheduler on reserved banks
+        //resrevedBankMask, stores the mask bits for reserved Banks.
+        //Check if the packet in the DRAM queue targets any of the reserved bank.
+        if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
+        //bankmaskSaved initially has the reservedBankMask bits.
+            if( bankmaskSaved & (0x01 << dram_pkt->bank) ) {
+                selected_pkt_it = i;
+                found_reserved_diff_bank = true;
+            //once we selected a packet from a particular resrved bank,
+            //we will clear that bank bit, inorder to ensure that the
+            //next request slected is from a deifferent reserved bank.
+            //Hence forcing RR.
+                bankmaskSaved &= ~(0x01 << dram_pkt->bank);
+            //Once we choose each packet from reserved banks,
+            //Reset the bankmaskSaved to reservedBankMask to start
+            //next round.
+                if(!bankmaskSaved)
+                    bankmaskSaved = reservedBankMask;
+
+                break;
+            }
+            else {
+            //While iterating the DRAM queue, we also store
+            //the FirstCome DRAM packet to one of the already
+            //selected  reserved banks.This is incase, DRAM controller
+            //doesn't has any requests queued to other reserved banks, this
+            //packet will be serviced.
+                 if (!found_reserved_same_bank) {
+                    selected_pkt_it = i;
+                    found_reserved_same_bank = true;
+                 }
+            }
+        }
+
+    //Else, FR-FCFS scheduler on shared banks
+        // Check if it is a row hit
+        // else if ( (bank.openRow == dram_pkt->row) & (bank.colAllowedAt - curTick() <= tBURST) & (!found_reserved_same_bank) & (!found_row_hit)) {
+        else if ( (bank.openRow == dram_pkt->row) &  (!found_reserved_same_bank) & (!found_row_hit)) {
+            if (dram_pkt->rank == activeRank || switched_cmd_type) {
+                // FCFS within the hits, giving priority to commands
+                // that access the same rank as the previous burst
+                // to minimize bus turnaround delays
+                // Only give rank prioity when command type is not changing
+                DPRINTF(DRAM, "Row buffer hit\n");
+                selected_pkt_it = i;
+                found_row_hit = true;
+            } else if (!found_prepped_diff_rank_pkt) {
+                // found row hit for command on different rank than prev burst
+                selected_pkt_it = i;
+                found_prepped_diff_rank_pkt = true;
+            }
+        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt & !found_row_hit & !found_reserved_same_bank ) {
+            // No row hit and
+            // haven't found an entry with a row hit to a new rank
+            if (earliest_banks == 0)
+                // Determine entries with earliest bank prep delay
+                // Function will give priority to commands that access the
+                // same rank as previous burst and can prep the bank seamlessly
+                earliest_banks = minBankPrep(queue, switched_cmd_type);
+
+            // FCFS - Bank is first available bank
+            if (bits(earliest_banks, dram_pkt->bankId, dram_pkt->bankId)) {
+                // Remember the packet to be scheduled to one of the earliest
+                // banks available, FCFS amongst the earliest banks
+                selected_pkt_it = i;
+                found_earliest_pkt = true;
+            }
+        }
+    }
+
+    DRAMPacket* selected_pkt = *selected_pkt_it;
+    //Reset round robin bank mask, if the queue doesn't have anymore requests from different banks
+    if (!found_reserved_diff_bank & found_reserved_same_bank)
+            bankmaskSaved = (reservedBankMask) & ~(0x01 << selected_pkt->bank);
+    queue.erase(selected_pkt_it);
+    queue.push_front(selected_pkt);
+}
+#if 0
+void
+DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
+{
+    // Only determine this when needed
+    uint64_t earliest_banks = 0;
+
+    // Search for row hits first, if no row hit is found then schedule the
+    // packet to one of the earliest banks available
+    bool found_earliest_pkt = false;
+    bool found_prepped_diff_rank_pkt = false;
+    bool found_row_hit = false;
+    auto selected_pkt_it = queue.begin();
+
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        const Bank& bank = dram_pkt->bankRef;
+        // Check if it is a row hit
+//        if ( (bank.openRow == dram_pkt->row) && (bank.colAllowedAt - curTick() <= tBURST) ) {
+//        if( system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,5,"cpus0") == 0 ) {
+        if(dram_pkt->bank == 0)  {
+                selected_pkt_it = i;
+                break;
+        } else if (bank.openRow == dram_pkt->row) {
+            if (dram_pkt->rank == activeRank || switched_cmd_type) {
+                // FCFS within the hits, giving priority to commands
+                // that access the same rank as the previous burst
+                // to minimize bus turnaround delays
+                // Only give rank prioity when command type is not changing
+                //DPRINTF(PK, "Row buffer hit\n");
+                selected_pkt_it = i;
+                found_row_hit = true;
+            //    break;
+            } else if (!found_prepped_diff_rank_pkt) {
+                // found row hit for command on different rank than prev burst
+                selected_pkt_it = i;
+                found_prepped_diff_rank_pkt = true;
+            }
+        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt & !found_row_hit) {
+
+            // No row hit and
+            // haven't found an entry with a row hit to a new rank
+           if (earliest_banks == 0)
+                // Determine entries with earliest bank prep delay
+                // Function will give priority to commands that access the
+                // same rank as previous burst and can prep the bank seamlessly
+                earliest_banks = minBankPrep(queue, switched_cmd_type);
+
+            // FCFS - Bank is first available bank
+            if (bits(earliest_banks, dram_pkt->bankId, dram_pkt->bankId)) {
+                // Remember the packet to be scheduled to one of the earliest
+                // banks available, FCFS amongst the earliest banks
+                selected_pkt_it = i;
+                found_earliest_pkt = true;
+            }
+        }
+    }
+
+    DRAMPacket* selected_pkt = *selected_pkt_it;
+    queue.erase(selected_pkt_it);
+    queue.push_front(selected_pkt);
+}
+#endif
 void
 DRAMCtrl::reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
 {
@@ -919,104 +1118,7 @@ DRAMCtrl::reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_t
     queue.push_front(selected_pkt);
 }
 
-void
-DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
-{
-    // Only determine this when needed
-    uint64_t earliest_banks = 0;
 
-    // Search for row hits first, if no row hit is found then schedule the
-    // packet to one of the earliest banks available
-    bool found_earliest_pkt = false;
-    bool found_prepped_diff_rank_pkt = false;
-    bool found_row_hit = false;
-    bool found_reserved_diff_bank = false;
-    bool found_reserved_same_bank = false;
-    static uint64_t bankmaskSaved = reservedBankMask;
-    auto selected_pkt_it = queue.begin();
-
-//    overlapRequest(queue, banksPerRank);
-    //Arbitrate Requests in the DRAM queue using two-level
-    //hierarchical scheduler.
-    for (auto i = queue.begin(); i != queue.end() ; ++i) {
-        DRAMPacket* dram_pkt = *i;
-        const Bank& bank = dram_pkt->bankRef;
-    // RR scheduler on reserved banks
-        //resrevedBankMask, stores the mask bits for reserved Banks.
-        //Check if the packet in the DRAM queue targets any of the reserved bank.
-            if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
-            //bankmaskSaved initially has the reservedBankMask bits.
-                if( bankmaskSaved & (0x01 << dram_pkt->bank) ) {
-                selected_pkt_it = i;
-                        found_reserved_diff_bank = true;
-                //once we selected a packet from a particular resrved bank,
-                //we will clear that bank bit, inorder to ensure that the
-                //next request slected is from a deifferent reserved bank.
-                //Hence forcing RR.
-                    bankmaskSaved &= ~(0x01 << dram_pkt->bank);
-                //Once we choose each packet from reserved banks,
-                //Reset the bankmaskSaved to reservedBankMask to start
-                //next round.
-                if(!bankmaskSaved)
-                            bankmaskSaved = reservedBankMask;
-                        break;
-                }
-                else {
-                //While iterating the DRAM queue, we also store
-                //the FirstCome DRAM packet to one of the already
-                //selected  reserved banks.This is incase, DRAM controller
-                //doesn't has any requests queued to other reserved banks, this
-                //packet will be serviced.
-                        if (!found_reserved_same_bank) {
-                            selected_pkt_it = i;
-                            found_reserved_same_bank = true;
-                }
-                }
-            }
-
-    //Else, FR-FCFS scheduler on shared banks
-        // Check if it is a row hit
-        // else if ( (bank.openRow == dram_pkt->row) & (bank.colAllowedAt - curTick() <= tBURST) & (!found_reserved_same_bank) & (!found_row_hit)) {
-        else if ( (bank.openRow == dram_pkt->row) &  (!found_reserved_same_bank) & (!found_row_hit)) {
-            if (dram_pkt->rank == activeRank || switched_cmd_type) {
-                // FCFS within the hits, giving priority to commands
-                // that access the same rank as the previous burst
-                // to minimize bus turnaround delays
-                // Only give rank prioity when command type is not changing
-                DPRINTF(DRAM, "Row buffer hit\n");
-                selected_pkt_it = i;
-                        found_row_hit = true;
-            } else if (!found_prepped_diff_rank_pkt) {
-                // found row hit for command on different rank than prev burst
-                selected_pkt_it = i;
-                found_prepped_diff_rank_pkt = true;
-            }
-        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt & !found_row_hit & !found_reserved_same_bank ) {
-            // No row hit and
-            // haven't found an entry with a row hit to a new rank
-            if (earliest_banks == 0)
-                // Determine entries with earliest bank prep delay
-                // Function will give priority to commands that access the
-                // same rank as previous burst and can prep the bank seamlessly
-                earliest_banks = minBankPrep(queue, switched_cmd_type);
-
-            // FCFS - Bank is first available bank
-            if (bits(earliest_banks, dram_pkt->bankId, dram_pkt->bankId)) {
-                // Remember the packet to be scheduled to one of the earliest
-                // banks available, FCFS amongst the earliest banks
-                selected_pkt_it = i;
-                found_earliest_pkt = true;
-            }
-        }
-    }
-
-    DRAMPacket* selected_pkt = *selected_pkt_it;
-    //Reset round robin bank mask, if the queue doesn't have anymore requests from different banks
-    if (!found_reserved_diff_bank & found_reserved_same_bank)
-            bankmaskSaved = (reservedBankMask) & ~(0x01 << selected_pkt->bank);
-    queue.erase(selected_pkt_it);
-    queue.push_front(selected_pkt);
-}
 
 void
 DRAMCtrl::accessAndRespond(PacketPtr pkt, Tick static_latency)
@@ -1394,11 +1496,19 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         totQLat += cmd_at - dram_pkt->entryTime;
         //Per request memory access time
         if (((uint64_t)0x01 << dram_pkt->bank) & reservedBankMask) {
-            DPRINTF(KU, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
+            DPRINTF(PK, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
         }
 
-        if (dram_pkt->bank == 0)
+        if (dram_pkt->bank == 0) {
             totMemAccLatBank0 += dram_pkt->readyTime - dram_pkt->entryTime;
+            //DPRINTF(PK, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
+        }
+        if (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0){
+            totMemAccLatCore0 += dram_pkt->readyTime - dram_pkt->entryTime;
+            //DPRINTF(PK, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
+        }
+        if ( (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0) && (dram_pkt->bank!=0) )
+            totMemAccLatCore0Other += dram_pkt->readyTime - dram_pkt->entryTime;
 
     } else {
         ++writesThisTime;
@@ -1528,8 +1638,12 @@ DRAMCtrl::processNextReqEvent()
             // we have so many writes that we have to transition
             //	Fixme: issue commands to reserved banks
             if (writeQueue.size() > writeHighThreshold) {
-#ifdef MEDUSA
+//#if defined(MEDUSA) || defined(DCMC)
+#if defined(MEDUSA)
                     if (!isRequestToReservedBank(readQueue))
+                            switch_to_writes = true;
+#elif defined(DCMC)
+                    if ( (!isRequestToReservedBank(readQueue)) || (isRequestToReservedBank(writeQueue)) )
                             switch_to_writes = true;
 #else
                     switch_to_writes = true;
@@ -1544,7 +1658,11 @@ DRAMCtrl::processNextReqEvent()
             busState = READ_TO_WRITE;
         }
     } else {
+#ifdef DCMC
         chooseNext(writeQueue, switched_cmd_type);
+#else
+        chooseNextWrite(writeQueue, switched_cmd_type);
+#endif
         DRAMPacket* dram_pkt = writeQueue.front();
         // sanity check
         assert(dram_pkt->size <= burstSize);
@@ -1917,6 +2035,15 @@ DRAMCtrl::regStats()
         .name(name() + ".readBursts")
         .desc("Number of DRAM read bursts, "
               "including those serviced by the write queue");
+    readBurstsCore0
+        .name(name() + ".readBurstsCore0")
+        .desc("Number of DRAM read bursts, "
+              "including those serviced by the write queue");
+
+    readBurstsCore0Other
+        .name(name() + ".readBurstsCore0Other")
+        .desc("Number of DRAM read bursts, "
+              "including those serviced by the write queue");
 
     writeBursts
         .name(name() + ".writeBursts")
@@ -2023,6 +2150,13 @@ DRAMCtrl::regStats()
         .precision(2);
 
     avgMemAccLatCore0 = totMemAccLatCore0 / (readBurstsCore0);
+
+    avgMemAccLatCore0Other
+        .name(name() + ".avgMemAccLatCore0Other")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatCore0Other = totMemAccLatCore0Other / (readBurstsCore0Other);
 
     numRdRetry
         .name(name() + ".numRdRetry")

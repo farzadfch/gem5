@@ -290,6 +290,7 @@ class DRAMCtrl : public AbstractMemory
      * @return true if read queue is full, false otherwise
      */
     bool readQueueFull(unsigned int pktCount) const;
+    bool unifiedQueueFull(unsigned int pktCount) const;
 
     /**
      * Check if the write queue has room for more entries
@@ -314,6 +315,7 @@ class DRAMCtrl : public AbstractMemory
      * then pktCount is greater than one.
      */
     void addToReadQueue(PacketPtr pkt, unsigned int pktCount);
+    void addToUnifiedQueue(PacketPtr pkt, unsigned int pktCount);
 
     /**
      * Decode the incoming pkt, create a dram_pkt and push to the
@@ -377,6 +379,7 @@ class DRAMCtrl : public AbstractMemory
      * @param switched_cmd_type Command type is changing
      */
     void chooseNext(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
+    void chooseNextWrite(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
 
     /**
      * For FR-FCFS policy reorder the read/write queue depending on row buffer
@@ -446,6 +449,7 @@ class DRAMCtrl : public AbstractMemory
      */
     std::deque<DRAMPacket*> readQueue;
     std::deque<DRAMPacket*> writeQueue;
+    std::deque<DRAMPacket*> unifiedQueue;
 
     /**
      * Response queue where read packets wait after we're done working
@@ -635,6 +639,7 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar readBursts;
     Stats::Scalar readBurstsBank0;
     Stats::Scalar readBurstsCore0;
+    Stats::Scalar readBurstsCore0Other;
     Stats::Scalar writeBursts;
     Stats::Scalar bytesReadDRAM;
     Stats::Scalar bytesReadWrQ;
@@ -662,6 +667,7 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar totMemAccLat;
     Stats::Scalar totMemAccLatBank0;
     Stats::Scalar totMemAccLatCore0;
+    Stats::Scalar totMemAccLatCore0Other;
     Stats::Scalar totBusLat;
 
     // Average latencies per request
@@ -670,6 +676,7 @@ class DRAMCtrl : public AbstractMemory
     Stats::Formula avgMemAccLat;
     Stats::Formula avgMemAccLatBank0;
     Stats::Formula avgMemAccLatCore0;
+    Stats::Formula avgMemAccLatCore0Other;
 
     // Average bandwidth
     Stats::Formula avgRdBW;
