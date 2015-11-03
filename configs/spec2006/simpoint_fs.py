@@ -59,6 +59,7 @@ import spec_fs as spec_fs
 import pyterm
 import os
 import errno
+
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -83,7 +84,7 @@ parser.add_option("--bare-metal", action="store_true",
 parser.add_option("-n", "--num-cpus", type="int", default=1)
 
 # Run options
-parser.add_option("--simpoint-mode", type="choice", choices=["init", "checkpoint", "simulate", "check_affinity", "fastfwd"],
+parser.add_option("--simpoint-mode", type="choice", choices=["init", "checkpoint", "simulate", "check_affinity", "fastfwd", "batch"],
                   default="init")
 parser.add_option("--checkpoint-dir", action="store", type="string",
                   default=None, dest="checkpoint_dir",
@@ -110,11 +111,11 @@ parser.add_option("--mem-channels", type="int", default=1, # Not used for NVMain
 
 # Clock timings
 parser.add_option("--sys-clock", action="store", type="string",
-                  default='4GHz',
+                  default='1.6GHz',
                   help = """Top-level clock for blocks running at system
                   speed""")
 parser.add_option("--cpu-clock", action="store", type="string",
-                  default='4GHz',
+                  default='1.6GHz',
                   help="Clock for blocks running at CPU speed")
 parser.add_option("--sys-voltage", action="store", type="string",
                   default='1.0V',
@@ -213,12 +214,11 @@ bm = [SysConfig(disk=options.disk_image, mem=options.mem_size)]
 # quickly switch into a timing CPU
 sim_mem_mode = "atomic"
 
-# test_sys = makeLinuxX86System(sim_mem_mode, options.num_cpus, bm[0])
+#test_sys = makeLinuxX86System(sim_mem_mode, options.num_cpus, bm[0])
 
 test_sys = makeArmSystem(sim_mem_mode, options.machine_type, bm[0],
                                  options.dtb_filename,
                                  bare_metal=options.bare_metal)
-
 # Add isolated CPUs option if used
 if options.isolated_cpus != None:
     test_sys.boot_osflags = "%s isolcpus=%s" % (test_sys.boot_osflags, options.isolated_cpus)
@@ -259,9 +259,8 @@ for i in xrange(np):
         # the simpoint is instruction 0.
         test_sys.cpu[i].max_insts_all_threads = max(simpoint_list)
 
-if options.simpoint_mode == "simulate" or options.simpoint_mode == "fastfwd":
+if options.simpoint_mode == "simulate" or options.simpoint_mode == "fastfwd" or options.simpoint_mode == "batch":
     cpu_options = dict(config.items('cpu'))
-#    simulate_cpu = [Nehalem(clk_domain=test_sys.cpu_clk_domain, cpu_id=i, switched_out=True, **cpu_options) for i in xrange(np)]
     simulate_cpu = [O3_ARM_v7a_3(clk_domain=test_sys.cpu_clk_domain, cpu_id=i, switched_out=True, **cpu_options) for i in xrange(np)]
     for i in xrange(np):
         simulate_cpu[i].workload = test_sys.cpu[i].workload
@@ -293,8 +292,7 @@ if config.has_section('l2') and not options.private_l2:
     if l2_options.has_key('prefetcher'):
         l2_options['prefetcher'] = eval(l2_options['prefetcher'])
     test_sys.l2 = BaseCache(clk_domain = test_sys.cpu_clk_domain, **l2_options)
-    #test_sys.tol2bus = CoherentBus(clk_domain = test_sys.cpu_clk_domain, width = 32)
-    test_sys.tol2bus = CoherentXBar(clk_domain = test_sys.cpu_clk_domain, width = 256)
+    test_sys.tol2bus = CoherentXBar(clk_domain = test_sys.cpu_clk_domain, width = 16)
     test_sys.l2.cpu_side = test_sys.tol2bus.master
     if config.has_section('l3') == False:
         test_sys.l2.mem_side = test_sys.membus.slave
@@ -308,19 +306,19 @@ elif config.has_section('l2') and options.private_l2:
         test_sys.l2[idx].cpu_side = test_sys.tol2bus[idx].master
 
 # Configure L3 cache
-#if config.has_section('l3'):
-#    l3_options = dict(config.items('l3'))
-#    if l3_options.has_key('prefetcher'):
-#        l3_options['prefetcher'] = eval(l3_options['prefetcher'])
-#    test_sys.l3 = BaseCache(clk_domain = test_sys.cpu_clk_domain, **l3_options)
-#    test_sys.tol3bus = CoherentBus(clk_domain = test_sys.clk_domain, width = 16)
-#    if not options.private_l2:
-#        test_sys.l2.mem_side = test_sys.tol3bus.slave
-#    else:
-#        for idx in xrange(np):
-#            test_sys.l2[idx].mem_side = test_sys.tol3bus.slave
-#    test_sys.l3.cpu_side = test_sys.tol3bus.master
-#    test_sys.l3.mem_side = test_sys.membus.slave
+if config.has_section('l3'):
+    l3_options = dict(config.items('l3'))
+    if l3_options.has_key('prefetcher'):
+        l3_options['prefetcher'] = eval(l3_options['prefetcher'])
+    test_sys.l3 = BaseCache(clk_domain = test_sys.cpu_clk_domain, **l3_options)
+    test_sys.tol3bus = CoherentBus(clk_domain = test_sys.clk_domain, width = 16)
+    if not options.private_l2:
+        test_sys.l2.mem_side = test_sys.tol3bus.slave
+    else:
+        for idx in xrange(np):
+            test_sys.l2[idx].mem_side = test_sys.tol3bus.slave
+    test_sys.l3.cpu_side = test_sys.tol3bus.master
+    test_sys.l3.mem_side = test_sys.membus.slave
 
 for i in xrange(options.num_cpus):
     icache = None
@@ -367,12 +365,37 @@ if options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd":
     checkpoint_dir = os.path.join(options.init_checkpoint_dir, "cpt.init")
 elif options.simpoint_mode == "simulate" or options.simpoint_mode == "check_affinity":
     checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_'))
+elif options.simpoint_mode == "batch":
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2858989699500") #m5out-journal-shared
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868280197750") #m5out-journal-partitioned
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.lbm1_lbm2_lbm3") #RTAS-cache-part-2way
+    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864565682250") #RTAS-cache-part-2way
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part-vision
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-mixed
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part-periodic
+#     checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949868916875") #RTAS-cache-part-mixed
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949969531250") #RTAS-mshr-part-periodic
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864531628250") #RTAS-cache-part-4way-vga
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864535642750") #RTAS-cache-part-4way
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864531012000") #RTAS-cache-part-sqcif
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864526919250") #RTAS-cache-part-qcif
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864526919250") #RTAS-cache-part-vga
+#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864527001000") #RTAS-cache-part
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2859017276250")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338162750")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2859017276250")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338071500")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500370000")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338044250")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500412750")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500206250")
+    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864446059000")
 m5.instantiate(checkpoint_dir)
 
-#term_port = test_sys.terminal
-term_port = 3458
-#print "DEBUG: term_port" %  Terminal()
-#term_port = Terminal()
+#term_port = test_sys.pc.com_1.terminal.getListenPort()
+#print 'term port %d' % (test_sys.terminal.getListenPort())
+term_port = test_sys.terminal.getListenPort()
 
 print "**** REAL SIMULATION ****"
 
@@ -380,8 +403,7 @@ start_count = 0
 maxtick = m5.MaxTick
 
 if options.simpoint_mode == "init":
-    (term, inpipe) = pyterm.pyterm(3458)
-    #(term, inpipe) = pyterm.pyterm(term_port)
+    (term, inpipe) = pyterm.pyterm(term_port)
 elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd":
     (term, inpipe) = pyterm.pyterm(term_port)
 
@@ -394,48 +416,45 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
 
     print "Starting longest simpoint benchmark(s) on CPU0"
 
-    for point in sorted_points:
-        if point.getStartInst() == 0:
+    for bench in sorted_points:
+        if bench.getStartInst() == 0:
             start_cpu = start_count
-            print "Starting benchmark %s on CPU %d" % (point.getCmd(), start_cpu)
-            inpipe.send(spec_fs.getSPECCmd(point, start_cpu))
+
+            # Start on an isolated_cpu..
+            if options.isolated_cpus != None:
+                isolated_cpu_list = options.isolated_cpus.split(',')
+                start_cpu = int(isolated_cpu_list[start_count % len(isolated_cpu_list)])
+
+            print "Starting benchmark %s on CPU %d" % (bench.getCmd(), start_cpu)
+            inpipe.send(spec_fs.getSPECCmd(bench, start_cpu))
             inpipe.send("export PID%i=$!\n" % start_count)
             start_count = start_count + 1
 
-            # Start on an isolated_cpu..
-            #if options.isolated_cpus != None:
-             #   isolated_cpu_list = options.isolated_cpus.split(',')
-              #  start_cpu = int(isolated_cpu_list[start_count % len(isolated_cpu_list)])
-
-            #print "Starting benchmark %s on CPU %d" % (point.getCmd(), start_cpu)
-            #inpipe.send(spec_fs.getSPECCmd(point, start_cpu))
-            #inpipe.send("export PID%i=$!\n" % start_count)
-            #start_count = start_count + 1
-
-    print "Start count %d length of sorted points %d" % (start_count, len(sorted_points))
-    if start_count   >= len(sorted_points)  and options.simpoint_mode == "checkpoint":
-    #if options.simpoint_mode == "checkpoint":
+    if start_count >= len(sorted_points) and options.simpoint_mode == "checkpoint":
         print "Sending checkpoint write (deferred) -- All at 0"
 
         stop_cmd = "kill -s SIGSTOP "
         for pid in xrange(len(options.benchmark.split(':'))):
             stop_cmd = "%s $PID%i" % (stop_cmd, pid)
-       #inpipe.send("%s\n" % stop_cmd)
-#        inpipe.send("/sbin/m5 checkpoint 1000000\n")
-            exit_event = m5.simulate()
-            exit_cause = exit_event.getCause()
+        #inpipe.send("%s\n" % stop_cmd)
+        #inpipe.send("/sbin/m5 checkpoint 1000000\n")
+        #while exit_cause != "checkpoint":
+        exit_event = m5.simulate()
+        exit_cause = exit_event.getCause()
 
         print 'Exiting @ tick %i because %s' % (m5.curTick(), exit_cause)
-        if exit_cause == "all threads reached the max instruction count":
-            inpipe.send("/sbin/m5 checkpoint\n")
-            print '######################################################################Going to make cpt'
-            while exit_cause != "checkpoint":
-                exit_event = m5.simulate()
-                exit_cause = exit_event.getCause()
-
-            if exit_cause == "checkpoint":
-                mkdir_p(options.checkpoint_dir)
-                m5.checkpoint(os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_')))
+        while exit_cause != "all threads reached the max instruction count":
+            exit_event = m5.simulate()
+            exit_cause = exit_event.getCause()
+        print 'Exiting @ tick %i because %s' % (m5.curTick(), exit_cause)
+        inpipe.send("/sbin/m5 checkpoint\n")
+        print 'here'
+        while exit_cause != "checkpoint":
+            exit_event = m5.simulate()
+            exit_cause = exit_event.getCause()
+        if exit_cause == "checkpoint":
+            mkdir_p(options.checkpoint_dir)
+            m5.checkpoint(os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_')))
         pyterm.close_pyterm(term, inpipe)
 
         print 'Exiting @ tick %i because %s' % (m5.curTick(), exit_event.getCause())
@@ -445,7 +464,7 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
     elif start_count >= len(sorted_points) and options.simpoint_mode =="fastfwd":
         inpipe.send("/sbin/m5 switchcpus\n")
 
-        exit_event = m5.simulate(m5.curTick() + 100000000000)
+        exit_event = m5.simulate()
         exit_cause = exit_event.getCause()
 
         if exit_cause == "switch cpus":
@@ -456,7 +475,7 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
             print "exit_cause was %s" % exit_cause
             sys.exit(1)
 
-elif options.simpoint_mode == "simulate":
+elif options.simpoint_mode == "simulate" or options.simpoint_mode == "batch":
     (term, inpipe) = pyterm.pyterm(term_port)
 
     print "Waiting for bash shell to start (tick %i)..." % m5.curTick()
@@ -476,6 +495,13 @@ elif options.simpoint_mode == "simulate":
     for pid in xrange(len(options.benchmark.split(':'))):
         cont_cmd = "%s $PID%i" % (cont_cmd, pid)
     #inpipe.send("%s\n" % cont_cmd)
+    if options.simpoint_mode == "batch":
+        bench_list = options.benchmark.split(':')
+        fsBench_list = []
+        for bench in bench_list:
+            print "bench is %s" % bench
+            inpipe.send(spec_fs.getSPECCmd(bench, 0))
+
     inpipe.send("echo Affirmative\n")
 elif options.simpoint_mode == "check_affinity":
     (term, inpipe) = pyterm.pyterm(term_port)
@@ -488,9 +514,8 @@ elif options.simpoint_mode == "check_affinity":
     print "Wait stopped because %s" % exit_cause
 
     inpipe.send("mount -t proc proc /proc\n")
-    inpipe.send("ps -a\n")
-    inpipe.send("taskset -p 738\n")
-    inpipe.send("taskset -p 740\n")
+    inpipe.send("ps -el\n")
+    inpipe.send("cat < /sys/kernel/debug/palloc/palloc_mask\n")
     inpipe.send("/sbin/m5 exit\n")
 
     exit_event = m5.simulate(m5.curTick() + 10000000000)
@@ -499,9 +524,12 @@ elif options.simpoint_mode == "check_affinity":
     pyterm.close_pyterm(term, inpipe)
     sys.exit(0)
 
-print "maxtick %d and current tick %d" % (maxtick , m5.curTick())
 exit_event = m5.simulate(maxtick - m5.curTick())
 exit_cause = exit_event.getCause()
+print 'Exiting @ tick %i because %s maxtick %s' % (m5.curTick(), exit_event.getCause(),maxtick)
+#while exit_cause == "all threads reached the max instruction count":
+#    exit_event = m5.simulate(maxtick - m5.curTick())
+#    exit_cause = exit_event.getCause()
 
 if options.simpoint_mode == "init":
     if exit_cause == "checkpoint":
@@ -511,23 +539,15 @@ if options.simpoint_mode == "init":
 elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd":
     num_inst_steps = 0
     max_inst_steps = len(simpoint_list)
-    print "here"
-    if  exit_cause == "all threads reached the max instruction count":
-        exit_event = m5.simulate()
-        exit_cause = exit_event.getCause()
-        print "here debug"
+
     while exit_cause == "simpoint starting point found":
         m5.stats.dump()
-#        m5.simulate()
 
-        print "here"
-        num_inst_steps =  num_inst_steps + 1
+        num_inst_steps = num_inst_steps + 1
 
         if num_inst_steps >= max_inst_steps:
             exit_cause = "%d simpoints aligned" % len(bench_list)
             break
-        for inst in simpoint_inst_list:
-            print inst
 
         cur_inst = simpoint_inst_list[num_inst_steps]
         print "Current inst should be %d" % simpoint_list[num_inst_steps]
@@ -545,48 +565,31 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
                 inpipe.send(spec_fs.getSPECCmd(bench, start_cpu))
                 inpipe.send("export PID%i=$!\n" % start_count)
                 start_count = start_count + 1
-                print "test1 start_count = %d" %start_count
-
 
         if start_count >= len(sorted_points):
-            inpipe.send("/sbin/m5 checkpoint\n")
-            print "test2 start_count = %d" %start_count
             # Continue until max instruction...
-
+            print "Here..............................."
             exit_event = m5.simulate()
             exit_cause = exit_event.getCause()
 
-          #  if exit_cause != "all threads reached the max instruction count":
-          #      print "WARNING: Expected max instruction count exit, but the cause was: %s" % exit_cause
-          #      print "Continuing anyways..."
+            if exit_cause != "all threads reached the max instruction count":
+                print "WARNING: Expected max instruction count exit, but the cause was: %s" % exit_cause
+                print "Continuing anyways..."
 
-        #    if options.simpoint_mode == "fastfwd":
-         #       break
+            if options.simpoint_mode == "fastfwd":
+                break
 
-           # print "Sending checkpoint write (deferred)"
+            print "Sending checkpoint write (deferred)"
 
-           # stop_cmd = "kill -s SIGSTOP "
-            #for pid in xrange(len(options.benchmark.split(':'))):
-             #   stop_cmd = "%s $PID%i" % (stop_cmd, pid)
+            stop_cmd = "kill -s SIGSTOP "
+            for pid in xrange(len(options.benchmark.split(':'))):
+                stop_cmd = "%s $PID%i" % (stop_cmd, pid)
             #inpipe.send("%s\n" % stop_cmd)
-            #inpipe.send("/sbin/m5 checkpoint\n")
+            inpipe.send("/sbin/m5 checkpoint 1000000\n")
             while exit_cause != "checkpoint":
                 exit_event = m5.simulate()
                 exit_cause = exit_event.getCause()
-                print "wait......"
-        else:
-            print "test3 start_count = %d" %start_count
-            exit_event = m5.simulate()
-            exit_cause = exit_event.getCause()
 
-#            if exit_cause == "all threads reached the max instruction count":
-#                inpipe.send("/sbin/m5 checkpoint\n")
-#                while exit_cause != "checkpoint":
-#                    exit_event = m5.simulate()
-#                    exit_cause = exit_event.getCause()
-        if  exit_cause == "all threads reached the max instruction count":
-            exit_event = m5.simulate()
-            exit_cause = exit_event.getCause()
         if exit_cause == "checkpoint":
             m5.checkpoint(os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_')))
 
@@ -601,7 +604,7 @@ elif options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd"
         exit_cause = exit_event.getCause()
 
     pyterm.close_pyterm(term, inpipe)
-elif options.simpoint_mode == "simulate":
+elif options.simpoint_mode == "simulate" or options.simpoint_mode == "batch":
     pyterm.close_pyterm(term, inpipe)
 
 print 'Exiting @ tick %i because %s' % (m5.curTick(), exit_event.getCause())
