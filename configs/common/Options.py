@@ -69,11 +69,11 @@ def addCommonOptions(parser):
                       help = """Top-level voltage for blocks running at system
                       power supply""")
     parser.add_option("--sys-clock", action="store", type="string",
-                      default='4GHz',
+                      default='2GHz',
                       help = """Top-level clock for blocks running at system
                       speed""")
     parser.add_option("--cpu-clock", action="store", type="string",
-                      default='4GHz',
+                      default='2GHz',
                       help="Clock for blocks running at CPU speed")
     parser.add_option("--smt", action="store_true", default=False,
                       help = """
@@ -91,7 +91,7 @@ def addCommonOptions(parser):
     parser.add_option("--mem-channels", type="int", default=1,
                       help = "number of memory channels")
     parser.add_option("--mem-size", action="store", type="string",
-                      default="512MB",
+                      default="2GB",
                       help="Specify the physical memory size (single memory)")
 
     parser.add_option("-l", "--lpae", action="store_true")
@@ -106,11 +106,11 @@ def addCommonOptions(parser):
     parser.add_option("--num-l3caches", type="int", default=1)
     parser.add_option("--l1d_size", type="string", default="32kB")
     parser.add_option("--l1i_size", type="string", default="32kB")
-    parser.add_option("--l2_size", type="string", default="1MB")
+    parser.add_option("--l2_size", type="string", default="2MB")
     parser.add_option("--l3_size", type="string", default="16MB")
     parser.add_option("--l1d_assoc", type="int", default=2)
     parser.add_option("--l1i_assoc", type="int", default=2)
-    parser.add_option("--l2_assoc", type="int", default=8)
+    parser.add_option("--l2_assoc", type="int", default=16)
     parser.add_option("--l3_assoc", type="int", default=16)
     parser.add_option("--cacheline_size", type="int", default=64)
     parser.add_option("--cpu_id", type="int", default=0)

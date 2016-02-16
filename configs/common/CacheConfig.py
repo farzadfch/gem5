@@ -74,7 +74,7 @@ def config_cache(options, system):
 #                                     trace_enable = True)
 
         system.tol2bus = CoherentXBar(clk_domain = system.cpu_clk_domain,
-                                      width = 256)
+                                      width = 16)
         system.l2.cpu_side = system.tol2bus.master
         system.l2.mem_side = system.membus.slave
         #system.l2.mem_side = system.monitor.slave
