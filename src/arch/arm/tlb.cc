@@ -1062,6 +1062,9 @@ TLB::translateFs(RequestPtr req, ThreadContext *tc, Mode mode,
             req->setFlags(Request::UNCACHEABLE);
         }
 
+        if (te->deterministic)
+            req->setFlags(Request::DETERMINISTIC);
+
         if (!bootUncacheability &&
             ((ArmSystem*)tc->getSystemPtr())->adderBootUncacheable(vaddr)) {
             req->setFlags(Request::UNCACHEABLE);

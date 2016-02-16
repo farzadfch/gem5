@@ -142,6 +142,9 @@ struct TlbEntry
     bool shareable;
     bool outerShareable;
 
+    // Deterministic Memory
+    bool deterministic;
+
     // Access permissions
     bool xn;                // Execute Never
     bool pxn;               // Privileged Execute Never (LPAE only)
@@ -154,7 +157,7 @@ struct TlbEntry
          domain(DomainType::Client),  mtype(MemoryType::StronglyOrdered),
          longDescFormat(false), isHyp(false), global(false), valid(true),
          ns(true), nstid(true), el(0), nonCacheable(false), shareable(false),
-         outerShareable(false), xn(0), pxn(0)
+         outerShareable(false), deterministic(false), xn(0), pxn(0)
     {
         // no restrictions by default, hap = 0x3
 
@@ -167,7 +170,7 @@ struct TlbEntry
          domain(DomainType::Client), mtype(MemoryType::StronglyOrdered),
          longDescFormat(false), isHyp(false), global(false), valid(true),
          ns(true), nstid(true), el(0), nonCacheable(false),
-         shareable(false), outerShareable(false), xn(0), pxn(0)
+         shareable(false), outerShareable(false), deterministic(false), xn(0), pxn(0)
     {
         // no restrictions by default, hap = 0x3
 

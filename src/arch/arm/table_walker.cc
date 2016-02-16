@@ -1079,7 +1079,15 @@ TableWalker::memAttrs(ThreadContext *tc, TlbEntry &te, SCTLR sctlr,
                 te.shareable = true;
             break;
           case 3:
-            panic("Reserved type");
+            DPRINTF(TLBVerbose, "Normal Deterministic ns1:%d ns0:%d s:%d\n",
+                    prrr.ns1, prrr.ns0, s);
+            te.mtype = TlbEntry::MemoryType::Normal;
+            if (prrr.ns1 && s)
+                te.shareable = true;
+            if (prrr.ns0 && !s)
+                te.shareable = true;
+            te.deterministic = true;
+            break;
         }
 
         if (te.mtype == TlbEntry::MemoryType::Normal){
