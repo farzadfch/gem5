@@ -42,17 +42,18 @@
  *          Neha Agarwal
  */
 
+#include "arch/arm/stacktrace.hh"
 #include "base/bitfield.hh"
 #include "base/trace.hh"
+#include "debug/DET.hh"
 #include "debug/DRAM.hh"
-#include "debug/KU.hh"
-#include "debug/PK.hh"
 #include "debug/DRAMPower.hh"
 #include "debug/DRAMState.hh"
 #include "debug/Drain.hh"
+#include "debug/KU.hh"
+#include "debug/PK.hh"
 #include "mem/dram_ctrl.hh"
 #include "sim/system.hh"
-#include "arch/arm/stacktrace.hh"
 //#define MEDUSA
 //#define MEDUSA_NO_SWITCH
 //#define DCMC
@@ -288,7 +289,7 @@ DRAMCtrl::writeQueueFull(unsigned int neededEntries) const
 
 DRAMCtrl::DRAMPacket*
 DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
-                       bool isRead)
+                       bool isRead, bool isDeterministic)
 {
     // decode the address based on the address mapping scheme, with
     // Ro, Ra, Co, Ba and Ch denoting row, rank, column, bank and
@@ -391,7 +392,7 @@ DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
     // ready time set to the current tick, the latter will be updated
     // later
     uint16_t bank_id = banksPerRank * rank + bank;
-    return new DRAMPacket(pkt, isRead, rank, bank, row, bank_id, dramPktAddr,
+    return new DRAMPacket(pkt, isRead, isDeterministic, rank, bank, row, bank_id, dramPktAddr,
                           size, banks[rank][bank]);
 }
 
@@ -478,7 +479,12 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
                 burst_helper = new BurstHelper(pktCount);
             }
 
-            DRAMPacket* dram_pkt = decodeAddr(pkt, addr, size, true);
+            DRAMPacket* dram_pkt;
+            if(pkt->req->isDeterministic())
+                dram_pkt = decodeAddr(pkt, addr, size, true, true);
+            else
+                dram_pkt = decodeAddr(pkt, addr, size, true, false);
+
             cpu_id = getCpuid(dram_pkt->bank);
 
 
@@ -621,7 +627,7 @@ DRAMCtrl::addToWriteQueue(PacketPtr pkt, unsigned int pktCount)
         // if the item was not merged we need to create a new write
         // and enqueue it
         if (!merged) {
-            DRAMPacket* dram_pkt = decodeAddr(pkt, addr, size, false);
+            DRAMPacket* dram_pkt = decodeAddr(pkt, addr, size, false, false);
             cpu_id = getCpuid(dram_pkt->bank);
 
             assert(writeQueue.size() < writeBufferSize);
@@ -1073,14 +1079,19 @@ DRAMCtrl::reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_t
     // packet to one of the earliest banks available
     bool found_earliest_pkt = false;
     bool found_prepped_diff_rank_pkt = false;
+    bool found_row_hit = false;
     auto selected_pkt_it = queue.begin();
 
     for (auto i = queue.begin(); i != queue.end() ; ++i) {
         DRAMPacket* dram_pkt = *i;
         const Bank& bank = dram_pkt->bankRef;
+        if (dram_pkt->isDeterministic) {
+            DPRINTF(DET, "deterministic dram packet\n");
+            selected_pkt_it = i;
+            // no need to look through the remaining queue entries
+            break;
+        } else if (bank.openRow == dram_pkt->row) {
         // Check if it is a row hit
-//        if ( (bank.openRow == dram_pkt->row) && (bank.colAllowedAt - curTick() <= tBURST) ) {
-        if (bank.openRow == dram_pkt->row) {
             if (dram_pkt->rank == activeRank || switched_cmd_type) {
                 // FCFS within the hits, giving priority to commands
                 // that access the same rank as the previous burst
@@ -1088,13 +1099,14 @@ DRAMCtrl::reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_t
                 // Only give rank prioity when command type is not changing
                 //DPRINTF(PK, "Row buffer hit\n");
                 selected_pkt_it = i;
-                break;
-            } else if (!found_prepped_diff_rank_pkt) {
+                found_row_hit = true;
+                //break;
+            } else if (!found_row_hit && !found_prepped_diff_rank_pkt) {
                 // found row hit for command on different rank than prev burst
                 selected_pkt_it = i;
                 found_prepped_diff_rank_pkt = true;
             }
-        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt) {
+        } else if (!found_earliest_pkt & !found_prepped_diff_rank_pkt && !found_row_hit) {
             // No row hit and
             // haven't found an entry with a row hit to a new rank
            if (earliest_banks == 0)
@@ -1315,6 +1327,8 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
 {
     DPRINTF(DRAM, "Timing access to addr %lld, rank/bank/row %d %d %d\n",
             dram_pkt->addr, dram_pkt->rank, dram_pkt->bank, dram_pkt->row);
+    DPRINTF(PK, "Timing access to addr %lld, rank/bank/row %d %d %d\n",
+            dram_pkt->addr, dram_pkt->rank, dram_pkt->bank, dram_pkt->row);
 
     // get the bank
     Bank& bank = dram_pkt->bankRef;
@@ -1328,7 +1342,9 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
     // Determine the access latency and update the bank state
     if (bank.openRow == dram_pkt->row) {
         // nothing to do
+        DPRINTF(PK, "RowHit:%s\n",dram_pkt->isRead?"READ":"WRITE");
     } else {
+        DPRINTF(PK, "RowMiss:%s\n",dram_pkt->isRead?"READ":"WRITE");
         row_hit = false;
 
         // If there is a page open, precharge it.
@@ -1472,6 +1488,8 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
 
     DPRINTF(DRAM, "Access to %lld, ready at %lld bus busy until %lld.\n",
             dram_pkt->addr, dram_pkt->readyTime, busBusyUntil);
+    DPRINTF(PK, "Access to %lld, ready at %lld bus busy until %lld.\n",
+            dram_pkt->addr, dram_pkt->readyTime, busBusyUntil);
 
     DPRINTF(DRAMPower, "%llu,%s,%d,%d\n", divCeil(cmd_at, tCK), mem_cmd,
             dram_pkt->bank, dram_pkt->rank);
@@ -1495,9 +1513,9 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         totBusLat += tBURST;
         totQLat += cmd_at - dram_pkt->entryTime;
         //Per request memory access time
-        if (((uint64_t)0x01 << dram_pkt->bank) & reservedBankMask) {
-            DPRINTF(PK, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
-        }
+//        if (((uint64_t)0x01 << dram_pkt->bank) & reservedBankMask) {
+//            DPRINTF(PK, "Bank%d %d\n", dram_pkt->bank, dram_pkt->readyTime - dram_pkt->entryTime);
+//        }
 
         if (dram_pkt->bank == 0) {
             totMemAccLatBank0 += dram_pkt->readyTime - dram_pkt->entryTime;

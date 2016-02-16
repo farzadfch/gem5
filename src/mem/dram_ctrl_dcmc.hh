@@ -122,7 +122,7 @@ class DRAMCtrl : public AbstractMemory
      */
     bool retryRdReq;
     bool retryWrReq;
-//    bool guard[4];
+    bool retryReq;
 
     /**
      * Bus state used to control the read/write switching and drive
@@ -214,7 +214,6 @@ class DRAMCtrl : public AbstractMemory
         const PacketPtr pkt;
 
         const bool isRead;
-        const bool isDeterministic;
 
         /** Will be populated by address decoder */
         const uint8_t rank;
@@ -249,11 +248,11 @@ class DRAMCtrl : public AbstractMemory
         BurstHelper* burstHelper;
         Bank& bankRef;
 
-        DRAMPacket(PacketPtr _pkt, bool is_read, bool is_Deterministic, uint8_t _rank, uint8_t _bank,
+        DRAMPacket(PacketPtr _pkt, bool is_read, uint8_t _rank, uint8_t _bank,
                    uint32_t _row, uint16_t bank_id, Addr _addr,
                    unsigned int _size, Bank& bank_ref)
             : entryTime(curTick()), readyTime(curTick()),
-              pkt(_pkt), isRead(is_read), isDeterministic(is_Deterministic), rank(_rank), bank(_bank), row(_row),
+              pkt(_pkt), isRead(is_read), rank(_rank), bank(_bank), row(_row),
               bankId(bank_id), addr(_addr), size(_size), burstHelper(NULL),
               bankRef(bank_ref)
         { }
@@ -284,6 +283,7 @@ class DRAMCtrl : public AbstractMemory
     void processPowerEvent();
     EventWrapper<DRAMCtrl,&DRAMCtrl::processPowerEvent> powerEvent;
 
+    bool unifiedQueueFull(unsigned int pktCount) const;
     /**
      * Check if the read queue has room for more entries
      *
@@ -291,7 +291,6 @@ class DRAMCtrl : public AbstractMemory
      * @return true if read queue is full, false otherwise
      */
     bool readQueueFull(unsigned int pktCount) const;
-    bool unifiedQueueFull(unsigned int pktCount) const;
 
     /**
      * Check if the write queue has room for more entries
@@ -316,7 +315,6 @@ class DRAMCtrl : public AbstractMemory
      * then pktCount is greater than one.
      */
     void addToReadQueue(PacketPtr pkt, unsigned int pktCount);
-    void addToUnifiedQueue(PacketPtr pkt, unsigned int pktCount);
 
     /**
      * Decode the incoming pkt, create a dram_pkt and push to the
@@ -367,7 +365,7 @@ class DRAMCtrl : public AbstractMemory
      * @return A DRAMPacket pointer with the decoded information
      */
     DRAMPacket* decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned int size,
-                           bool isRead, bool isDeterministic);
+                           bool isRead);
 
     /**
      * The memory schduler/arbiter - picks which request needs to
@@ -379,8 +377,8 @@ class DRAMCtrl : public AbstractMemory
      * @param queue Queued requests to consider
      * @param switched_cmd_type Command type is changing
      */
+    void printUnifiedQ(std::deque<DRAMPacket*>& queue);
     void chooseNext(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
-    void chooseNextWrite(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
 
     /**
      * For FR-FCFS policy reorder the read/write queue depending on row buffer
@@ -391,19 +389,8 @@ class DRAMCtrl : public AbstractMemory
      * @param queue Queued requests to consider
      * @param switched_cmd_type Command type is changing
      */
+    void reorderQueueRR(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
     void reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
-    void reorderQueueFrfcfs(std::deque<DRAMPacket*>& queue, bool switched_cmd_type);
-    int kucheckQueue(std::deque<DRAMPacket*>& queue, bool print);
-    //void overlapRequest(std::deque<DRAMPacket*>& queue, uint8_t bankmask);
-    void overlapRequest(std::deque<DRAMPacket*>& queue, uint64_t banks);
-    bool isRequestToReservedBank(std::deque<DRAMPacket*>& queue);
-
-    /**
-     * MemGuard Functions
-     */
-
-     uint8_t getCpuid(uint8_t bank);
-     void memGuard(uint8_t cpu_id);
 
     /**
      * Find which are the earliest banks ready to issue an activate
@@ -448,9 +435,9 @@ class DRAMCtrl : public AbstractMemory
     /**
      * The controller's main read and write queues
      */
+    std::deque<DRAMPacket*> unifiedQueue;
     std::deque<DRAMPacket*> readQueue;
     std::deque<DRAMPacket*> writeQueue;
-    std::deque<DRAMPacket*> unifiedQueue;
 
     /**
      * Response queue where read packets wait after we're done working
@@ -494,6 +481,7 @@ class DRAMCtrl : public AbstractMemory
     const uint32_t banksPerRank;
     const uint32_t channels;
     uint32_t rowsPerBank;
+    const uint32_t unifiedBufferSize;
     const uint32_t readBufferSize;
     const uint32_t writeBufferSize;
     const uint32_t writeHighThreshold;
@@ -638,9 +626,6 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar readReqs;
     Stats::Scalar writeReqs;
     Stats::Scalar readBursts;
-    Stats::Scalar readBurstsBank0;
-    Stats::Scalar readBurstsCore0;
-    Stats::Scalar readBurstsCore0Other;
     Stats::Scalar writeBursts;
     Stats::Scalar bytesReadDRAM;
     Stats::Scalar bytesReadWrQ;
@@ -666,18 +651,12 @@ class DRAMCtrl : public AbstractMemory
     // Latencies summed over all requests
     Stats::Scalar totQLat;
     Stats::Scalar totMemAccLat;
-    Stats::Scalar totMemAccLatBank0;
-    Stats::Scalar totMemAccLatCore0;
-    Stats::Scalar totMemAccLatCore0Other;
     Stats::Scalar totBusLat;
 
     // Average latencies per request
     Stats::Formula avgQLat;
     Stats::Formula avgBusLat;
     Stats::Formula avgMemAccLat;
-    Stats::Formula avgMemAccLatBank0;
-    Stats::Formula avgMemAccLatCore0;
-    Stats::Formula avgMemAccLatCore0Other;
 
     // Average bandwidth
     Stats::Formula avgRdBW;
@@ -692,8 +671,6 @@ class DRAMCtrl : public AbstractMemory
     // Average queue lengths
     Stats::Average avgRdQLen;
     Stats::Average avgWrQLen;
-    Stats::Average avgRdQLenBank0;
-    Stats::Average avgRespQLenBank0;
 
     // Row hit count and rate
     Stats::Scalar readRowHits;
