@@ -55,6 +55,8 @@ using namespace std;
 
 BaseSetAssoc::BaseSetAssoc(const Params *p)
     :BaseTags(p), assoc(p->assoc),
+     lowerWayNum(0),
+     upperWayNum(p->assoc - 1),
      numSets(p->size / (p->block_size * p->assoc)),
      sequentialAccess(p->sequential_access)
 {
@@ -111,6 +113,7 @@ BaseSetAssoc::BaseSetAssoc(const Params *p)
             blk->size = blkSize;
             sets[i].blks[j]=blk;
             blk->set = i;
+            blk->way = j;
         }
     }
 }

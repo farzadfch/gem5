@@ -89,6 +89,7 @@ System::System(Params *p)
       memoryMode(p->mem_mode),
       mshrCount{-1,-1,-1,-1},
       _cacheLineSize(p->cache_line_size),
+      wayPartEnabled(false),
       workItemsBegin(0),
       workItemsEnd(0),
       numWorkIds(p->num_work_ids),
@@ -244,6 +245,16 @@ System::isGuarded()
         return true;
     else
         return false;
+}
+
+void
+System::enableWayPart(int use) {
+    wayPartEnabled = use;
+}
+
+bool
+System::isWayPartEnable() {
+    return wayPartEnabled;
 }
 
 bool System::breakpoint()

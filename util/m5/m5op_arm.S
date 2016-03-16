@@ -92,6 +92,7 @@ SIMPLE_OP(m5_work_end, work_end_func, 0)
 SIMPLE_OP(m5_setmshr, setmshr_func, 0)
 SIMPLE_OP(m5_setmembudget, setmembudget_func, 0)
 SIMPLE_OP(m5_enablememguard, enablememguard_func, 0)
+SIMPLE_OP(m5_enablewaypart, enablewaypart_func, 0)
 
 SIMPLE_OP(m5a_bsm, annotate_func, an_bsm)
 SIMPLE_OP(m5a_esm, annotate_func, an_esm)

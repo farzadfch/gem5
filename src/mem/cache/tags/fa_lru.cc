@@ -103,6 +103,7 @@ FALRU::FALRU(const Params *p)
         blks[i].prev = &(blks[i-1]);
         blks[i].next = &(blks[i+1]);
         blks[i].isTouched = false;
+        blks[i].way = i;
     }
     assert(j == numCaches);
     assert(index == numBlocks);

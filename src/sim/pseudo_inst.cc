@@ -61,6 +61,7 @@
 #include "debug/Loader.hh"
 #include "debug/PseudoInst.hh"
 #include "debug/MSHRInst.hh"
+#include "debug/WayPart.hh"
 #include "debug/Quiesce.hh"
 #include "debug/WorkItems.hh"
 #include "params/BaseCPU.hh"
@@ -202,7 +203,7 @@ pseudoInst(ThreadContext *tc, uint8_t func, uint8_t subfunc)
        enablememguard(tc, args[0]);
        break;
       case 0x59: // reserved5_func
-        warn("Unimplemented m5 op (0x%x)\n", func);
+        enablewaypart(tc, args[0]);
         break;
 
       default:
@@ -731,6 +732,13 @@ void enablememguard(ThreadContext *tc, int use)
     DPRINTF(MSHRInst, "PseudoInst::enablememguard(%i)\n", use);
     System *sys = tc->getSystemPtr();
     sys->enableMemGuard(use);
+}
+
+void enablewaypart(ThreadContext *tc, int use)
+{
+    DPRINTF(WayPart, "PseudoInst::enablewaypart(%i)\n", use);
+    System *sys = tc->getSystemPtr();
+    sys->enableWayPart(use);
 }
 
 

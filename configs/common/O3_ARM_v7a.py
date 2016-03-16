@@ -100,8 +100,12 @@ class O3_ARM_v7a_BP(BranchPredictor):
     instShiftAmt = 2
 
 class O3_ARM_v7a_3(DerivO3CPU):
-    LQEntries = 255
-    SQEntries = 255
+    #LQEntries = 255
+    #SQEntries = 255
+    #LQEntries = 16
+    #SQEntries = 16
+    LQEntries = 48
+    SQEntries = 48
     LSQDepCheckShift = 0
     LFSTSize = 1024
     SSITSize = 1024
@@ -136,8 +140,12 @@ class O3_ARM_v7a_3(DerivO3CPU):
     forwardComSize = 5
     numPhysIntRegs = 128
     numPhysFloatRegs = 192
-    numIQEntries = 256
-    numROBEntries = 300
+    #numIQEntries = 256
+    #numROBEntries = 300
+    #numIQEntries = 32
+    #numROBEntries = 40
+    numIQEntries = 96
+    numROBEntries = 128
 
     switched_out = False
     branchPred = O3_ARM_v7a_BP()

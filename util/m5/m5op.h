@@ -64,6 +64,7 @@ void m5_work_end(uint64_t workid, uint64_t threadid);
 void m5_setmshr(uint8_t cpu_id, uint64_t mshrcount);
 void m5_setmembudget(uint8_t cpu_id, uint64_t mshrcount);
 void m5_enablememguard(int use);
+void m5_enablewaypart(int use);
 
 // These operations are for critical path annotation
 void m5a_bsm(char *sm, const void *id, int flags);

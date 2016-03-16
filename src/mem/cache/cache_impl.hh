@@ -59,11 +59,13 @@
 #include "debug/Cache.hh"
 #include "debug/CachePort.hh"
 #include "debug/CacheTags.hh"
+#include "debug/WayPart.hh"
 #include "mem/cache/prefetch/base.hh"
 #include "mem/cache/blk.hh"
 #include "mem/cache/cache.hh"
 #include "mem/cache/mshr.hh"
 #include "sim/sim_exit.hh"
+#include <string>
 
 template<class TagStore>
 Cache<TagStore>::Cache(const Params *p)
@@ -321,7 +323,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
         assert(blkSize == pkt->getSize());
         if (blk == NULL) {
             // need to do a replacement
-            blk = allocateBlock(pkt->getAddr(), pkt->isSecure(), writebacks);
+            blk = allocateBlock(pkt->getAddr(), pkt->isSecure(), writebacks, id, pkt->req->masterId());
             if (blk == NULL) {
                 // no replaceable block available, give up.
                 // Writeback will be forwarded to next level,
@@ -1387,9 +1389,57 @@ Cache<TagStore>::uncacheableFlush(PacketPtr pkt)
 template<class TagStore>
 typename Cache<TagStore>::BlkType*
 Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
-                               PacketList &writebacks)
+                               PacketList &writebacks, int id, int masterId)
 {
+    using namespace std;
+    
+    string masterName = system->getMasterName(masterId);
+    string cpu0("cpu0"), cpus0("cpus0"), cpu1("cpu1"), cpus1("cpus1"), cpu2("cpu2"), cpus2("cpus2"), cpu3("cpu3"), cpus3("cpus3");
+    
+    if (! isTopLevel && system->isWayPartEnable())
+    {
+      if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+         tags->setWayAllocation(0, 3);
+      else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
+         tags->setWayAllocation(4, 7);
+      else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
+         tags->setWayAllocation(8, 11);
+      else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
+         tags->setWayAllocation(12, 15);
+      else
+      {
+         tags->setWayAllocation(0, 15);
+         DPRINTF(WayPart, "CPU ID not found\n");
+      }
+    }
+    
+    /* if (isTopLevel == false)
+      switch (id)
+      {
+         case 0:
+           tags->setWayAllocation(0, 3);
+         break; 
+         case 1:
+           tags->setWayAllocation(4, 7);
+         break; 
+         case 2:
+           tags->setWayAllocation(8, 11);
+         break; 
+         case 3:
+           tags->setWayAllocation(12, 15);
+         break;
+         default:
+           tags->setWayAllocation(0, 15);
+      }
+    */  
+      
     BlkType *blk = tags->findVictim(addr);
+
+    if (isTopLevel == false)
+    {
+      string masterName = system->getMasterName(masterId);
+      DPRINTF(WayPart, "CPU ID: %d Master:%d %s Way No: %d \n", id, masterId, masterName.c_str(), blk->way);
+    }
 
     if (blk->isValid()) {
         Addr repl_addr = tags->regenerateBlkAddr(blk->tag, blk->set);
@@ -1440,7 +1490,8 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
         // better have read new data...
         assert(pkt->hasData());
         // need to do a replacement
-        blk = allocateBlock(addr, is_secure, writebacks);
+        int id = pkt->req->hasContextId() ? pkt->req->contextId() : -1;
+        blk = allocateBlock(addr, is_secure, writebacks, id, pkt->req->masterId());
         if (blk == NULL) {
             // No replaceable block... just use temporary storage to
             // complete the current request and then get rid of it

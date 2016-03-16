@@ -60,7 +60,8 @@
 #define setmembudget_func       0x57 // Reserved for user
 #define enablememguard_func          0x58 // Reserved for user
 //#define reserved4_func          0x58 // Reserved for user
-#define reserved5_func          0x59 // Reserved for user
+#define enablewaypart_func          0x59 // Reserved for user
+//#define reserved5_func          0x59 // Reserved for user
 
 #define work_begin_func          0x5a
 #define work_end_func            0x5b

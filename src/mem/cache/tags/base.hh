@@ -169,6 +169,15 @@ class BaseTags : public ClockedObject
      * Computes stats just prior to dump event
      */
     virtual void computeStats() {}
+    
+    /**
+     * Limit the allocation for the cache ways.
+     * @param ways The ways available for replacement.
+     */
+    virtual void setWayAllocation(int lowerNum, int upperNum)
+    {
+        panic("This tag class does not implement way allocation limit!\n");
+    }
 
     /**
      *iterated through all blocks and clear all locks

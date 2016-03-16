@@ -636,4 +636,28 @@ let {{
     header_output += BasicDeclare.subst(m5enablememguardIop)
     decoder_output += BasicConstructor.subst(m5enablememguardIop)
     exec_output += PredOpExecute.subst(m5enablememguardIop)
+    
+    m5enablewaypart_code = '''
+        PseudoInst::enablewaypart(xc->tcBase(), join32to64(R1, R0));
+    '''
+
+    m5enablewaypart_code64 = '''
+        PseudoInst::enablewaypart(xc->tcBase(), X0);
+    '''
+
+    m5enablewaypartIop = InstObjParams("m5enablewaypart", "M5enablewaypart", "PredOp",
+                                   { "code":  m5enablewaypart_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5enablewaypartIop)
+    decoder_output += BasicConstructor.subst(m5enablewaypartIop)
+    exec_output += PredOpExecute.subst(m5enablewaypartIop)
+
+    m5enablewaypartIop = InstObjParams("m5enablewaypart", "M5enablewaypart64", "PredOp",
+                                   { "code":  m5enablewaypart_code64,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5enablewaypartIop)
+    decoder_output += BasicConstructor.subst(m5enablewaypartIop)
+    exec_output += PredOpExecute.subst(m5enablewaypartIop)
 }};

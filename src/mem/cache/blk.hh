@@ -117,6 +117,8 @@ class CacheBlk
      * @todo Move this into subclasses when we fix CacheTags to use them.
      */
     int set;
+    
+    int way;
 
     /** whether this block has been touched */
     bool isTouched;

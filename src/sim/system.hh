@@ -189,6 +189,8 @@ class System : public MemObject
     void  resetMemBudget(uint8_t cpu_id);
     void enableMemGuard(int use);
     bool isGuarded();
+    void enableWayPart(int use);
+    bool isWayPartEnable();
     /** @} */
 
     /**
@@ -290,6 +292,7 @@ class System : public MemObject
     Enums::MemoryMode memoryMode;
     int mshrCount[4];
     const unsigned int _cacheLineSize;
+    bool wayPartEnabled;
 
     uint64_t workItemsBegin;
     uint64_t workItemsEnd;

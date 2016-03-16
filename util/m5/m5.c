@@ -280,6 +280,15 @@ do_enablememguard(int argc, char *argv[])
     printf("Enabled:use memguard = 0x%x\n",ints[0]);
     m5_enablememguard(ints[0]);
 }
+
+void
+do_enablewaypart(int argc, char *argv[])
+{
+    uint64_t ints[1];
+    parse_int_args(argc, argv, ints, 1);
+    printf("Enable waypart = 0x%x\n",ints[0]);
+    m5_enablewaypart(ints[0]);
+}
 #ifdef linux
 void
 do_pin(int argc, char *argv[])
@@ -328,6 +337,7 @@ struct MainFunc mainfuncs[] = {
     { "setmshr",        do_setmshr,          "" },
     { "setmembudget",   do_setmembudget,     "" },
     { "enablememguard", do_enablememguard,   "" },
+    { "enablewaypart",  do_enablewaypart,   "" },
 #ifdef linux
     { "pin",            do_pin,              "<cpu> <program> [args ...]" }
 #endif

@@ -87,6 +87,8 @@ class BaseSetAssoc : public BaseTags
   protected:
     /** The associativity of the cache. */
     const unsigned assoc;
+    /** Ways available for allocation */
+    unsigned lowerWayNum, upperWayNum;
     /** The number of sets in the cache. */
     const unsigned numSets;
     /** Whether tags and data are accessed sequentially. */
@@ -227,7 +229,7 @@ public:
         int set = extractSet(addr);
 
         // prefer to evict an invalid block
-        for (int i = 0; i < assoc; ++i) {
+        for (int i = lowerWayNum; i <= upperWayNum; ++i) {
             blk = sets[set].blks[i];
             if (!blk->isValid()) {
                 break;
@@ -290,6 +292,20 @@ public:
          tagAccesses += 1;
          dataAccesses += 1;
      }
+     
+     
+    /**
+     * Limit the allocation for the cache ways.
+     * @param ways The ways available for replacement.
+     */
+    virtual void setWayAllocation(int lowerNum, int upperNum) override
+    {
+        fatal_if(lowerNum < 0, "Lower allocation limit must be greater than or equal to zero");
+        fatal_if(upperNum < 0, "Upper allocation limit must be greater than or equal to zero");
+        fatal_if(upperNum >= assoc, "Upper allocation limit must be less that the number of ways");
+        lowerWayNum = lowerNum;
+        upperWayNum = upperNum;
+    }
 
     /**
      * Generate the tag from the given address.

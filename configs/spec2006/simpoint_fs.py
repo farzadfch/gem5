@@ -111,11 +111,11 @@ parser.add_option("--mem-channels", type="int", default=1, # Not used for NVMain
 
 # Clock timings
 parser.add_option("--sys-clock", action="store", type="string",
-                  default='1.6GHz',
+                  default='2GHz',
                   help = """Top-level clock for blocks running at system
                   speed""")
 parser.add_option("--cpu-clock", action="store", type="string",
-                  default='1.6GHz',
+                  default='2GHz',
                   help="Clock for blocks running at CPU speed")
 parser.add_option("--sys-voltage", action="store", type="string",
                   default='1.0V',
@@ -366,31 +366,7 @@ if options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd":
 elif options.simpoint_mode == "simulate" or options.simpoint_mode == "check_affinity":
     checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_'))
 elif options.simpoint_mode == "batch":
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2858989699500") #m5out-journal-shared
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868280197750") #m5out-journal-partitioned
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.lbm1_lbm2_lbm3") #RTAS-cache-part-2way
-    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864565682250") #RTAS-cache-part-2way
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part-vision
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-mixed
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949869161875") #RTAS-mshr-part-periodic
-#     checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949868916875") #RTAS-cache-part-mixed
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2949969531250") #RTAS-mshr-part-periodic
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864531628250") #RTAS-cache-part-4way-vga
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864535642750") #RTAS-cache-part-4way
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864531012000") #RTAS-cache-part-sqcif
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864526919250") #RTAS-cache-part-qcif
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864526919250") #RTAS-cache-part-vga
-#    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864527001000") #RTAS-cache-part
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2859017276250")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338162750")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2859017276250")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338071500")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500370000")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2868338044250")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500412750")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864500206250")
-    #checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864446059000")
+    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864565443000")
 m5.instantiate(checkpoint_dir)
 
 #term_port = test_sys.pc.com_1.terminal.getListenPort()
