@@ -117,7 +117,7 @@ class CacheBlk
      * @todo Move this into subclasses when we fix CacheTags to use them.
      */
     int set;
-    
+
     int way;
 
     /** whether this block has been touched */
@@ -130,6 +130,9 @@ class CacheBlk
     int srcMasterId;
 
     Tick tickInserted;
+    
+    /** whether it is allocated for a deterministic request */
+    bool deterministic;
 
   protected:
     /**
@@ -178,7 +181,8 @@ class CacheBlk
           asid(-1), tag(0), data(0) ,size(0), status(0), whenReady(0),
           set(-1), isTouched(false), refCount(0),
           srcMasterId(Request::invldMasterId),
-          tickInserted(0)
+          tickInserted(0),
+          deterministic(false)
     {}
 
     /**
@@ -276,6 +280,22 @@ class CacheBlk
     bool isSecure() const
     {
         return (status & BlkSecure) != 0;
+    }
+    
+    /**
+     * Check if this block is deterministic.
+    */
+    bool isDeterministic() const
+    {
+        return deterministic;
+    }
+    
+    /**
+     * Set this block to be deterministic or not.
+    */
+    void setDeterministic(bool dm)
+    {
+        deterministic = dm;
     }
 
     /**

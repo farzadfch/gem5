@@ -66,6 +66,7 @@
 #include "mem/cache/mshr.hh"
 #include "sim/sim_exit.hh"
 #include <string>
+#include <cstdio>
 
 template<class TagStore>
 Cache<TagStore>::Cache(const Params *p)
@@ -337,6 +338,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
+            blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -1286,6 +1288,8 @@ Cache<TagStore>::writebackBlk(BlkType *blk, MasterID masterId)
                 /* Request::wbMasterId */ masterId);
     if (blk->isSecure())
         writebackReq->setFlags(Request::SECURE);
+    if (blk->isDeterministic())
+        writebackReq->setFlags(Request::DETERMINISTIC);
 
     writebackReq->taskId(blk->task_id);
     blk->task_id= ContextSwitchTaskId::Unknown;
@@ -1396,21 +1400,26 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
     string masterName = system->getMasterName(masterId);
     string cpu0("cpu0"), cpus0("cpus0"), cpu1("cpu1"), cpus1("cpus1"), cpu2("cpu2"), cpus2("cpus2"), cpu3("cpu3"), cpus3("cpus3");
 
-    if (! isTopLevel && system->isWayPartEnable())
+    if (!isTopLevel)
     {
-      if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
-         tags->setWayAllocation(0, 3);
-      else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
-         tags->setWayAllocation(4, 7);
-      else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
-         tags->setWayAllocation(8, 11);
-      else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
-         tags->setWayAllocation(12, 15);
-      else
-      {
+       if (system->isWayPartEnable())
+       {
+         if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+            tags->setWayAllocation(0, 3);
+         else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
+            tags->setWayAllocation(4, 7);
+         else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
+            tags->setWayAllocation(8, 11);
+         else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
+            tags->setWayAllocation(12, 15);
+         else
+         {
+            printf("CPU ID not found\n");
+            assert(0);
+         }
+       }
+       else
          tags->setWayAllocation(0, 15);
-         DPRINTF(WayPart, "CPU ID not found\n");
-      }
     }
 
     /* if (isTopLevel == false)
@@ -1435,10 +1444,10 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
 
     BlkType *blk = tags->findVictim(addr);
 
-    if (isTopLevel == false)
+    if (!isTopLevel)
     {
       string masterName = system->getMasterName(masterId);
-      DPRINTF(WayPart, "CPU ID: %d Master:%d %s Way No: %d \n", id, masterId, masterName.c_str(), blk->way);
+      DPRINTF(WayPart, "CPU ID:%d Master:%d %s Way No:%d DM:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic());
     }
 
     if (blk->isValid()) {
@@ -1520,6 +1529,7 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
     if (is_secure)
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
+    blk->setDeterministic(pkt->req->isDeterministic());
 
     if (!pkt->sharedAsserted()) {
         blk->status |= BlkWritable;
