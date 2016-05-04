@@ -223,7 +223,7 @@ class Cache : public BaseCache
      * list.  Return free block frame.  May return NULL if there are
      * no replaceable blocks at the moment.
      */
-    BlkType *allocateBlock(Addr addr, bool is_secure, PacketList &writebacks, int id, int masterId);
+    BlkType *allocateBlock(Addr addr, bool is_secure, PacketList &writebacks, int id, MasterID masterId);
 
     /**
      * Populates a cache block and handles all outstanding requests for the
@@ -308,7 +308,7 @@ class Cache : public BaseCache
      * @param blk The block to writeback.
      * @return The writeback request for the block.
      */
-    PacketPtr writebackBlk(BlkType *blk);
+    PacketPtr writebackBlk(BlkType *blk, MasterID masterId);
 
 
     void memWriteback();

@@ -1260,7 +1260,7 @@ Cache<TagStore>::recvTimingResp(PacketPtr pkt)
     // if we used temp block, clear it out
     if (blk == tempBlock) {
         if (blk->isDirty()) {
-            allocateWriteBuffer(writebackBlk(blk), time, true);
+            allocateWriteBuffer(writebackBlk(blk, pkt->req->masterId()), time, true);
         }
         blk->invalidate();
     }
@@ -1275,7 +1275,7 @@ Cache<TagStore>::recvTimingResp(PacketPtr pkt)
 
 template<class TagStore>
 PacketPtr
-Cache<TagStore>::writebackBlk(BlkType *blk)
+Cache<TagStore>::writebackBlk(BlkType *blk, MasterID masterId)
 {
     assert(blk && blk->isValid() && blk->isDirty());
 
@@ -1283,7 +1283,7 @@ Cache<TagStore>::writebackBlk(BlkType *blk)
 
     Request *writebackReq =
         new Request(tags->regenerateBlkAddr(blk->tag, blk->set), blkSize, 0,
-                Request::wbMasterId);
+                /* Request::wbMasterId */ masterId);
     if (blk->isSecure())
         writebackReq->setFlags(Request::SECURE);
 
@@ -1389,13 +1389,13 @@ Cache<TagStore>::uncacheableFlush(PacketPtr pkt)
 template<class TagStore>
 typename Cache<TagStore>::BlkType*
 Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
-                               PacketList &writebacks, int id, int masterId)
+                               PacketList &writebacks, int id, MasterID masterId)
 {
     using namespace std;
-    
+
     string masterName = system->getMasterName(masterId);
     string cpu0("cpu0"), cpus0("cpus0"), cpu1("cpu1"), cpus1("cpus1"), cpu2("cpu2"), cpus2("cpus2"), cpu3("cpu3"), cpus3("cpus3");
-    
+
     if (! isTopLevel && system->isWayPartEnable())
     {
       if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
@@ -1412,27 +1412,27 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
          DPRINTF(WayPart, "CPU ID not found\n");
       }
     }
-    
+
     /* if (isTopLevel == false)
       switch (id)
       {
          case 0:
            tags->setWayAllocation(0, 3);
-         break; 
+         break;
          case 1:
            tags->setWayAllocation(4, 7);
-         break; 
+         break;
          case 2:
            tags->setWayAllocation(8, 11);
-         break; 
+         break;
          case 3:
            tags->setWayAllocation(12, 15);
          break;
          default:
            tags->setWayAllocation(0, 15);
       }
-    */  
-      
+    */
+
     BlkType *blk = tags->findVictim(addr);
 
     if (isTopLevel == false)
@@ -1461,7 +1461,7 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
 
             if (blk->isDirty()) {
                 // Save writeback packet for handling by caller
-                writebacks.push_back(writebackBlk(blk));
+                writebacks.push_back(writebackBlk(blk, masterId));
             }
         }
     }
