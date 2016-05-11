@@ -337,7 +337,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-            if (system->isWayPartEnable())
+            if (system->getWayPartMode() == 2)
                blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
@@ -1402,7 +1402,7 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
 
     if (!isTopLevel)
     {
-       if (system->isWayPartEnable())
+       if (system->getWayPartMode() != 0)
        {
          if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
             tags->setWayAllocation(0, 3);
@@ -1414,13 +1414,14 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
             tags->setWayAllocation(12, 15);
          else
             panic("CPU ID not found");
-         tags->setDmAssoc(isDetermReq);
        }
        else
-       {
          tags->setWayAllocation(0, 15);
+         
+       if (system->getWayPartMode() == 2)
+         tags->setDmAssoc(isDetermReq);
+       else
          tags->setDmAssoc(true);
-       }
     }
 
     BlkType *blk = tags->findVictim(addr);
@@ -1510,7 +1511,7 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
     if (is_secure)
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
-    if (system->isWayPartEnable())
+    if (system->getWayPartMode() == 2)
        blk->setDeterministic(pkt->req->isDeterministic());
 
     if (!pkt->sharedAsserted()) {

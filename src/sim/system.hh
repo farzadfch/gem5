@@ -189,8 +189,8 @@ class System : public MemObject
     void  resetMemBudget(uint8_t cpu_id);
     void enableMemGuard(int use);
     bool isGuarded();
-    void enableWayPart(int use);
-    bool isWayPartEnable();
+    void setWayPartMode(int use);
+    bool getWayPartMode();
     /** @} */
 
     /**
@@ -292,7 +292,12 @@ class System : public MemObject
     Enums::MemoryMode memoryMode;
     int mshrCount[4];
     const unsigned int _cacheLineSize;
-    bool wayPartEnabled;
+    /**
+     * 0: partitioning disabled
+     * 1: simple Way-based partitioning
+     * 2: deterministic memory replacement policy
+     */
+    int wayPartMode;
 
     uint64_t workItemsBegin;
     uint64_t workItemsEnd;

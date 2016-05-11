@@ -62,7 +62,7 @@
 #include "debug/MSHRInst.hh"
 #include "debug/PseudoInst.hh"
 #include "debug/Quiesce.hh"
-#include "debug/WayPart.hh"
+#include "debug/WayPartInst.hh"
 #include "debug/WorkItems.hh"
 #include "params/BaseCPU.hh"
 #include "sim/full_system.hh"
@@ -736,9 +736,9 @@ void enablememguard(ThreadContext *tc, int use)
 
 void enablewaypart(ThreadContext *tc, int use)
 {
-    DPRINTF(WayPart, "PseudoInst::enablewaypart(%i)\n", use);
+    DPRINTF(WayPartInst, "PseudoInst::enablewaypart(%i)\n", use);
     System *sys = tc->getSystemPtr();
-    sys->enableWayPart(use);
+    sys->setWayPartMode(use);
 }
 
 
