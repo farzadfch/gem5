@@ -66,7 +66,6 @@
 #include "mem/cache/mshr.hh"
 #include "sim/sim_exit.hh"
 #include <string>
-#include <cstdio>
 
 template<class TagStore>
 Cache<TagStore>::Cache(const Params *p)
@@ -324,7 +323,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
         assert(blkSize == pkt->getSize());
         if (blk == NULL) {
             // need to do a replacement
-            blk = allocateBlock(pkt->getAddr(), pkt->isSecure(), writebacks, id, pkt->req->masterId());
+            blk = allocateBlock(pkt->getAddr(), pkt->isSecure(), writebacks, id, pkt->req->masterId(), pkt->req->isDeterministic());
             if (blk == NULL) {
                 // no replaceable block available, give up.
                 // Writeback will be forwarded to next level,
@@ -338,7 +337,8 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-            blk->setDeterministic(pkt->req->isDeterministic());
+            if (system->isWayPartEnable())
+               blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -1393,7 +1393,7 @@ Cache<TagStore>::uncacheableFlush(PacketPtr pkt)
 template<class TagStore>
 typename Cache<TagStore>::BlkType*
 Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
-                               PacketList &writebacks, int id, MasterID masterId)
+                               PacketList &writebacks, int id, MasterID masterId, bool isDetermReq)
 {
     using namespace std;
 
@@ -1413,41 +1413,22 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
          else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
             tags->setWayAllocation(12, 15);
          else
-         {
-            printf("CPU ID not found\n");
-            assert(0);
-         }
+            panic("CPU ID not found");
+         tags->setDmAssoc(isDetermReq);
        }
        else
+       {
          tags->setWayAllocation(0, 15);
+         tags->setDmAssoc(true);
+       }
     }
-
-    /* if (isTopLevel == false)
-      switch (id)
-      {
-         case 0:
-           tags->setWayAllocation(0, 3);
-         break;
-         case 1:
-           tags->setWayAllocation(4, 7);
-         break;
-         case 2:
-           tags->setWayAllocation(8, 11);
-         break;
-         case 3:
-           tags->setWayAllocation(12, 15);
-         break;
-         default:
-           tags->setWayAllocation(0, 15);
-      }
-    */
 
     BlkType *blk = tags->findVictim(addr);
 
     if (!isTopLevel)
     {
       string masterName = system->getMasterName(masterId);
-      DPRINTF(WayPart, "CPU ID:%d Master:%d %s Way No:%d DM:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic());
+      DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
     }
 
     if (blk->isValid()) {
@@ -1500,7 +1481,7 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
         assert(pkt->hasData());
         // need to do a replacement
         int id = pkt->req->hasContextId() ? pkt->req->contextId() : -1;
-        blk = allocateBlock(addr, is_secure, writebacks, id, pkt->req->masterId());
+        blk = allocateBlock(addr, is_secure, writebacks, id, pkt->req->masterId(), pkt->req->isDeterministic());
         if (blk == NULL) {
             // No replaceable block... just use temporary storage to
             // complete the current request and then get rid of it
@@ -1529,7 +1510,8 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
     if (is_secure)
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
-    blk->setDeterministic(pkt->req->isDeterministic());
+    if (system->isWayPartEnable())
+       blk->setDeterministic(pkt->req->isDeterministic());
 
     if (!pkt->sharedAsserted()) {
         blk->status |= BlkWritable;

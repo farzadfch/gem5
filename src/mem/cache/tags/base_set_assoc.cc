@@ -57,6 +57,7 @@ BaseSetAssoc::BaseSetAssoc(const Params *p)
     :BaseTags(p), assoc(p->assoc),
      lowerWayNum(0),
      upperWayNum(p->assoc - 1),
+     dmAssoc(true),
      numSets(p->size / (p->block_size * p->assoc)),
      sequentialAccess(p->sequential_access)
 {

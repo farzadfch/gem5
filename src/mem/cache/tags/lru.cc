@@ -78,7 +78,7 @@ LRU::findVictim(Addr addr) const
     BlkType *blk = NULL;
     for (int i = assoc - 1; i >= 0; i--) {
         BlkType *b = sets[set].blks[i];
-        if ((b->way >= lowerWayNum && b->way <= upperWayNum) || !b->isDeterministic()) {
+        if ((dmAssoc && b->way >= lowerWayNum && b->way <= upperWayNum) || (!dmAssoc && !b->isDeterministic())) {
             blk = b;
             break;
         }

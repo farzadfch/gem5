@@ -89,6 +89,8 @@ class BaseSetAssoc : public BaseTags
     const unsigned assoc;
     /** Ways available for allocation */
     unsigned lowerWayNum, upperWayNum;
+    /** deterministic associativity */
+    bool dmAssoc;
     /** The number of sets in the cache. */
     const unsigned numSets;
     /** Whether tags and data are accessed sequentially. */
@@ -291,8 +293,7 @@ public:
          // We only need to write into one tag and one data block.
          tagAccesses += 1;
          dataAccesses += 1;
-     }
-     
+     } 
      
     /**
      * Limit the allocation for the cache ways.
@@ -305,6 +306,14 @@ public:
         fatal_if(upperNum >= assoc, "Upper allocation limit must be less that the number of ways");
         lowerWayNum = lowerNum;
         upperWayNum = upperNum;
+    } 
+    
+    /**
+     * Set deterministic associativity.
+     */
+    virtual void setDmAssoc(bool dmAssocArg) override 
+    {
+        dmAssoc = dmAssocArg;
     }
 
     /**
