@@ -190,7 +190,7 @@ class System : public MemObject
     void enableMemGuard(int use);
     bool isGuarded();
     void setWayPartMode(int use);
-    bool getWayPartMode();
+    int getWayPartMode();
     /** @} */
 
     /**

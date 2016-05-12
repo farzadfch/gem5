@@ -1417,7 +1417,7 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
        }
        else
          tags->setWayAllocation(0, 15);
-         
+
        if (system->getWayPartMode() == 2)
          tags->setDmAssoc(isDetermReq);
        else

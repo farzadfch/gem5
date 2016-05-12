@@ -252,7 +252,7 @@ System::setWayPartMode(int use) {
     wayPartMode = use;
 }
 
-bool
+int
 System::getWayPartMode() {
     return wayPartMode;
 }
