@@ -1407,11 +1407,11 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
          if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
             tags->setWayAllocation(0, 3);
          else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
-            tags->setWayAllocation(4, 7);
+            tags->setWayAllocation(4, 15);
          else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
-            tags->setWayAllocation(8, 11);
+            tags->setWayAllocation(4, 15);
          else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
-            tags->setWayAllocation(12, 15);
+            tags->setWayAllocation(4, 15);
          else
             panic("CPU ID not found");
        }
