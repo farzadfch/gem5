@@ -480,9 +480,11 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
             }
 
             DRAMPacket* dram_pkt;
+#if 0
             if(pkt->req->isDeterministic())
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
             else
+#endif
                 dram_pkt = decodeAddr(pkt, addr, size, true, false);
 
             cpu_id = getCpuid(dram_pkt->bank);
