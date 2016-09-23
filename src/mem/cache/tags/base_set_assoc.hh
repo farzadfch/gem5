@@ -260,19 +260,19 @@ public:
                  warmupCycle = curTick();
              }
          }
-         
 
-	 if (blk->isDeterministic())
-	 {
-	    determ_blks[blk->srcMasterId]--;
-	    avg_determ_blks[blk->srcMasterId]--;
-	    determ_replacement[master_id]++;
-	 }
-	 if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
-	 {
-	    determ_blks[master_id]++;
-	    avg_determ_blks[master_id]++;
-	 }
+
+         if (blk->isDeterministic())
+         {
+            determ_blks[blk->srcMasterId]--;
+            avg_determ_blks[blk->srcMasterId]--;
+            determ_replacement[master_id]++;
+         }
+         if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
+         {
+            determ_blks[master_id]++;
+            avg_determ_blks[master_id]++;
+         }
 
          // If we're replacing a block that was previously valid update
          // stats for it. This can't be done in findBlock() because a
