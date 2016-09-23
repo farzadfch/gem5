@@ -242,6 +242,7 @@ class CacheBlk
     {
         status = 0;
         isTouched = false;
+	deterministic = false;
         clearLoadLocks();
     }
 

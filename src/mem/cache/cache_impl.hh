@@ -337,8 +337,8 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-            if (system->getWayPartMode() == 2)
-               blk->setDeterministic(pkt->req->isDeterministic());
+	    if (pkt->req->isDeterministic() && system->getWayPartMode() == 2)
+		blk->setDeterministic(true);
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -795,7 +795,7 @@ Cache<TagStore>::recvAtomic(PacketPtr pkt)
 
     // @TODO: make this a parameter
     bool last_level_cache = false;
-
+    
     // Forward the request if the system is in cache bypass mode.
     if (system->bypassCaches())
         return ticksToCycles(memSidePort->sendAtomic(pkt));
@@ -1511,8 +1511,8 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
     if (is_secure)
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
-    if (system->getWayPartMode() == 2)
-       blk->setDeterministic(pkt->req->isDeterministic());
+    if (pkt->req->isDeterministic() && system->getWayPartMode() == 2)
+	blk->setDeterministic(true);
 
     if (!pkt->sharedAsserted()) {
         blk->status |= BlkWritable;

@@ -769,7 +769,6 @@ BaseCache::regStats()
         .name(name() +".no_allocate_misses")
         .desc("Number of misses that were no-allocate")
         ;
-
 }
 
 unsigned int

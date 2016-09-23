@@ -158,7 +158,37 @@ BaseTags::regStats()
         .name(name() + ".data_accesses")
         .desc("Number of data accesses")
         ;
+	
+    determ_blks
+        .init(cache->system->maxMasters())
+        .name(name() + ".determ_blks")
+        .desc("Number of allocated deterministic blocks from last stat reset")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        determ_blks.subname(i, cache->system->getMasterName(i));
+    }
+	
+    avg_determ_blks
+        .init(cache->system->maxMasters())
+        .name(name() + ".avg_determ_blks")
+        .desc("Average number of deterministic blocks")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        avg_determ_blks.subname(i, cache->system->getMasterName(i));
+    }	
 
+    determ_replacement
+        .init(cache->system->maxMasters())
+        .name(name() + ".determ_replacement")
+        .desc("Number of deterministic blocks replacements by this master")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        determ_replacement.subname(i, cache->system->getMasterName(i));
+    }
+    
     registerDumpCallback(new BaseTagsDumpCallback(this));
     registerExitCallback(new BaseTagsCallback(this));
 }

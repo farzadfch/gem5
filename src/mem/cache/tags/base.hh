@@ -134,6 +134,12 @@ class BaseTags : public ClockedObject
     Stats::Scalar tagAccesses;
     /** Number of data blocks consulted over all accesses. */
     Stats::Scalar dataAccesses;
+    
+    Stats::Vector determ_blks;
+    
+    Stats::AverageVector avg_determ_blks;
+    
+    Stats::Vector determ_replacement;
 
     /**
      * @}
@@ -178,7 +184,7 @@ class BaseTags : public ClockedObject
     {
         panic("This tag class does not implement way allocation limit!\n");
     }
-    
+
     /**
      * Set deterministic associativity.
      */
@@ -186,7 +192,7 @@ class BaseTags : public ClockedObject
     {
         panic("This tag class does not implement deterministic way allocation limit!\n");
     }
-    
+
     /**
      *iterated through all blocks and clear all locks
      *Needed to clear all lock tracking at once
