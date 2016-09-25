@@ -79,6 +79,29 @@ BaseTags::regStats()
         .flags(total)
         ;
 
+    determ_replacements
+        .init(cache->system->maxMasters())
+        .name(name() + ".determ_replacements")
+        .desc("Number of deterministic blocks replacements by this master")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        determ_replacements.subname(i, cache->system->getMasterName(i));
+    }
+    
+    for (int j = 0; j < cache->system->maxMasters(); j++)
+    {  
+	replacements_detail[j]
+	    .init(cache->system->maxMasters())
+	    .name(name() + "." + cache->system->getMasterName(j) + "_replaced")
+	    .desc("Number of replacements for the blocks allocated by " + cache->system->getMasterName(j))
+	    .flags(total | nozero | nonan)
+	    ;
+	for (int i = 0; i < cache->system->maxMasters(); i++) {
+	    replacements_detail[j].subname(i, cache->system->getMasterName(i));
+	}
+    }
+
     tagsInUse
         .name(name() + ".tagsinuse")
         .desc("Cycle average of tags in use")
@@ -158,7 +181,7 @@ BaseTags::regStats()
         .name(name() + ".data_accesses")
         .desc("Number of data accesses")
         ;
-	
+
     determ_blks
         .init(cache->system->maxMasters())
         .name(name() + ".determ_blks")
@@ -168,7 +191,7 @@ BaseTags::regStats()
     for (int i = 0; i < cache->system->maxMasters(); i++) {
         determ_blks.subname(i, cache->system->getMasterName(i));
     }
-	
+
     avg_determ_blks
         .init(cache->system->maxMasters())
         .name(name() + ".avg_determ_blks")
@@ -177,18 +200,8 @@ BaseTags::regStats()
         ;
     for (int i = 0; i < cache->system->maxMasters(); i++) {
         avg_determ_blks.subname(i, cache->system->getMasterName(i));
-    }	
-
-    determ_replacement
-        .init(cache->system->maxMasters())
-        .name(name() + ".determ_replacement")
-        .desc("Number of deterministic blocks replacements by this master")
-        .flags(total | nozero | nonan)
-        ;
-    for (int i = 0; i < cache->system->maxMasters(); i++) {
-        determ_replacement.subname(i, cache->system->getMasterName(i));
     }
-    
+
     registerDumpCallback(new BaseTagsDumpCallback(this));
     registerExitCallback(new BaseTagsCallback(this));
 }

@@ -266,7 +266,7 @@ public:
          {
             determ_blks[blk->srcMasterId]--;
             avg_determ_blks[blk->srcMasterId]--;
-            determ_replacement[master_id]++;
+            determ_replacements[master_id]++;
          }
          if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
          {
@@ -280,6 +280,7 @@ public:
          // coherence protocol says it can't be.
          if (blk->isValid()) {
              replacements[0]++;
+	     replacements_detail[blk->srcMasterId][master_id]++;
              totalRefs += blk->refCount;
              ++sampledRefs;
              blk->refCount = 0;

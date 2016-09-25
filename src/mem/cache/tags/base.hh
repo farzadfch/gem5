@@ -93,6 +93,13 @@ class BaseTags : public ClockedObject
 
     /** Number of replacements of valid blocks per thread. */
     Stats::Vector replacements;
+
+    Stats::Vector determ_replacements;
+    
+    // This is not good approach. But I have not found any other way.
+#define MAX_NUM_MASTER 32
+    Stats::Vector replacements_detail[MAX_NUM_MASTER];
+    
     /** Per cycle average of the number of tags that hold valid data. */
     Stats::Average tagsInUse;
 
@@ -134,12 +141,11 @@ class BaseTags : public ClockedObject
     Stats::Scalar tagAccesses;
     /** Number of data blocks consulted over all accesses. */
     Stats::Scalar dataAccesses;
-    
+
     Stats::Vector determ_blks;
-    
+
     Stats::AverageVector avg_determ_blks;
-    
-    Stats::Vector determ_replacement;
+
 
     /**
      * @}
