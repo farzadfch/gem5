@@ -292,7 +292,7 @@ if config.has_section('l2') and not options.private_l2:
     if l2_options.has_key('prefetcher'):
         l2_options['prefetcher'] = eval(l2_options['prefetcher'])
     test_sys.l2 = BaseCache(clk_domain = test_sys.cpu_clk_domain, **l2_options)
-    test_sys.tol2bus = CoherentXBar(clk_domain = test_sys.cpu_clk_domain, width = 16)
+    test_sys.tol2bus = CoherentXBar(clk_domain = test_sys.cpu_clk_domain, width = 64)
     test_sys.l2.cpu_side = test_sys.tol2bus.master
     if config.has_section('l3') == False:
         test_sys.l2.mem_side = test_sys.membus.slave
