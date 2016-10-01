@@ -190,7 +190,7 @@ class O3_ARM_v7aL2(BaseCache):
     hit_latency = 12
     response_latency = 12
     #mshrs = 11
-    mshrs = 24
+    mshrs = 48
     tgts_per_mshr = 8
     size = '1MB'
     assoc = 16

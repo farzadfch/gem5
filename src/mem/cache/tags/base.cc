@@ -79,15 +79,8 @@ BaseTags::regStats()
         .flags(total)
         ;
 
-    determ_replacements
-        .init(cache->system->maxMasters())
-        .name(name() + ".determ_replacements")
-        .desc("Number of deterministic blocks replacements by this master")
-        .flags(total | nozero | nonan)
-        ;
-    for (int i = 0; i < cache->system->maxMasters(); i++) {
-        determ_replacements.subname(i, cache->system->getMasterName(i));
-    }
+    
+    assert(cache->system->maxMasters() <= MAX_NUM_MASTER);
     
     for (int j = 0; j < cache->system->maxMasters(); j++)
     {  
@@ -100,6 +93,47 @@ BaseTags::regStats()
 	for (int i = 0; i < cache->system->maxMasters(); i++) {
 	    replacements_detail[j].subname(i, cache->system->getMasterName(i));
 	}
+    }
+    for (int j = cache->system->maxMasters(); j < MAX_NUM_MASTER; j++)
+    {  
+	string j_str = to_string(j);
+	
+	replacements_detail[j]
+	    .init(1)
+	    .name(name() + ".replacements_detail_dummy" + j_str)
+	    .desc("dummy")
+	    .flags(total | nozero | nonan)
+	    ;
+    }
+
+    determ_replacements
+        .init(cache->system->maxMasters())
+        .name(name() + ".determ_replacements")
+        .desc("Number of deterministic blocks replacements by this master")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        determ_replacements.subname(i, cache->system->getMasterName(i));
+    }
+    
+    determ_blks
+        .init(cache->system->maxMasters())
+        .name(name() + ".determ_blks")
+        .desc("Number of allocated deterministic blocks from last stat reset")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        determ_blks.subname(i, cache->system->getMasterName(i));
+    }
+
+    avg_determ_blks
+        .init(cache->system->maxMasters())
+        .name(name() + ".avg_determ_blks")
+        .desc("Average number of deterministic blocks")
+        .flags(total | nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        avg_determ_blks.subname(i, cache->system->getMasterName(i));
     }
 
     tagsInUse
@@ -181,26 +215,6 @@ BaseTags::regStats()
         .name(name() + ".data_accesses")
         .desc("Number of data accesses")
         ;
-
-    determ_blks
-        .init(cache->system->maxMasters())
-        .name(name() + ".determ_blks")
-        .desc("Number of allocated deterministic blocks from last stat reset")
-        .flags(total | nozero | nonan)
-        ;
-    for (int i = 0; i < cache->system->maxMasters(); i++) {
-        determ_blks.subname(i, cache->system->getMasterName(i));
-    }
-
-    avg_determ_blks
-        .init(cache->system->maxMasters())
-        .name(name() + ".avg_determ_blks")
-        .desc("Average number of deterministic blocks")
-        .flags(total | nozero | nonan)
-        ;
-    for (int i = 0; i < cache->system->maxMasters(); i++) {
-        avg_determ_blks.subname(i, cache->system->getMasterName(i));
-    }
 
     registerDumpCallback(new BaseTagsDumpCallback(this));
     registerExitCallback(new BaseTagsCallback(this));

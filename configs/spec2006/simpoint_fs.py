@@ -366,7 +366,7 @@ if options.simpoint_mode == "checkpoint" or options.simpoint_mode == "fastfwd":
 elif options.simpoint_mode == "simulate" or options.simpoint_mode == "check_affinity":
     checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.%s" % options.benchmark.replace(':', '_'))
 elif options.simpoint_mode == "batch":
-    checkpoint_dir = os.path.join(options.checkpoint_dir, "cpt.2864565443000")
+    checkpoint_dir = os.path.join(options.checkpoint_dir, "")
 m5.instantiate(checkpoint_dir)
 
 #term_port = test_sys.pc.com_1.terminal.getListenPort()

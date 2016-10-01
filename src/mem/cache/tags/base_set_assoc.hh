@@ -160,6 +160,11 @@ public:
         tagsInUse--;
         assert(blk->srcMasterId < cache->system->maxMasters());
         occupancies[blk->srcMasterId]--;
+	if (blk->isDeterministic())
+	{
+	    avg_determ_blks[blk->srcMasterId]--;	
+	    determ_blks[blk->srcMasterId]--;
+	}
         blk->srcMasterId = Request::invldMasterId;
         blk->task_id = ContextSwitchTaskId::Unknown;
         blk->tickInserted = curTick();
@@ -261,19 +266,6 @@ public:
              }
          }
 
-
-         if (blk->isDeterministic())
-         {
-            determ_blks[blk->srcMasterId]--;
-            avg_determ_blks[blk->srcMasterId]--;
-            determ_replacements[master_id]++;
-         }
-         if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
-         {
-            determ_blks[master_id]++;
-            avg_determ_blks[master_id]++;
-         }
-
          // If we're replacing a block that was previously valid update
          // stats for it. This can't be done in findBlock() because a
          // found block might not actually be replaced there if the
@@ -288,6 +280,12 @@ public:
              // deal with evicted block
              assert(blk->srcMasterId < cache->system->maxMasters());
              occupancies[blk->srcMasterId]--;
+	     if (blk->isDeterministic())
+	     {
+		 determ_blks[blk->srcMasterId]--;
+		 avg_determ_blks[blk->srcMasterId]--;
+		 determ_replacements[master_id]++;
+	     }
 
              blk->invalidate();
          }
@@ -300,6 +298,11 @@ public:
          // deal with what we are bringing in
          assert(master_id < cache->system->maxMasters());
          occupancies[master_id]++;
+         if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
+         {
+            determ_blks[master_id]++;
+            avg_determ_blks[master_id]++;
+         }
          blk->srcMasterId = master_id;
          blk->task_id = task_id;
          blk->tickInserted = curTick();
