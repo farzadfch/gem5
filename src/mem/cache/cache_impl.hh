@@ -337,8 +337,8 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-	    if (pkt->req->isDeterministic() && system->getWayPartMode() == 2)
-		blk->setDeterministic(true);
+	    if (system->getWayPartMode() == 2)
+		blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -1429,7 +1429,16 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
     if (!isTopLevel)
     {
       string masterName = system->getMasterName(masterId);
-      DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+      //DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+      if (system->getWayPartMode() == 2)
+      {
+	  if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+	  {
+	      DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+	      if (isDetermReq)
+		  assert(blk->way >= 0 && blk->way <= 3);
+	  }
+      }
     }
 
     if (blk->isValid()) {
@@ -1511,8 +1520,8 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
     if (is_secure)
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
-    if (pkt->req->isDeterministic() && system->getWayPartMode() == 2)
-	blk->setDeterministic(true);
+    if (system->getWayPartMode() == 2)
+	blk->setDeterministic(pkt->req->isDeterministic());
 
     if (!pkt->sharedAsserted()) {
         blk->status |= BlkWritable;

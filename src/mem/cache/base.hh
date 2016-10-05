@@ -599,6 +599,11 @@ class BaseCache : public MemObject
         hits[pkt->cmdToIndex()][pkt->req->masterId()]++;
 
     }
+    
+    bool getIsTopLevel() const
+    {
+      return isTopLevel;
+    }  
 
 };
 

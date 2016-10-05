@@ -160,11 +160,11 @@ public:
         tagsInUse--;
         assert(blk->srcMasterId < cache->system->maxMasters());
         occupancies[blk->srcMasterId]--;
-	if (blk->isDeterministic())
-	{
-	    avg_determ_blks[blk->srcMasterId]--;	
-	    determ_blks[blk->srcMasterId]--;
-	}
+        if (blk->isDeterministic())
+        {
+            avg_determ_blks[blk->srcMasterId]--;
+            determ_blks[blk->srcMasterId]--;
+        }
         blk->srcMasterId = Request::invldMasterId;
         blk->task_id = ContextSwitchTaskId::Unknown;
         blk->tickInserted = curTick();
@@ -280,12 +280,12 @@ public:
              // deal with evicted block
              assert(blk->srcMasterId < cache->system->maxMasters());
              occupancies[blk->srcMasterId]--;
-	     if (blk->isDeterministic())
-	     {
-		 determ_blks[blk->srcMasterId]--;
-		 avg_determ_blks[blk->srcMasterId]--;
-		 determ_replacements[master_id]++;
-	     }
+             if (blk->isDeterministic())
+             {
+                 determ_blks[blk->srcMasterId]--;
+                 avg_determ_blks[blk->srcMasterId]--;
+                 determ_replacements[master_id]++;
+             }
 
              blk->invalidate();
          }
