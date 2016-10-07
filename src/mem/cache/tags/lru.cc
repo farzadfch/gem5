@@ -65,7 +65,7 @@ LRU::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id)
         DPRINTF(CacheRepl, "set %x: moving blk %x (%s) to MRU\n",
                 blk->set, regenerateBlkAddr(blk->tag, blk->set),
                 is_secure ? "s" : "ns");
-	
+
     }
 
     return blk;
@@ -86,13 +86,13 @@ LRU::findVictim(Addr addr) const
     }
     if (dmAssoc && blk == NULL)
     {
-	for (int i = assoc - 1; i >= 0; i--) {
-	    BlkType *b = sets[set].blks[i];
-	    if (b->way >= lowerWayNum && b->way <= upperWayNum) {
-		blk = b;
-		break;
-	    }
-	}
+        for (int i = assoc - 1; i >= 0; i--) {
+            BlkType *b = sets[set].blks[i];
+            if (b->way >= lowerWayNum && b->way <= upperWayNum) {
+                blk = b;
+                break;
+            }
+        }
     }
     // assert(!blk || blk->way < allocAssoc);
     assert(blk != NULL);
@@ -101,17 +101,17 @@ LRU::findVictim(Addr addr) const
         DPRINTF(CacheRepl, "set:%x way:%d DM:%d: selecting blk %x for replacement dmAssoc:%d L:%d U:%d\n",
                 set, blk->way, blk->isDeterministic(), regenerateBlkAddr(blk->tag, set), dmAssoc, lowerWayNum, upperWayNum);
     }
-    
+
     if ( blk && blk->isDeterministic() && !cache->getIsTopLevel() )
     {
-	DPRINTF(CacheRepl, "DM Repl:");
-	for (int i = assoc - 1; i >= 0; i--) {
-	    BlkType *b = sets[set].blks[i];
-	    DPRINTF(CacheRepl, "%d:%d,%d ", i, b->way, b->isDeterministic());
-	}
-	DPRINTF(CacheRepl, "\n");
+        DPRINTF(CacheRepl, "DM Repl:");
+        for (int i = assoc - 1; i >= 0; i--) {
+            BlkType *b = sets[set].blks[i];
+            DPRINTF(CacheRepl, "%d:%d,%d ", i, b->way, b->isDeterministic());
+        }
+        DPRINTF(CacheRepl, "\n");
     }
-	
+
 
     return blk;
 }

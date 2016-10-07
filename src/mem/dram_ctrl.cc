@@ -54,6 +54,7 @@
 #include "debug/PK.hh"
 #include "mem/dram_ctrl.hh"
 #include "sim/system.hh"
+#include <string>
 //#define MEDUSA
 //#define MEDUSA_NO_SWITCH
 //#define DCMC
@@ -480,12 +481,21 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
             }
 
             DRAMPacket* dram_pkt;
+
+	    string cpu0("cpu0"), cpus0("cpus0");
+	    string masterName = system()->getMasterName(pkt->req->masterId());
+
+            if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+                dram_pkt = decodeAddr(pkt, addr, size, true, true);
+            else
+                dram_pkt = decodeAddr(pkt, addr, size, true, false);
+	    
 #if 0
             if(pkt->req->isDeterministic())
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
             else
-#endif
                 dram_pkt = decodeAddr(pkt, addr, size, true, false);
+#endif
 
             cpu_id = getCpuid(dram_pkt->bank);
 
