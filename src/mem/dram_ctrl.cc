@@ -482,6 +482,7 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
 
             DRAMPacket* dram_pkt;
 
+#if 0
 	    string cpu0("cpu0"), cpus0("cpus0");
 	    string masterName = system()->getMasterName(pkt->req->masterId());
 
@@ -489,11 +490,13 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
             else
                 dram_pkt = decodeAddr(pkt, addr, size, true, false);
-	    
+#else
+    
 #if 0
             if(pkt->req->isDeterministic())
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
             else
+#else
                 dram_pkt = decodeAddr(pkt, addr, size, true, false);
 #endif
 

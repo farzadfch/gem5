@@ -34,19 +34,26 @@ for i in "${arr[@]}"
 do
   file_name=${i}-${CONFIG}".txt"
   #echo -n ${file_name}","
-  #grep "sim_seconds" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  #grep "system.cpu0.icache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
-  #grep "system.cpu0.dcache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
+  grep "sim_seconds" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ",,"
   #grep "system.switch_cpu0.commit.committedInsts" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  #grep "system.l2.overall_misses::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  #echo -n ","
+  #grep "system.cpu0.icache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
+  #echo -n ","
+  #grep "system.cpu0.dcache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
+  #echo -n ",,,"
+  grep "system.l2.overall_misses::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
   #grep "system.l2.overall_miss_latency::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  #grep "system.l2.overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  #grep "system.l2.overall_miss_latency::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  #grep "system.l2.tags.determ_blks::total" ${file_name} | sed -n 1p | awk '{ printf $2 }'
-  #grep "system.l2.tags.determ_blks::total" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  grep "system.l2.overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.l2.overall_miss_latency::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.l2.tags.determ_blks::total" ${file_name} | sed -n 1p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.l2.tags.determ_blks::total" ${file_name} | sed -n 2p | awk '{ printf $2 }'
   #echo -n $(expr $dm1 + $dm2)
-  #grep "system.l2.tags.avg_determ_blks::total" ${file_name} | awk '{ printf $2 }'
-  #grep "system.l2.tags.determ_blks::total" ${file_name} | awk '{ printf $2 }'
+  echo -n ","
   grep "system.switch_cpu1.ipc " ${file_name} | sed -n 2p | awk '{ printf $2 }'
   echo -n ","
   grep "system.switch_cpu2.ipc " ${file_name} | sed -n 2p | awk '{ printf $2 }'
