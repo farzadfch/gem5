@@ -337,8 +337,8 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-	    if (system->getWayPartMode() == 2)
-		blk->setDeterministic(pkt->req->isDeterministic());
+            if (system->getWayPartMode() == 2)
+                blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -452,6 +452,15 @@ Cache<TagStore>::recvTimingReq(PacketPtr pkt)
 //@todo Add back in MemDebug Calls
 //    MemDebug::cacheAccess(pkt);
 
+    if (!isTopLevel && system->clearDmFlag)
+    {
+	// This implementation just works for CPU 0
+	if (system->clearDmCpuId == 0)
+	    tags->clearDM(0, 3);
+	else
+	  panic("Deterministic bit clearing just works for CPU 0");
+	system->clearDmFlag = false;
+    }
 
     /// @todo temporary hack to deal with memory corruption issue until
     /// 4-phase transactions are complete
@@ -1432,12 +1441,12 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
       //DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
       if (system->getWayPartMode() == 2)
       {
-	  if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
-	  {
-	      DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
-	      if (isDetermReq)
-		  assert(blk->way >= 0 && blk->way <= 3);
-	  }
+          if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+          {
+              DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+              if (isDetermReq)
+                  assert(blk->way >= 0 && blk->way <= 3);
+          }
       }
     }
 
@@ -1521,7 +1530,7 @@ Cache<TagStore>::handleFill(PacketPtr pkt, BlkType *blk,
         blk->status |= BlkSecure;
     blk->status |= BlkValid | BlkReadable;
     if (system->getWayPartMode() == 2)
-	blk->setDeterministic(pkt->req->isDeterministic());
+        blk->setDeterministic(pkt->req->isDeterministic());
 
     if (!pkt->sharedAsserted()) {
         blk->status |= BlkWritable;

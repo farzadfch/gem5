@@ -289,6 +289,16 @@ do_enablewaypart(int argc, char *argv[])
     printf("Enable waypart = 0x%x\n",ints[0]);
     m5_enablewaypart(ints[0]);
 }
+
+void
+do_cleardm(int argc, char *argv[])
+{
+    uint64_t ints[1];
+    parse_int_args(argc, argv, ints, 1);
+    printf("Clear DM = 0x%x\n",ints[0]);
+    m5_cleardm(ints[0]);
+}
+
 #ifdef linux
 void
 do_pin(int argc, char *argv[])
@@ -338,6 +348,7 @@ struct MainFunc mainfuncs[] = {
     { "setmembudget",   do_setmembudget,     "" },
     { "enablememguard", do_enablememguard,   "" },
     { "enablewaypart",  do_enablewaypart,   "" },
+    { "cleardm",  do_cleardm,   "" },
 #ifdef linux
     { "pin",            do_pin,              "<cpu> <program> [args ...]" }
 #endif

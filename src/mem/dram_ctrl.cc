@@ -490,8 +490,8 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
             else
                 dram_pkt = decodeAddr(pkt, addr, size, true, false);
-#else
-    
+#endif
+
 #if 0
             if(pkt->req->isDeterministic())
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);

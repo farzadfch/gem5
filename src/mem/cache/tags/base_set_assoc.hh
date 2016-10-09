@@ -58,6 +58,7 @@
 #include "mem/cache/blk.hh"
 #include "mem/packet.hh"
 #include "params/BaseSetAssoc.hh"
+#include "debug/ClearDm.hh"
 
 /**
  * A BaseSetAssoc cache tag store.
@@ -331,6 +332,25 @@ public:
     virtual void setDmAssoc(bool dmAssocArg) override 
     {
         dmAssoc = dmAssocArg;
+    }
+    
+    virtual void clearDM(int lowerWay, int upperWay) override 
+    {
+        for (unsigned set = 0; set < numSets; set++)
+	    for(unsigned i = 0; i < assoc; i++)
+	    {
+		BlkType *b = sets[set].blks[i];
+		if (b->way >= lowerWayNum && b->way <= upperWayNum)
+		    b->deterministic = false;
+	    }
+	    
+	for (unsigned masterId = 0; masterId < cache->system->maxMasters(); masterId++)
+	{
+	    avg_determ_blks[masterId] = 0;
+	    determ_blks[masterId] = 0;
+	}
+	
+	DPRINTF(ClearDm, "Clear DM bit for ways between %d and %d\n", lowerWay, upperWay);
     }
 
     /**

@@ -103,7 +103,7 @@ class BaseTags : public ClockedObject
     Stats::Vector determ_blks;
 
     Stats::AverageVector avg_determ_blks;
-    
+
     /** Per cycle average of the number of tags that hold valid data. */
     Stats::Average tagsInUse;
 
@@ -196,6 +196,11 @@ class BaseTags : public ClockedObject
     virtual void setDmAssoc(bool dmAssocArg)
     {
         panic("This tag class does not implement deterministic way allocation limit!\n");
+    }
+    
+    virtual void clearDM(int lowerWay, int upperWay)
+    {
+        panic("This tag class does not implement deterministic bit clearing!\n");
     }
 
     /**

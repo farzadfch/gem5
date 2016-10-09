@@ -72,6 +72,7 @@ def format M5ops() {{
             case 0x57: return new M5setmembudget(machInst);
             case 0x58: return new M5enablememguard(machInst);
             case 0x59: return new M5enablewaypart(machInst);
+	    case 0x5c: return new M5cleardm(machInst);
         }
    }
    '''

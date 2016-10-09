@@ -66,6 +66,8 @@
 #define work_begin_func          0x5a
 #define work_end_func            0x5b
 
+#define cleardm_func            0x5c
+
 // These operations are for critical path annotation
 #define annotate_func     0x55
 #define an_bsm            0x1

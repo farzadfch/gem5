@@ -2012,6 +2012,7 @@ namespace Aarch64
           case 0x57: return new M5setmembudget64(machInst);
           case 0x58: return new M5enablememguard64(machInst);
           case 0x59: return new M5enablewaypart(machInst);
+	  case 0x5c: return new M5cleardm(machInst);
           default: return new Unknown64(machInst);
         }
     }

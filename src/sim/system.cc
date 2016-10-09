@@ -100,6 +100,7 @@ System::System(Params *p)
       guard{false,false,false,false},
       use_memguard(0),
       switched_mshr_count{false, false, false, false},
+      clearDmFlag(0),
       _params(p),
       totalNumInsts(0),
       instEventQueue("system instruction-based event queue")
@@ -255,6 +256,12 @@ System::setWayPartMode(int use) {
 int
 System::getWayPartMode() {
     return wayPartMode;
+}
+
+void
+System::clearDM(int cpu_id) {
+    clearDmFlag = true;
+    clearDmCpuId = cpu_id;
 }
 
 bool System::breakpoint()

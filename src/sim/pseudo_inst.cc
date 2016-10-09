@@ -205,6 +205,9 @@ pseudoInst(ThreadContext *tc, uint8_t func, uint8_t subfunc)
       case 0x59: // reserved5_func
         enablewaypart(tc, args[0]);
         break;
+      case 0x5c:
+        cleardm(tc, args[0]);
+        break;
 
       default:
         warn("Unhandled m5 op: 0x%x\n", func);
@@ -741,5 +744,11 @@ void enablewaypart(ThreadContext *tc, int use)
     sys->setWayPartMode(use);
 }
 
+void cleardm(ThreadContext *tc, int use)
+{
+    DPRINTF(WayPartInst, "PseudoInst::cleardm(%i)\n", use);
+    System *sys = tc->getSystemPtr();
+    sys->clearDM(use);
+}
 
 } // namespace PseudoInst

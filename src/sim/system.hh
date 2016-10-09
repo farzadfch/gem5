@@ -191,6 +191,7 @@ class System : public MemObject
     bool isGuarded();
     void setWayPartMode(int use);
     int getWayPartMode();
+    void clearDM(int cpu_id);
     /** @} */
 
     /**
@@ -327,6 +328,8 @@ class System : public MemObject
     bool guard[4];
     int use_memguard;
     bool switched_mshr_count[4];
+    bool clearDmFlag;
+    int clearDmCpuId;
     MasterID getMasterId(std::string req_name);
 
     /** Get the name of an object for a given request id.
