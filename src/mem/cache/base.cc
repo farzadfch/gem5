@@ -207,6 +207,42 @@ BaseCache::regStats()
     for (int i = 0; i < system->maxMasters(); i++) {
         overallHits.subname(i, system->getMasterName(i));
     }
+    
+    // DM Hit statistics
+    for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {
+        MemCmd cmd(access_idx);
+        const string &cstr = cmd.toString();
+
+        dmHits[access_idx]
+            .init(system->maxMasters())
+            .name(name() + "." + cstr + "_dm_hits")
+            .desc("number of " + cstr + "DM hits")
+            .flags(total | nozero | nonan)
+            ;
+        for (int i = 0; i < system->maxMasters(); i++) {
+            dmHits[access_idx].subname(i, system->getMasterName(i));
+        }
+    }
+    
+    dmDemandHits
+        .name(name() + ".dm_demand_hits")
+        .desc("number of DM demand (read+write) hits")
+        .flags(total | nozero | nonan)
+        ;
+    dmDemandHits = SUM_DEMAND(dmHits);
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmDemandHits.subname(i, system->getMasterName(i));
+    }
+
+    dmOverallHits
+        .name(name() + ".dm_overall_hits")
+        .desc("number of DM overall hits")
+        .flags(total | nozero | nonan)
+        ;
+    dmOverallHits = dmDemandHits + SUM_NON_DEMAND(dmHits);
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmOverallHits.subname(i, system->getMasterName(i));
+    }
 
     // Miss statistics
     for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {
@@ -242,6 +278,42 @@ BaseCache::regStats()
     overallMisses = demandMisses + SUM_NON_DEMAND(misses);
     for (int i = 0; i < system->maxMasters(); i++) {
         overallMisses.subname(i, system->getMasterName(i));
+    }
+    
+    // DM Miss statistics
+    for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {
+        MemCmd cmd(access_idx);
+        const string &cstr = cmd.toString();
+
+        dmMisses[access_idx]
+            .init(system->maxMasters())
+            .name(name() + "." + cstr + "_dm_misses")
+            .desc("number of " + cstr + " DM misses")
+            .flags(total | nozero | nonan)
+            ;
+        for (int i = 0; i < system->maxMasters(); i++) {
+            dmMisses[access_idx].subname(i, system->getMasterName(i));
+        }
+    }
+
+    dmDemandMisses
+        .name(name() + ".dm_demand_misses")
+        .desc("number of DM demand (read+write) misses")
+        .flags(total | nozero | nonan)
+        ;
+    dmDemandMisses = SUM_DEMAND(dmMisses);
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmDemandMisses.subname(i, system->getMasterName(i));
+    }
+
+    dmOverallMisses
+        .name(name() + ".dm_overall_misses")
+        .desc("number of DM overall misses")
+        .flags(total | nozero | nonan)
+        ;
+    dmOverallMisses = dmDemandMisses + SUM_NON_DEMAND(dmMisses);
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmOverallMisses.subname(i, system->getMasterName(i));
     }
 
     // Miss latency statistics
@@ -315,6 +387,43 @@ BaseCache::regStats()
     overallAccesses = overallHits + overallMisses;
     for (int i = 0; i < system->maxMasters(); i++) {
         overallAccesses.subname(i, system->getMasterName(i));
+    }
+    
+    // DM access formulas
+    for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {
+        MemCmd cmd(access_idx);
+        const string &cstr = cmd.toString();
+
+        dmAccesses[access_idx]
+            .name(name() + "." + cstr + "_dm_accesses")
+            .desc("number of " + cstr + " DM accesses(hits+misses)")
+            .flags(total | nozero | nonan)
+            ;
+        dmAccesses[access_idx] = dmHits[access_idx] + dmMisses[access_idx];
+
+        for (int i = 0; i < system->maxMasters(); i++) {
+            dmAccesses[access_idx].subname(i, system->getMasterName(i));
+        }
+    }
+
+    dmDemandAccesses
+        .name(name() + ".dm_demand_accesses")
+        .desc("number of DM demand (read+write) accesses")
+        .flags(total | nozero | nonan)
+        ;
+    dmDemandAccesses = dmDemandHits + dmDemandMisses;
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmDemandAccesses.subname(i, system->getMasterName(i));
+    }
+
+    dmOverallAccesses
+        .name(name() + ".dm_overall_accesses")
+        .desc("number of DM overall (read+write) accesses")
+        .flags(total | nozero | nonan)
+        ;
+    dmOverallAccesses = dmOverallHits + dmOverallMisses;
+    for (int i = 0; i < system->maxMasters(); i++) {
+        dmOverallAccesses.subname(i, system->getMasterName(i));
     }
 
     // miss rate formulas

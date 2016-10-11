@@ -452,6 +452,7 @@ Cache<TagStore>::recvTimingReq(PacketPtr pkt)
 //@todo Add back in MemDebug Calls
 //    MemDebug::cacheAccess(pkt);
 
+    // Clear DM bits
     if (!isTopLevel && system->clearDmFlag)
     {
 	// This implementation just works for CPU 0
@@ -808,6 +809,17 @@ Cache<TagStore>::recvAtomic(PacketPtr pkt)
     // Forward the request if the system is in cache bypass mode.
     if (system->bypassCaches())
         return ticksToCycles(memSidePort->sendAtomic(pkt));
+    
+    // Clear DM bits
+    if (!isTopLevel && system->clearDmFlag)
+    {
+	// This implementation just works for CPU 0
+	if (system->clearDmCpuId == 0)
+	    tags->clearDM(0, 3);
+	else
+	  panic("Deterministic bit clearing just works for CPU 0");
+	system->clearDmFlag = false;
+    }
 
     promoteWholeLineWrites(pkt);
 
@@ -966,6 +978,17 @@ Cache<TagStore>::functionalAccess(PacketPtr pkt, bool fromCpuSide)
         // so we don't need to check if we need to update anything.
         memSidePort->sendFunctional(pkt);
         return;
+    }
+    
+    // Clear DM bits
+    if (!isTopLevel && system->clearDmFlag)
+    {
+	// This implementation just works for CPU 0
+	if (system->clearDmCpuId == 0)
+	    tags->clearDM(0, 3);
+	else
+	  panic("Deterministic bit clearing just works for CPU 0");
+	system->clearDmFlag = false;
     }
 
     Addr blk_addr = blockAlign(pkt->getAddr());

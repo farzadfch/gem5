@@ -323,6 +323,13 @@ class BaseCache : public MemObject
     Stats::Formula demandHits;
     /** Number of hit for all accesses. */
     Stats::Formula overallHits;
+    
+    /** Number of hits per thread for each type of command. @sa Packet::Command */
+    Stats::Vector dmHits[MemCmd::NUM_MEM_CMDS];
+    /** Number of hits for demand accesses. */
+    Stats::Formula dmDemandHits;
+    /** Number of hit for all accesses. */
+    Stats::Formula dmOverallHits;
 
     /** Number of misses per thread for each type of command. @sa Packet::Command */
     Stats::Vector misses[MemCmd::NUM_MEM_CMDS];
@@ -330,6 +337,13 @@ class BaseCache : public MemObject
     Stats::Formula demandMisses;
     /** Number of misses for all accesses. */
     Stats::Formula overallMisses;
+    
+    /** Number of misses per thread for each type of command. @sa Packet::Command */
+    Stats::Vector dmMisses[MemCmd::NUM_MEM_CMDS];
+    /** Number of misses for demand accesses. */
+    Stats::Formula dmDemandMisses;
+    /** Number of misses for all accesses. */
+    Stats::Formula dmOverallMisses;
 
     /**
      * Total number of cycles per thread/command spent waiting for a miss.
@@ -348,6 +362,13 @@ class BaseCache : public MemObject
     /** The number of overall accesses. */
     Stats::Formula overallAccesses;
 
+    /** The number of accesses per command and thread. */
+    Stats::Formula dmAccesses[MemCmd::NUM_MEM_CMDS];
+    /** The number of demand accesses. */
+    Stats::Formula dmDemandAccesses;
+    /** The number of overall accesses. */
+    Stats::Formula dmOverallAccesses;
+    
     /** The miss rate per command and thread. */
     Stats::Formula missRate[MemCmd::NUM_MEM_CMDS];
     /** The miss rate of all demand accesses. */
@@ -586,6 +607,8 @@ class BaseCache : public MemObject
     {
         assert(pkt->req->masterId() < system->maxMasters());
         misses[pkt->cmdToIndex()][pkt->req->masterId()]++;
+	if (pkt->req->isDeterministic())
+	    dmMisses[pkt->cmdToIndex()][pkt->req->masterId()]++;
         pkt->req->incAccessDepth();
         if (missCount) {
             --missCount;
@@ -597,13 +620,16 @@ class BaseCache : public MemObject
     {
         assert(pkt->req->masterId() < system->maxMasters());
         hits[pkt->cmdToIndex()][pkt->req->masterId()]++;
+	if (pkt->req->isDeterministic())
+	    dmHits[pkt->cmdToIndex()][pkt->req->masterId()]++;
 
     }
-    
+
+
     bool getIsTopLevel() const
     {
       return isTopLevel;
-    }  
+    }
 
 };
 
