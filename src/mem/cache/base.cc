@@ -425,6 +425,16 @@ BaseCache::regStats()
     for (int i = 0; i < system->maxMasters(); i++) {
         dmOverallAccesses.subname(i, system->getMasterName(i));
     }
+    
+    nonDmKernelReq
+        .name(name() +".non_dm_kernel_accesses")
+        .desc("number of non-DM kernel accesses")
+        ;
+	
+    nonDmUserReq
+        .name(name() +".non_dm_user_accesses")
+        .desc("number of non-DM user accesses")
+        ;
 
     // miss rate formulas
     for (int access_idx = 0; access_idx < MemCmd::NUM_MEM_CMDS; ++access_idx) {

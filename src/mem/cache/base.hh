@@ -369,6 +369,9 @@ class BaseCache : public MemObject
     /** The number of overall accesses. */
     Stats::Formula dmOverallAccesses;
     
+    Stats::Scalar nonDmKernelReq;
+    Stats::Scalar nonDmUserReq;
+    
     /** The miss rate per command and thread. */
     Stats::Formula missRate[MemCmd::NUM_MEM_CMDS];
     /** The miss rate of all demand accesses. */
@@ -596,6 +599,19 @@ class BaseCache : public MemObject
         // to request a prefetch, and someday that might be
         // interesting again.
     }
+    
+    bool
+    isCpu0(MasterID masterId) const
+    {
+	using namespace std;
+	string masterName = system->getMasterName(masterId);
+	string cpu0("cpu0"), cpus0("cpus0");
+	
+	if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+	    return true;
+	else
+	    return false;
+    }
 
     virtual unsigned int drain(DrainManager *dm);
 
@@ -609,6 +625,13 @@ class BaseCache : public MemObject
         misses[pkt->cmdToIndex()][pkt->req->masterId()]++;
 	if (pkt->req->isDeterministic())
 	    dmMisses[pkt->cmdToIndex()][pkt->req->masterId()]++;
+	else if (isTopLevel && isCpu0(pkt->req->masterId()))
+	{
+	    if (pkt->req->getVaddr() < 0x80000000)
+		nonDmKernelReq++;
+	    else
+		nonDmUserReq++;
+	}
         pkt->req->incAccessDepth();
         if (missCount) {
             --missCount;
@@ -622,7 +645,13 @@ class BaseCache : public MemObject
         hits[pkt->cmdToIndex()][pkt->req->masterId()]++;
 	if (pkt->req->isDeterministic())
 	    dmHits[pkt->cmdToIndex()][pkt->req->masterId()]++;
-
+	else if (isTopLevel && isCpu0(pkt->req->masterId()))
+	{
+	    if (pkt->req->getVaddr() < 0x80000000)
+		nonDmKernelReq++;
+	    else
+		nonDmUserReq++;
+	}
     }
 
 

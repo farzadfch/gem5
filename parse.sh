@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CONFIG=$1
-#declare -a arr=("Da2time01" "Daifftr01" "Daifirf01" "Daiifft01" "Dbasefp01" "Dbitmnp01" "Dcacheb01" "Dcanrdr01" "Didctrn01" "Diirflt01" "Dmatrix01" "Dpntrch01" "Dpuwmod01" "Drspeed01" "Dtblook01" "Dttsprk01")
+declare -a arr=("Da2time01" "Daifftr01" "Daifirf01" "Daiifft01" "Dbasefp01" "Dbitmnp01" "Dcacheb01" "Dcanrdr01" "Didctrn01" "Diirflt01" "Dmatrix01" "Dpntrch01" "Dpuwmod01" "Drspeed01" "Dtblook01" "Dttsprk01")
 #declare -a arr=("a2time01-3b683" "aifftr01-3b683" "aifirf01-3b683" "aiifft01-3b683" "basefp01-3b683" "bitmnp01-3b683" "cacheb01-3b683" "canrdr01-3b683" "idctrn01-3b683" "iirflt01-3b683" "matrix01-3b683" "pntrch01-3b683" "puwmod01-3b683" "rspeed01-3b683" "tblook01-3b683" "ttsprk01-3b683")
 #declare -a arr=("a2time01-3b683-wp" "aifftr01-3b683-wp" "aifirf01-3b683-wp" "aiifft01-3b683-wp" "basefp01-3b683-wp" "bitmnp01-3b683-wp" "cacheb01-3b683-wp" "canrdr01-3b683-wp" "idctrn01-3b683-wp" "iirflt01-3b683-wp" "matrix01-3b683-wp" "pntrch01-3b683-wp" "puwmod01-3b683-wp" "rspeed01-3b683-wp" "tblook01-3b683-wp" "ttsprk01-3b683-wp")
 #declare -a arr=("a2time01-3b683-dm" "aifftr01-3b683-dm" "aifirf01-3b683-dm" "aiifft01-3b683-dm" "basefp01-3b683-dm" "bitmnp01-3b683-dm" "cacheb01-3b683-dm" "canrdr01-3b683-dm" "idctrn01-3b683-dm" "iirflt01-3b683-dm" "matrix01-3b683-dm" "pntrch01-3b683-dm" "puwmod01-3b683-dm" "rspeed01-3b683-dm" "tblook01-3b683-dm" "ttsprk01-3b683-dm")
@@ -22,7 +22,7 @@ CONFIG=$1
 #declare -a arr=("Ddisparity-itr2-sim" "Dlocalization-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dstitch-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim")
 #declare -a arr=("disparity-itr2-sim-3b683" "localization-itr2-sim-3b683" "mser-itr2-sim-3b683" "sift-itr2-sim-3b683" "stitch-itr2-sim-3b683" "svm-itr2-sim-3b683" "texture_synthesis-itr2-sim-3b683")
 #declare -a arr=("disparity-itr2-sim-3b683-wp" "localization-itr2-sim-3b683-wp" "mser-itr2-sim-3b683-wp" "sift-itr2-sim-3b683-wp" "stitch-itr2-sim-3b683-wp" "svm-itr2-sim-3b683-wp" "texture_synthesis-itr2-sim-3b683-wp")
-declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "stitch-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm")
+#declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "stitch-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm")
 #declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "stitch-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all")
 
 #declare -a arr=("Ddisparity-sqcif" "Dlocalization-sqcif" "Dmser-sqcif" "Dmulti_ncut-sqcif" "Dsift-sqcif" "Dstitch-sqcif" "Dsvm-sqcif" "Dtexture_synthesis-sqcif" "Dtracking-sqcif")
@@ -36,6 +36,26 @@ declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "
 #declare -a arr=("disparity-itr2-sim_fast" "disparity-itr2-sim_fast-3b683" "disparity-itr2-sim_fast-3b683-wp" "disparity-itr2-sim_fast-3b683-dm" "disparity-itr2-sim_fast-3b683-dm-all")
 #declare -a arr=("Ddisparity-sqcif" "disparity-sqcif-3b683" "disparity-sqcif-3b683-wp" "disparity-sqcif-3b683-dm" "disparity-sqcif-3b683-dm-all")
 #declare -a arr=("Ddisparity-sim" "disparity-sim-3b683" "disparity-sim-3b683-wp" "disparity-sim-3b683-dm" "disparity-sim-3b683-dm-all")
+
+for i in "${arr[@]}"
+do
+  file_name=${i}-${CONFIG}".txt"
+  #echo -n ${file_name}","
+  grep "sim_seconds" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.switch_cpu0.commit.committedInsts" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.cpu0.icache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
+  echo -n ","
+  grep "system.cpu0.dcache.overall_misses::total" ${file_name} | sed -n 2p | awk '{ printf $2 }' 
+  echo -n ",,,"
+  grep "system.l2.overall_misses::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.l2.overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.l2.overall_miss_latency::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo ""
+done
 
 #for i in "${arr[@]}"
 #do
@@ -71,11 +91,4 @@ declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "
 #  echo ""
 #  
 #done
-
-for i in "${arr[@]}"
-do
-  file_name=${i}-${CONFIG}".txt"
-  grep "system.l2.overall_miss_rate::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
-  echo ""
-done
 
