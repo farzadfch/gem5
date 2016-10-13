@@ -61,6 +61,7 @@
 #include "base/types.hh"
 #include "debug/Cache.hh"
 #include "debug/CachePort.hh"
+#include "debug/NonDm.hh"
 #include "mem/cache/mshr_queue.hh"
 #include "mem/mem_object.hh"
 #include "mem/packet.hh"
@@ -628,9 +629,10 @@ class BaseCache : public MemObject
 	else if (isTopLevel && isCpu0(pkt->req->masterId()))
 	{
 	    if (pkt->req->getVaddr() < 0x80000000)
-		nonDmKernelReq++;
-	    else
 		nonDmUserReq++;
+	    else
+		nonDmKernelReq++;
+	    DPRINTF(NonDm, "VA:%x\n", pkt->req->getVaddr());
 	}
         pkt->req->incAccessDepth();
         if (missCount) {
@@ -648,9 +650,10 @@ class BaseCache : public MemObject
 	else if (isTopLevel && isCpu0(pkt->req->masterId()))
 	{
 	    if (pkt->req->getVaddr() < 0x80000000)
-		nonDmKernelReq++;
-	    else
 		nonDmUserReq++;
+	    else
+		nonDmKernelReq++;
+	    DPRINTF(NonDm, "VA:%x\n", pkt->req->getVaddr());
 	}
     }
 
