@@ -172,7 +172,7 @@ FALRU::invalidate(FALRU::BlkType *blk)
 
 FALRUBlk*
 FALRU::accessBlock(Addr addr, bool is_secure, Cycles &lat, int context_src,
-                   int *inCache)
+                   PacketPtr pkt, int *inCache)
 {
     accesses++;
     int tmp_in_cache = 0;

@@ -70,7 +70,7 @@ class LRU : public BaseSetAssoc
     ~LRU() {}
 
     BlkType* accessBlock(Addr addr, bool is_secure, Cycles &lat,
-                         int context_src);
+                         int context_src, PacketPtr pkt);
     BlkType* findVictim(Addr addr) const;
     void insertBlock(PacketPtr pkt, BlkType *blk);
     void invalidate(BlkType *blk);

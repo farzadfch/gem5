@@ -189,7 +189,7 @@ public:
      * @return Pointer to the cache block.
      */
     FALRUBlk* accessBlock(Addr addr, bool is_secure, Cycles &lat,
-                          int context_src, int *inCache = 0);
+                          int context_src, PacketPtr pkt, int *inCache = 0);
 
     /**
      * Find the block in the cache, do not update the replacement data.

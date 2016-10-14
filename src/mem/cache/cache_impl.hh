@@ -307,7 +307,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
     }
 
     int id = pkt->req->hasContextId() ? pkt->req->contextId() : -1;
-    blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), lat, id);
+    blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), lat, id, pkt);
 
     DPRINTF(Cache, "%s%s %x (%s) %s %s\n", pkt->cmdString(),
             pkt->req->isInstFetch() ? " (ifetch)" : "",
@@ -337,8 +337,6 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             if (pkt->isSecure()) {
                 blk->status |= BlkSecure;
             }
-            if (system->getWayPartMode() == 2)
-                blk->setDeterministic(pkt->req->isDeterministic());
         }
         std::memcpy(blk->data, pkt->getPtr<uint8_t>(), blkSize);
         if (pkt->cmd == MemCmd::Writeback) {
@@ -354,6 +352,9 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             blk->status &= ~BlkWritable;
             ++fastWrites;
         }
+        // DM
+        if (system->getWayPartMode() == 2)
+	    blk->setDeterministic(pkt->req->isDeterministic());
         DPRINTF(Cache, "%s new state is %s\n", __func__, blk->print());
         incHitCount(pkt);
         return true;
@@ -367,6 +368,9 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
     } else if ((blk != NULL) &&
                (pkt->needsExclusive() ? blk->isWritable()
                                       : blk->isReadable())) {
+	// DM
+	if (system->getWayPartMode() == 2)
+	    blk->setDeterministic(pkt->req->isDeterministic());
         // OK to satisfy access
         incHitCount(pkt);
         satisfyCpuSideRequest(pkt, blk);

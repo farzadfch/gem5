@@ -55,9 +55,9 @@ LRU::LRU(const Params *p)
 }
 
 BaseSetAssoc::BlkType*
-LRU::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id)
+LRU::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id, PacketPtr pkt)
 {
-    BlkType *blk = BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id);
+    BlkType *blk = BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id, pkt);
 
     if (blk != NULL) {
         // move this block to head of the MRU list

@@ -183,7 +183,7 @@ public:
      * @return Pointer to the cache block if found.
      */
     BlkType* accessBlock(Addr addr, bool is_secure, Cycles &lat,
-                                 int context_src)
+                                 int context_src, PacketPtr pkt)
     {
         Addr tag = extractTag(addr);
         int set = extractSet(addr);
@@ -209,6 +209,12 @@ public:
                 lat = cache->ticksToCycles(blk->whenReady - curTick());
             }
             blk->refCount += 1;
+	    if (pkt->req->isDeterministic() && !blk->isDeterministic() && cache->system->getWayPartMode() == 2)
+	    {
+		MasterID master_id = pkt->req->masterId();
+		determ_blks[master_id]++;
+		avg_determ_blks[master_id]++;
+	    }
         }
 
         return blk;

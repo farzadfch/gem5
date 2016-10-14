@@ -45,9 +45,9 @@ RandomRepl::RandomRepl(const Params *p)
 }
 
 BaseSetAssoc::BlkType*
-RandomRepl::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id)
+RandomRepl::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id, PacketPtr pkt)
 {
-    return BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id);
+    return BaseSetAssoc::accessBlock(addr, is_secure, lat, master_id, pkt);
 }
 
 BaseSetAssoc::BlkType*
