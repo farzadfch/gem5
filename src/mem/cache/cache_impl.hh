@@ -57,6 +57,7 @@
 #include "base/misc.hh"
 #include "base/types.hh"
 #include "debug/Cache.hh"
+#include "debug/CacheDm.hh"
 #include "debug/CachePort.hh"
 #include "debug/CacheTags.hh"
 #include "debug/WayPart.hh"
@@ -313,6 +314,12 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             pkt->req->isInstFetch() ? " (ifetch)" : "",
             pkt->getAddr(), pkt->isSecure() ? "s" : "ns",
             blk ? "hit" : "miss", blk ? blk->print() : "");
+    
+    if (!isTopLevel && isCpu0(pkt->req->masterId()))
+	DPRINTF(CacheDm, "%s%s %x (%s) %s %s\n", pkt->cmdString(),
+	    pkt->req->isInstFetch() ? " (ifetch)" : "",
+	    pkt->getAddr(), pkt->req->isDeterministic() ? "dm" : "ndm",
+	    blk ? "hit" : "miss", blk ? blk->print() : "");
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at

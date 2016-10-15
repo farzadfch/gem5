@@ -214,6 +214,8 @@ public:
 		MasterID master_id = pkt->req->masterId();
 		determ_blks[master_id]++;
 		avg_determ_blks[master_id]++;
+		if (!cache->getIsTopLevel()) 
+		    DPRINTF(ClearDm, "INC DM Addr: %x\n", addr);
 	    }
         }
 
@@ -342,12 +344,17 @@ public:
     
     virtual void clearDM(int lowerWay, int upperWay) override 
     {
+	DPRINTF(ClearDm, "Clear DM bit for all sets(%d) and ways between %d and %d\n", numSets, lowerWay, upperWay);
+	
         for (unsigned set = 0; set < numSets; set++)
 	    for(unsigned i = 0; i < assoc; i++)
 	    {
 		BlkType *b = sets[set].blks[i];
-		if (b->way >= lowerWayNum && b->way <= upperWayNum)
+		if (b->way >= lowerWay && b->way <= upperWay)
+		{
+		    DPRINTF(ClearDm, "CL DM set:%d way:%d DM:%d\n", set, b->way, b->deterministic);
 		    b->deterministic = false;
+		}
 	    }
 	    
 	for (unsigned masterId = 0; masterId < cache->system->maxMasters(); masterId++)
@@ -356,7 +363,7 @@ public:
 	    determ_blks[masterId] = 0;
 	}
 	
-	DPRINTF(ClearDm, "Clear DM bit for ways between %d and %d\n", lowerWay, upperWay);
+
     }
 
     /**
