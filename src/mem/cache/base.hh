@@ -61,7 +61,6 @@
 #include "base/types.hh"
 #include "debug/Cache.hh"
 #include "debug/CachePort.hh"
-#include "debug/NonDm.hh"
 #include "mem/cache/mshr_queue.hh"
 #include "mem/mem_object.hh"
 #include "mem/packet.hh"
@@ -283,6 +282,8 @@ class BaseCache : public MemObject
      * never try to forward ownership and similar optimizations to the cpu
      * side */
     const bool isTopLevel;
+    
+    const bool is_dcache;
 
     /**
      * Bit vector of the blocking reasons for the access path.
@@ -372,6 +373,7 @@ class BaseCache : public MemObject
     
     Stats::Scalar nonDmKernelReq;
     Stats::Scalar nonDmUserReq;
+    Stats::Scalar nonDmNoVaddrReq;
     
     /** The miss rate per command and thread. */
     Stats::Formula missRate[MemCmd::NUM_MEM_CMDS];
@@ -626,14 +628,6 @@ class BaseCache : public MemObject
         misses[pkt->cmdToIndex()][pkt->req->masterId()]++;
 	if (pkt->req->isDeterministic())
 	    dmMisses[pkt->cmdToIndex()][pkt->req->masterId()]++;
-	else if (isTopLevel && isCpu0(pkt->req->masterId()))
-	{
-	    if (pkt->req->getVaddr() < 0x80000000)
-		nonDmUserReq++;
-	    else
-		nonDmKernelReq++;
-	    DPRINTF(NonDm, "VA:%x\n", pkt->req->getVaddr());
-	}
         pkt->req->incAccessDepth();
         if (missCount) {
             --missCount;
@@ -647,14 +641,6 @@ class BaseCache : public MemObject
         hits[pkt->cmdToIndex()][pkt->req->masterId()]++;
 	if (pkt->req->isDeterministic())
 	    dmHits[pkt->cmdToIndex()][pkt->req->masterId()]++;
-	else if (isTopLevel && isCpu0(pkt->req->masterId()))
-	{
-	    if (pkt->req->getVaddr() < 0x80000000)
-		nonDmUserReq++;
-	    else
-		nonDmKernelReq++;
-	    DPRINTF(NonDm, "VA:%x\n", pkt->req->getVaddr());
-	}
     }
 
 

@@ -15,4 +15,5 @@ ext/mcpat/regression/*/*.ouit
 *.ini
 *.json
 *.terminal
+*.csv
 .hgignore

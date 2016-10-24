@@ -78,6 +78,7 @@ BaseCache::BaseCache(const Params *p)
       numTarget(p->tgts_per_mshr),
       forwardSnoops(p->forward_snoops),
       isTopLevel(p->is_top_level),
+      is_dcache(p->is_dcache),
       blocked(0),
       order(0),
       noTargetMSHR(NULL),
@@ -434,6 +435,11 @@ BaseCache::regStats()
     nonDmUserReq
         .name(name() +".non_dm_user_accesses")
         .desc("number of non-DM user accesses")
+        ;
+	
+    nonDmNoVaddrReq
+        .name(name() +".non_dm_no_vaddr_accesses")
+        .desc("number of non-DM accesses without virtual address")
         ;
 
     // miss rate formulas

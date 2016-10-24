@@ -58,6 +58,7 @@
 #include "base/types.hh"
 #include "debug/Cache.hh"
 #include "debug/CacheDm.hh"
+#include "debug/CacheMiss.hh"
 #include "debug/CachePort.hh"
 #include "debug/CacheTags.hh"
 #include "debug/WayPart.hh"
@@ -309,17 +310,28 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
 
     int id = pkt->req->hasContextId() ? pkt->req->contextId() : -1;
     blk = tags->accessBlock(pkt->getAddr(), pkt->isSecure(), lat, id, pkt);
+    
+    if (!pkt->req->isDeterministic())
+    {
+	if(!pkt->req->hasVaddr())
+	    nonDmNoVaddrReq++;
+	else if (pkt->req->getVaddr() < 0x80000000)
+	    nonDmUserReq++;
+	else
+	    nonDmKernelReq++;
+    }
 
     DPRINTF(Cache, "%s%s %x (%s) %s %s\n", pkt->cmdString(),
             pkt->req->isInstFetch() ? " (ifetch)" : "",
             pkt->getAddr(), pkt->isSecure() ? "s" : "ns",
             blk ? "hit" : "miss", blk ? blk->print() : "");
+
+    // Print all accesses to CPU 0 L1 I & D and indicate whether it is DM or not
+    //if (isTopLevel && isCpu0(pkt->req->masterId()))
+    //	DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
     
-    if (!isTopLevel && isCpu0(pkt->req->masterId()))
-	DPRINTF(CacheDm, "%s%s %x (%s) %s %s\n", pkt->cmdString(),
-	    pkt->req->isInstFetch() ? " (ifetch)" : "",
-	    pkt->getAddr(), pkt->req->isDeterministic() ? "dm" : "ndm",
-	    blk ? "hit" : "miss", blk ? blk->print() : "");
+    if (isTopLevel && is_dcache && isCpu0(pkt->req->masterId()))
+	DPRINTF(CacheDm, "VA:%08x PA:%08x %s DM:%d\n", pkt->req->getVaddr(), pkt->getAddr(), blk ? "H" : "M", pkt->req->isDeterministic());
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at
