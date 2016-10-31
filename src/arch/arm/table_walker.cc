@@ -49,6 +49,7 @@
 #include "debug/Drain.hh"
 #include "debug/TLB.hh"
 #include "debug/TLBVerbose.hh"
+#include "debug/TLBInsert.hh"
 #include "sim/system.hh"
 
 using namespace ArmISA;
@@ -1956,14 +1957,14 @@ TableWalker::insertTableEntry(DescriptorBase &descriptor, bool longDescriptor)
     }
 
     // Debug output
-    DPRINTF(TLB, descriptor.dbgHeader().c_str());
-    DPRINTF(TLB, " - N:%d pfn:%#x size:%#x global:%d valid:%d\n",
+    DPRINTF(TLBInsert, descriptor.dbgHeader().c_str());
+    DPRINTF(TLBInsert, " - N:%d pfn:%#x size:%#x global:%d valid:%d\n",
             te.N, te.pfn, te.size, te.global, te.valid);
-    DPRINTF(TLB, " - vpn:%#x xn:%d pxn:%d ap:%d domain:%d asid:%d "
-            "vmid:%d hyp:%d nc:%d ns:%d\n", te.vpn, te.xn, te.pxn,
+    DPRINTF(TLBInsert, " - vpn:%#x xn:%d pxn:%d ap:%d domain:%d asid:%d "
+            "vmid:%d hyp:%d nc:%d ns:%d dm:%d\n", te.vpn, te.xn, te.pxn,
             te.ap, static_cast<uint8_t>(te.domain), te.asid, te.vmid, te.isHyp,
-            te.nonCacheable, te.ns);
-    DPRINTF(TLB, " - domain from L%d desc:%d data:%#x\n",
+            te.nonCacheable, te.ns, te.deterministic);
+    DPRINTF(TLBInsert, " - domain from L%d desc:%d data:%#x\n",
             descriptor.lookupLevel, static_cast<uint8_t>(descriptor.domain()),
             descriptor.getRawData());
 

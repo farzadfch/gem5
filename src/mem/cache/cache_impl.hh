@@ -327,11 +327,11 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             blk ? "hit" : "miss", blk ? blk->print() : "");
 
     // Print all accesses to CPU 0 L1 I & D and indicate whether it is DM or not
-    //if (isTopLevel && isCpu0(pkt->req->masterId()))
-    //	DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
+    if (isTopLevel && isCpu0(pkt->req->masterId()))
+    	DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
     
     if (isTopLevel && is_dcache && isCpu0(pkt->req->masterId()))
-	DPRINTF(CacheDm, "VA:%08x PA:%08x %s DM:%d\n", pkt->req->getVaddr(), pkt->getAddr(), blk ? "H" : "M", pkt->req->isDeterministic());
+	DPRINTF(CacheMiss, "VA:%08x PA:%08x %s DM:%d\n", pkt->req->getVaddr(), pkt->getAddr(), blk ? "H" : "M", pkt->req->isDeterministic());
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at

@@ -48,7 +48,9 @@ CONFIG=$2
 #declare -a arr=("disparity-itr2-sim-3b683" "localization-itr2-sim-3b683" "mser-itr2-sim-3b683" "sift-itr2-sim-3b683" "svm-itr2-sim-3b683" "texture_synthesis-itr2-sim-3b683" "aifftr01-3b683" "aiifft01-3b683" "cacheb01-3b683" "matrix01-3b683" "ttsprk01-3b683")
 #declare -a arr=("disparity-itr2-sim-3b683-wp" "localization-itr2-sim-3b683-wp" "mser-itr2-sim-3b683-wp" "sift-itr2-sim-3b683-wp" "svm-itr2-sim-3b683-wp" "texture_synthesis-itr2-sim-3b683-wp" "aifftr01-3b683-wp" "aiifft01-3b683-wp" "cacheb01-3b683-wp" "matrix01-3b683-wp" "ttsprk01-3b683-wp")
 #declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm" "aifftr01-3b683-dm" "aiifft01-3b683-dm" "cacheb01-3b683-dm" "matrix01-3b683-dm" "ttsprk01-3b683-dm")
-declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
+#declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
+
+declare -a arr=("svm-itr2-sim-3b683-dm-all")
 
 if false; then
 for i in "${arr[@]}"
