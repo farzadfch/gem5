@@ -341,6 +341,25 @@ class System : public MemObject
     {
         return masterIds.size();
     }
+    
+    int getCpuId(MasterID mid)
+    {
+	using namespace std;
+
+	const string cpu0("cpu0"), cpus0("cpus0"), cpu1("cpu1"), cpus1("cpus1"), cpu2("cpu2"), cpus2("cpus2"), cpu3("cpu3"), cpus3("cpus3");
+	string masterName = getMasterName(mid);
+	
+	if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
+	    return 0;
+	else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
+	    return 1;
+	else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
+	    return 2;
+	else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
+	    return 3;
+	else
+            return -1;
+    }
 
     virtual void regStats();
     /**

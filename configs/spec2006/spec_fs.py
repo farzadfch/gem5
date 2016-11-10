@@ -552,6 +552,18 @@ spec_fs_cmd["svm-itr2-sqcif-3b683-dm-all"] 		= fsBench("./set_wp_mode 2;./bandwi
 spec_fs_cmd["texture_synthesis-itr2-sqcif-3b683-dm-all"]	= fsBench("./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &./bandwidth -m 683 -a write -t 0 -c 3 &taskset -c 0 ./sd-vbs/itr/texture_synthesis/data/sqcif/texture_synthesis_deterministic ./sd-vbs/itr/texture_synthesis/data/sqcif -d 2")
 spec_fs_cmd["tracking-itr2-sqcif-3b683-dm-all"] 		= fsBench("./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &./bandwidth -m 683 -a write -t 0 -c 3 &taskset -c 0 ./sd-vbs/itr/tracking/data/sqcif/tracking_deterministic ./sd-vbs/itr/tracking/data/sqcif -d 2")
 
+spec_fs_cmd["disparity-itr2-sim-vma"]           = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/disparity/data/sqcif/disparity ./sd-vbs/itr/disparity/data/sqcif 2")
+spec_fs_cmd["localization-itr2-sim-vma"]        = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/localization/data/sqcif/localization ./sd-vbs/itr/localization/data/sqcif 2")
+spec_fs_cmd["mser-itr2-sim-vma"]                = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/mser/data/sqcif/mser ./sd-vbs/itr/mser/data/sqcif 2")
+spec_fs_cmd["sift-itr2-sim-vma"]                = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/sift/data/sqcif/sift ./sd-vbs/itr/sift/data/sqcif 2")
+spec_fs_cmd["svm-itr2-sim-vma"]                 = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/svm/data/sqcif/svm ./sd-vbs/itr/svm/data/sqcif 2")
+spec_fs_cmd["texture_synthesis-itr2-sim-vma"]   = fsBench("taskset -c 0 ./vma.sh 0.003 ./sd-vbs/itr/texture_synthesis/data/sqcif/texture_synthesis ./sd-vbs/itr/texture_synthesis/data/sqcif 2")
+spec_fs_cmd["aifftr01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/aifftr01")
+spec_fs_cmd["aiifft01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/aiifft01")
+spec_fs_cmd["cacheb01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/cacheb01")
+spec_fs_cmd["matrix01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/matrix01")
+spec_fs_cmd["ttsprk01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/ttsprk01")
+
 
 #vision
 spec_fs_cmd["disparity"] = fsBench("/root/vision.sh disparity-sqcif")

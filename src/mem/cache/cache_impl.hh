@@ -313,12 +313,12 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
     
     if (!pkt->req->isDeterministic())
     {
-	if(!pkt->req->hasVaddr())
-	    nonDmNoVaddrReq++;
-	else if (pkt->req->getVaddr() < 0x80000000)
-	    nonDmUserReq++;
-	else
-	    nonDmKernelReq++;
+        if(!pkt->req->hasVaddr())
+            nonDmNoVaddrReq++;
+        else if (pkt->req->getVaddr() < 0x80000000)
+            nonDmUserReq++;
+        else
+            nonDmKernelReq++;
     }
 
     DPRINTF(Cache, "%s%s %x (%s) %s %s\n", pkt->cmdString(),
@@ -327,11 +327,11 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             blk ? "hit" : "miss", blk ? blk->print() : "");
 
     // Print all accesses to CPU 0 L1 I & D and indicate whether it is DM or not
-    if (isTopLevel && isCpu0(pkt->req->masterId()))
-    	DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
+    if (name().compare("system.cpu0.dcache") == 0 || name().compare("system.cpu0.icache") == 0)
+            DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
     
-    if (isTopLevel && is_dcache && isCpu0(pkt->req->masterId()))
-	DPRINTF(CacheMiss, "VA:%08x PA:%08x %s DM:%d\n", pkt->req->getVaddr(), pkt->getAddr(), blk ? "H" : "M", pkt->req->isDeterministic());
+    if (name().compare("system.cpu0.dcache") == 0 || name().compare("system.cpu0.icache") == 0)
+        DPRINTF(CacheMiss, "VA:%08x %s\n", pkt->req->getVaddr(), blk ? "H" : "M");
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at
@@ -373,7 +373,7 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
         }
         // DM
         if (system->getWayPartMode() == 2)
-	    blk->setDeterministic(pkt->req->isDeterministic());
+            blk->setDeterministic(pkt->req->isDeterministic());
         DPRINTF(Cache, "%s new state is %s\n", __func__, blk->print());
         incHitCount(pkt);
         return true;
@@ -387,9 +387,9 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
     } else if ((blk != NULL) &&
                (pkt->needsExclusive() ? blk->isWritable()
                                       : blk->isReadable())) {
-	// DM
-	if (system->getWayPartMode() == 2)
-	    blk->setDeterministic(pkt->req->isDeterministic());
+        // DM
+        if (system->getWayPartMode() == 2)
+            blk->setDeterministic(pkt->req->isDeterministic());
         // OK to satisfy access
         incHitCount(pkt);
         satisfyCpuSideRequest(pkt, blk);
@@ -478,12 +478,12 @@ Cache<TagStore>::recvTimingReq(PacketPtr pkt)
     // Clear DM bits
     if (!isTopLevel && system->clearDmFlag)
     {
-	// This implementation just works for CPU 0
-	if (system->clearDmCpuId == 0)
-	    tags->clearDM(0, 3);
-	else
-	  panic("Deterministic bit clearing just works for CPU 0");
-	system->clearDmFlag = false;
+        // This implementation just works for CPU 0
+        if (system->clearDmCpuId == 0)
+            tags->clearDM(0, 3);
+        else
+          panic("Deterministic bit clearing just works for CPU 0");
+        system->clearDmFlag = false;
     }
 
     /// @todo temporary hack to deal with memory corruption issue until
@@ -836,12 +836,12 @@ Cache<TagStore>::recvAtomic(PacketPtr pkt)
     // Clear DM bits
     if (!isTopLevel && system->clearDmFlag)
     {
-	// This implementation just works for CPU 0
-	if (system->clearDmCpuId == 0)
-	    tags->clearDM(0, 3);
-	else
-	  panic("Deterministic bit clearing just works for CPU 0");
-	system->clearDmFlag = false;
+        // This implementation just works for CPU 0
+        if (system->clearDmCpuId == 0)
+            tags->clearDM(0, 3);
+        else
+          panic("Deterministic bit clearing just works for CPU 0");
+        system->clearDmFlag = false;
     }
 
     promoteWholeLineWrites(pkt);
@@ -1006,12 +1006,12 @@ Cache<TagStore>::functionalAccess(PacketPtr pkt, bool fromCpuSide)
     // Clear DM bits
     if (!isTopLevel && system->clearDmFlag)
     {
-	// This implementation just works for CPU 0
-	if (system->clearDmCpuId == 0)
-	    tags->clearDM(0, 3);
-	else
-	  panic("Deterministic bit clearing just works for CPU 0");
-	system->clearDmFlag = false;
+        // This implementation just works for CPU 0
+        if (system->clearDmCpuId == 0)
+            tags->clearDM(0, 3);
+        else
+          panic("Deterministic bit clearing just works for CPU 0");
+        system->clearDmFlag = false;
     }
 
     Addr blk_addr = blockAlign(pkt->getAddr());
@@ -1450,50 +1450,55 @@ typename Cache<TagStore>::BlkType*
 Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
                                PacketList &writebacks, int id, MasterID masterId, bool isDetermReq)
 {
-    using namespace std;
-
-    string masterName = system->getMasterName(masterId);
-    string cpu0("cpu0"), cpus0("cpus0"), cpu1("cpu1"), cpus1("cpus1"), cpu2("cpu2"), cpus2("cpus2"), cpu3("cpu3"), cpus3("cpus3");
-
     if (!isTopLevel)
     {
        if (system->getWayPartMode() != 0)
        {
-         if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
-            tags->setWayAllocation(0, 3);
-         else if (masterName.find(cpu1) != string::npos || masterName.find(cpus1) != string::npos)
-            tags->setWayAllocation(4, 15);
-         else if (masterName.find(cpu2) != string::npos || masterName.find(cpus2) != string::npos)
-            tags->setWayAllocation(4, 15);
-         else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
-            tags->setWayAllocation(4, 15);
-         else
-            panic("CPU ID not found");
+         switch (system->getCpuId(masterId))
+         {
+            case 0:
+                tags->setWayAllocation(0, 3);
+                break;
+            case 1:
+                tags->setWayAllocation(4, 15);
+                break;
+            case 2:
+                tags->setWayAllocation(4, 15);
+                break;
+            case 3:
+                tags->setWayAllocation(4, 15);
+                break;
+            default:
+                panic("Invalid CPU ID");
+         }
        }
        else
          tags->setWayAllocation(0, 15);
-
+       
        if (system->getWayPartMode() == 2)
          tags->setDmAssoc(isDetermReq);
        else
          tags->setDmAssoc(true);
+#if 0
+       if (system->getWayPartMode() == 2 && system->getCpuId(masterId) == 0)
+          tags->setDmAssoc(true);
+       else
+          tags->setDmAssoc(false);
+#endif
     }
 
     BlkType *blk = tags->findVictim(addr);
 
     if (!isTopLevel)
     {
-      string masterName = system->getMasterName(masterId);
-      //DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
-      if (system->getWayPartMode() == 2)
-      {
-          if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
-          {
-              DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
-              if (isDetermReq)
-                  assert(blk->way >= 0 && blk->way <= 3);
-          }
-      }
+        std::string masterName = system->getMasterName(masterId);
+        //DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+        if (system->getWayPartMode() == 2 && system->getCpuId(masterId) == 0)
+        {
+            DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
+            if (isDetermReq)
+                assert(blk->way >= 0 && blk->way <= 3);
+        }
     }
 
     if (blk->isValid()) {

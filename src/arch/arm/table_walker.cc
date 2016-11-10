@@ -1955,6 +1955,11 @@ TableWalker::insertTableEntry(DescriptorBase &descriptor, bool longDescriptor)
         memAttrs(currState->tc, te, currState->sctlr, descriptor.texcb(),
                  descriptor.shareable());
     }
+    
+#if 0
+    if (te.size == 0xfff && te.vpn < 0x80000 && params()->sys->getCpuId(masterId) == 0)
+	te.deterministic = true;
+#endif
 
     // Debug output
     DPRINTF(TLBInsert, descriptor.dbgHeader().c_str());

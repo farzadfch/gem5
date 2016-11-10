@@ -602,19 +602,6 @@ class BaseCache : public MemObject
         // to request a prefetch, and someday that might be
         // interesting again.
     }
-    
-    bool
-    isCpu0(MasterID masterId) const
-    {
-	using namespace std;
-	string masterName = system->getMasterName(masterId);
-	string cpu0("cpu0"), cpus0("cpus0");
-	
-	if (masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
-	    return true;
-	else
-	    return false;
-    }
 
     virtual unsigned int drain(DrainManager *dm);
 

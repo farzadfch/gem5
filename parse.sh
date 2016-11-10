@@ -50,7 +50,7 @@ CONFIG=$2
 #declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm" "aifftr01-3b683-dm" "aiifft01-3b683-dm" "cacheb01-3b683-dm" "matrix01-3b683-dm" "ttsprk01-3b683-dm")
 #declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
 
-declare -a arr=("svm-itr2-sim-3b683-dm-all")
+declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
 
 if false; then
 for i in "${arr[@]}"
@@ -145,6 +145,10 @@ do
   ipc3=$(grep "system.switch_cpu3.ipc " ${file_name} | sed -n 2p | awk '{ printf $2 }')
   ipc=$(echo $ipc1 + $ipc2 + $ipc3 | bc)
   echo -n $ipc
+  echo -n ",,"
+  grep "system.cpu0.dcache.non_dm_user_accesses" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.cpu0.dcache.non_dm_kernel_accesses" ${file_name} | sed -n 2p | awk '{ printf $2 }'
   echo ""
 done
 fi
