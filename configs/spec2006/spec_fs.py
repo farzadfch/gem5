@@ -1176,8 +1176,8 @@ def getSPECFSBench(bench):
 
 
 def getSPECCmd(bench, cpu):
-    #return "cd %s; taskset -c %d %s &\n" % (bench.cwd, cpu, bench.cmd)
+    return "cd %s; taskset -c %d %s &\n" % (bench.cwd, cpu, bench.cmd)
     #return "cd %s; %s &\n" % (bench.cwd, bench.cmd)
-    return "cd %s; %s \n" % ("/root", spec_fs_cmd[bench].cmd)
+    #return "cd %s; %s \n" % ("/root", spec_fs_cmd[bench].cmd)
 
 

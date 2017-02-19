@@ -87,7 +87,6 @@ def TerminalProcess(pipe, port):
 # input pipe can be used to send data to gem5
 def pyterm(port=3456):
     print "Trying to connect pyterm to port %d" % port
-
     (inpipe, outpipe) = multiprocessing.Pipe()
     term = multiprocessing.Process(target=TerminalProcess, args=((inpipe,outpipe),port,))
     term.start()
