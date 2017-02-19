@@ -50,7 +50,50 @@ CONFIG=$2
 #declare -a arr=("disparity-itr2-sim-3b683-dm" "localization-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm" "aifftr01-3b683-dm" "aiifft01-3b683-dm" "cacheb01-3b683-dm" "matrix01-3b683-dm" "ttsprk01-3b683-dm")
 #declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
 
-declare -a arr=("disparity-itr2-sim-3b683-dm-all" "localization-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "cacheb01-3b683-dm-all" "matrix01-3b683-dm-all" "ttsprk01-3b683-dm-all")
+
+#declare -a arr=("Daifftr01-mlock" "Daiifft01-mlock" "Dcacheb01-mlock" "Dmatrix01-mlock" "Dttsprk01-mlock")
+#declare -a arr=("aifftr01-mlock-3b683" "aiifft01-mlock-3b683" "cacheb01-mlock-3b683" "matrix01-mlock-3b683" "pntrch01-mlock-3b683" "ttsprk01-mlock-3b683")
+#declare -a arr=("aifftr01-mlock-3b683-wp" "aiifft01-mlock-3b683-wp" "cacheb01-mlock-3b683-wp" "matrix01-mlock-3b683-wp" "ttsprk01-mlock-3b683-wp")
+#declare -a arr=("aifftr01-mlock-3b683-dm" "aiifft01-mlock-3b683-dm" "cacheb01-mlock-3b683-dm" "matrix01-mlock-3b683-dm" "ttsprk01-mlock-3b683-dm")
+#declare -a arr=("aifftr01-mlok-3b683-dm-all" "aiifft01-mlok-3b683-dm-all" "cacheb01-mlok-3b683-dm-all" "matrix01-mlok-3b683-dm-all" "ttsprk01-mlok-3b683-dm-all")
+
+#declare -a arr=("pntrch01-mlock-3b683")
+#declare -a arr=("Dpntrch01-mlock" "pntrch01-mlock-3b683" "pntrch01-mlock-3b683-wp" "pntrch01-mlock-3b683-dm" "pntrch01-mlok-3b683-dm-all")
+
+#declare -a arr=("Ddisparity-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim" "Daifftr01" "Daiifft01" "Dmatrix01" "disparity-itr2-sim-3b683" "mser-itr2-sim-3b683" "sift-itr2-sim-3b683" "svm-itr2-sim-3b683" "texture_synthesis-itr2-sim-3b683" "aifftr01-3b683" "aiifft01-3b683" "matrix01-3b683" "disparity-itr2-sim-3b683-wp"  "mser-itr2-sim-3b683-wp" "sift-itr2-sim-3b683-wp" "svm-itr2-sim-3b683-wp" "texture_synthesis-itr2-sim-3b683-wp" "aifftr01-3b683-wp" "aiifft01-3b683-wp" "matrix01-3b683-wp" "disparity-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm" "aifftr01-3b683-dm" "aiifft01-3b683-dm" "matrix01-3b683-dm" "disparity-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "matrix01-3b683-dm-all")
+
+
+#declare -a arr=("Ddisparity-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim" "Daifftr01" "Daiifft01" "Dmatrix01")
+#declare -a arr=("disparity-itr2-sim-3b683" "mser-itr2-sim-3b683" "sift-itr2-sim-3b683" "svm-itr2-sim-3b683" "texture_synthesis-itr2-sim-3b683" "aifftr01-3b683" "aiifft01-3b683" "matrix01-3b683")
+#declare -a arr=("disparity-itr2-sim-3b683-wp"  "mser-itr2-sim-3b683-wp" "sift-itr2-sim-3b683-wp" "svm-itr2-sim-3b683-wp" "texture_synthesis-itr2-sim-3b683-wp" "aifftr01-3b683-wp" "aiifft01-3b683-wp" "matrix01-3b683-wp")
+#declare -a arr=("disparity-itr2-sim-3b683-dm" "mser-itr2-sim-3b683-dm" "sift-itr2-sim-3b683-dm" "svm-itr2-sim-3b683-dm" "texture_synthesis-itr2-sim-3b683-dm" "aifftr01-3b683-dm" "aiifft01-3b683-dm" "matrix01-3b683-dm")
+#declare -a arr=("disparity-itr2-sim-3b683-dm-all" "mser-itr2-sim-3b683-dm-all" "sift-itr2-sim-3b683-dm-all" "svm-itr2-sim-3b683-dm-all" "texture_synthesis-itr2-sim-3b683-dm-all" "aifftr01-3b683-dm-all" "aiifft01-3b683-dm-all" "matrix01-3b683-dm-all")
+
+#declare -a arr=("Ddisparity-itr2-sqcif" "Dlocalization-itr2-sqcif" "Dmser-itr2-sqcif" "Dmulti_ncut-itr2-sqcif" "Dsift-itr2-sqcif" "Dstitch-itr2-sqcif" "Dsvm-itr2-sqcif" "Dtexture_synthesis-itr2-sqcif" "Dtracking-itr2-sqcif")
+#declare -a arr=("disparity-itr2-sqcif-3b683" "localization-itr2-sqcif-3b683" "mser-itr2-sqcif-3b683" "multi_ncut-itr2-sqcif-3b683" "sift-itr2-sqcif-3b683" "stitch-itr2-sqcif-3b683" "svm-itr2-sqcif-3b683" "texture_synthesis-itr2-sqcif-3b683" "tracking-itr2-sqcif-3b683")
+#declare -a arr=("disparity-itr2-sqcif-3b683-wp" "localization-itr2-sqcif-3b683-wp" "mser-itr2-sqcif-3b683-wp" "multi_ncut-itr2-sqcif-3b683-wp" "sift-itr2-sqcif-3b683-wp" "stitch-itr2-sqcif-3b683-wp" "svm-itr2-sqcif-3b683-wp" "texture_synthesis-itr2-sqcif-3b683-wp" "tracking-itr2-sqcif-3b683-wp")
+#declare -a arr=("disparity-itr2-sqcif-3b683-dm" "localization-itr2-sqcif-3b683-dm" "mser-itr2-sqcif-3b683-dm" "multi_ncut-itr2-sqcif-3b683-dm" "sift-itr2-sqcif-3b683-dm" "stitch-itr2-sqcif-3b683-dm" "svm-itr2-sqcif-3b683-dm" "texture_synthesis-itr2-sqcif-3b683-dm" "tracking-itr2-sqcif-3b683-dm")
+#declare -a arr=("disparity-itr2-sqcif-3b683-dm-all" "localization-itr2-sqcif-3b683-dm-all" "mser-itr2-sqcif-3b683-dm-all" "multi_ncut-itr2-sqcif-3b683-dm-all" "sift-itr2-sqcif-3b683-dm-all" "stitch-itr2-sqcif-3b683-dm-all" "svm-itr2-sqcif-3b683-dm-all" "texture_synthesis-itr2-sqcif-3b683-dm-all" "tracking-itr2-sqcif-3b683-dm-all")
+
+#declare -a arr=("disparity-itr2-sim-3b1365" "mser-itr2-sim-3b1365" "sift-itr2-sim-3b1365" "svm-itr2-sim-3b1365" "texture_synthesis-itr2-sim-3b1365" "aifftr01-3b1365" "aiifft01-3b1365" "matrix01-3b1365")
+#declare -a arr=("disparity-itr2-sim-3b1365-wp"  "mser-itr2-sim-3b1365-wp" "sift-itr2-sim-3b1365-wp" "svm-itr2-sim-3b1365-wp" "texture_synthesis-itr2-sim-3b1365-wp" "aifftr01-3b1365-wp" "aiifft01-3b1365-wp" "matrix01-3b1365-wp")
+#declare -a arr=("disparity-itr2-sim-3b1365-dm" "mser-itr2-sim-3b1365-dm" "sift-itr2-sim-3b1365-dm" "svm-itr2-sim-3b1365-dm" "texture_synthesis-itr2-sim-3b1365-dm" "aifftr01-3b1365-dm" "aiifft01-3b1365-dm" "matrix01-3b1365-dm")
+#declare -a arr=("disparity-itr2-sim-3b1365-dm-all" "mser-itr2-sim-3b1365-dm-all" "sift-itr2-sim-3b1365-dm-all" "svm-itr2-sim-3b1365-dm-all" "texture_synthesis-itr2-sim-3b1365-dm-all" "aifftr01-3b1365-dm-all" "aiifft01-3b1365-dm-all" "matrix01-3b1365-dm-all")
+
+#declare -a arr=("Ddisparity-itr2-sqcif" "Dlocalization-itr2-sqcif" "Dmser-itr2-sqcif" "Dmulti_ncut-itr2-sqcif" "Dsift-itr2-sqcif" "Dstitch-itr2-sqcif" "Dsvm-itr2-sqcif" "Dtexture_synthesis-itr2-sqcif" "Dtracking-itr2-sqcif")
+#declare -a arr=("disparity-itr2-sqcif-3b1365" "localization-itr2-sqcif-3b1365" "mser-itr2-sqcif-3b1365" "multi_ncut-itr2-sqcif-3b1365" "sift-itr2-sqcif-3b1365" "stitch-itr2-sqcif-3b1365" "svm-itr2-sqcif-3b1365" "texture_synthesis-itr2-sqcif-3b1365" "tracking-itr2-sqcif-3b1365")
+#declare -a arr=("disparity-itr2-sqcif-3b1365-wp" "localization-itr2-sqcif-3b1365-wp" "mser-itr2-sqcif-3b1365-wp" "multi_ncut-itr2-sqcif-3b1365-wp" "sift-itr2-sqcif-3b1365-wp" "stitch-itr2-sqcif-3b1365-wp" "svm-itr2-sqcif-3b1365-wp" "texture_synthesis-itr2-sqcif-3b1365-wp" "tracking-itr2-sqcif-3b1365-wp")
+#declare -a arr=("disparity-itr2-sqcif-3b1365-dm" "localization-itr2-sqcif-3b1365-dm" "mser-itr2-sqcif-3b1365-dm" "multi_ncut-itr2-sqcif-3b1365-dm" "sift-itr2-sqcif-3b1365-dm" "stitch-itr2-sqcif-3b1365-dm" "svm-itr2-sqcif-3b1365-dm" "texture_synthesis-itr2-sqcif-3b1365-dm" "tracking-itr2-sqcif-3b1365-dm")
+#declare -a arr=("disparity-itr2-sqcif-3b1365-dm-all" "localization-itr2-sqcif-3b1365-dm-all" "mser-itr2-sqcif-3b1365-dm-all" "multi_ncut-itr2-sqcif-3b1365-dm-all" "sift-itr2-sqcif-3b1365-dm-all" "stitch-itr2-sqcif-3b1365-dm-all" "svm-itr2-sqcif-3b1365-dm-all" "texture_synthesis-itr2-sqcif-3b1365-dm-all" "tracking-itr2-sqcif-3b1365-dm-all")
+
+
+#declare -a arr=("disparity-itr2-sim" "Ddisparity-itr2-sim" "disparity-itr2-sim-dm" "disparity-itr2-sim-dm-all" "mser-itr2-sim" "Dmser-itr2-sim" "mser-itr2-sim-dm" "mser-itr2-sim-dm-all" "sift-itr2-sim" "Dsift-itr2-sim" "sift-itr2-sim-dm" "sift-itr2-sim-dm-all" "svm-itr2-sim" "Dsvm-itr2-sim" "svm-itr2-sim-dm" "svm-itr2-sim-dm-all" "texture_synthesis-itr2-sim" "Dtexture_synthesis-itr2-sim" "texture_synthesis-itr2-sim-dm" "texture_synthesis-itr2-sim-dm-all" "aifftr01" "Daifftr01" "aifftr01-dm" "aifftr01-dm-all" "aiifft01" "Daiifft01" "aiifft01-dm" "aiifft01-dm-all" "matrix01" "Dmatrix01" "matrix01-dm" "matrix01-dm-all")
+
+#declare -a arr=("disparity-itr2-sim" "mser-itr2-sim" "sift-itr2-sim" "svm-itr2-sim" "texture_synthesis-itr2-sim" "aifftr01" "aiifft01" "matrix01")
+declare -a arr=("Ddisparity-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim" "Daifftr01" "Daiifft01" "Dmatrix01")
+#declare -a arr=("disparity-itr2-sim-dm" "mser-itr2-sim-dm" "sift-itr2-sim-dm" "svm-itr2-sim-dm" "texture_synthesis-itr2-sim-dm" "aifftr01-dm" "aiifft01-dm" "matrix01-dm")
+#declare -a arr=("disparity-itr2-sim-dm-all" "mser-itr2-sim-dm-all" "sift-itr2-sim-dm-all" "svm-itr2-sim-dm-all" "texture_synthesis-itr2-sim-dm-all" "aifftr01-dm-all" "aiifft01-dm-all" "matrix01-dm-all")
+
 
 if false; then
 for i in "${arr[@]}"
@@ -85,6 +128,8 @@ do
   grep "system.l2.overall_accesses::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
   echo -n ","
   grep "system.l2.overall_accesses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ",,"
+  grep "system.switch_cpu0.commit.committedInsts" ${file_name} | sed -n 2p | awk '{ printf $2 }'
   echo ""
 done
 fi
@@ -117,7 +162,7 @@ do
 done
 fi
 
-if true; then
+if false; then
 for i in "${arr[@]}"
 do
   file_name=${i}-${CONFIG}".txt"

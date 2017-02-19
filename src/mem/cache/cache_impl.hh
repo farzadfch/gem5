@@ -57,8 +57,7 @@
 #include "base/misc.hh"
 #include "base/types.hh"
 #include "debug/Cache.hh"
-#include "debug/CacheDm.hh"
-#include "debug/CacheMiss.hh"
+#include "debug/CacheMy.hh"
 #include "debug/CachePort.hh"
 #include "debug/CacheTags.hh"
 #include "debug/WayPart.hh"
@@ -326,12 +325,9 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             pkt->getAddr(), pkt->isSecure() ? "s" : "ns",
             blk ? "hit" : "miss", blk ? blk->print() : "");
 
-    // Print all accesses to CPU 0 L1 I & D and indicate whether it is DM or not
+    // Print all accesses to CPU 0 L1 I & D
     if (name().compare("system.cpu0.dcache") == 0 || name().compare("system.cpu0.icache") == 0)
-            DPRINTF(CacheDm, "VA:%08x DM:%d\n",  pkt->req->getVaddr(), pkt->req->isDeterministic());
-    
-    if (name().compare("system.cpu0.dcache") == 0 || name().compare("system.cpu0.icache") == 0)
-        DPRINTF(CacheMiss, "VA:%08x %s\n", pkt->req->getVaddr(), blk ? "H" : "M");
+       DPRINTF(CacheMy, "VA:%08x %s DM:%d ASID:%d\n", pkt->req->getVaddr(), blk ? "H" : "M", pkt->req->isDeterministic(), pkt->req->getAsid());
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at
@@ -1460,13 +1456,13 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
                 tags->setWayAllocation(0, 3);
                 break;
             case 1:
-                tags->setWayAllocation(4, 15);
+                tags->setWayAllocation(4, 7);
                 break;
             case 2:
-                tags->setWayAllocation(4, 15);
+                tags->setWayAllocation(8, 11);
                 break;
             case 3:
-                tags->setWayAllocation(4, 15);
+                tags->setWayAllocation(12, 15);
                 break;
             default:
                 panic("Invalid CPU ID");

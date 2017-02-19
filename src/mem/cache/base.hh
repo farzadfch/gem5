@@ -60,6 +60,7 @@
 #include "base/trace.hh"
 #include "base/types.hh"
 #include "debug/Cache.hh"
+#include "debug/CacheMiss.hh"
 #include "debug/CachePort.hh"
 #include "mem/cache/mshr_queue.hh"
 #include "mem/mem_object.hh"
@@ -621,13 +622,16 @@ class BaseCache : public MemObject
             if (missCount == 0)
                 exitSimLoop("A cache reached the maximum miss count");
         }
+        if (isTopLevel == 0 && system->getCpuId(pkt->req->masterId()) == 0)
+            DPRINTF(CacheMiss, "%s VA:%08x DM:%d ASID:%d\n", system->getMasterName(pkt->req->masterId()), pkt->req->hasVaddr() ? pkt->req->getVaddr() : 0,
+                    pkt->req->isDeterministic(), pkt->req->hasVaddr() ? pkt->req->getAsid() : -1);
     }
     void incHitCount(PacketPtr pkt)
     {
         assert(pkt->req->masterId() < system->maxMasters());
         hits[pkt->cmdToIndex()][pkt->req->masterId()]++;
-	if (pkt->req->isDeterministic())
-	    dmHits[pkt->cmdToIndex()][pkt->req->masterId()]++;
+        if (pkt->req->isDeterministic())
+            dmHits[pkt->cmdToIndex()][pkt->req->masterId()]++;
     }
 
 
