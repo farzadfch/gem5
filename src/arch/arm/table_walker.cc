@@ -50,6 +50,7 @@
 #include "debug/TLB.hh"
 #include "debug/TLBVerbose.hh"
 #include "debug/TLBInsert.hh"
+#include "debug/TLBInsertMy.hh"
 #include "sim/system.hh"
 
 using namespace ArmISA;
@@ -1957,8 +1958,11 @@ TableWalker::insertTableEntry(DescriptorBase &descriptor, bool longDescriptor)
     }
     
 #if 0
-    if (te.size == 0xfff && te.vpn < 0x80000 && params()->sys->getCpuId(masterId) == 0)
-	te.deterministic = true;
+    if (te.deterministic == false && te.size == 0xfff && te.vpn < 0x80000
+            && name().compare("system.switch_cpus0.dtb.walker") == 0 && te.asid == 49) {
+        te.deterministic = true;
+        DPRINTF(TLBInsertMy, "vpn:%05x asid:%d\n", te.vpn, te.asid);
+    }
 #endif
 
     // Debug output

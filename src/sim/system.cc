@@ -71,7 +71,6 @@ using namespace std;
 using namespace TheISA;
 
 vector<System *> System::systemList;
-
 int System::numSystemsRunning = 0;
 
 System::System(Params *p)
@@ -255,7 +254,7 @@ System::setWayPartMode(int use) {
 
 int
 System::getWayPartMode() {
-    return wayPartMode;
+    return 2;
 }
 
 void

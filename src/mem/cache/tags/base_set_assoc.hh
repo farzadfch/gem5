@@ -59,6 +59,7 @@
 #include "mem/packet.hh"
 #include "params/BaseSetAssoc.hh"
 #include "debug/ClearDm.hh"
+#include "debug/CacheCont.hh"
 
 /**
  * A BaseSetAssoc cache tag store.
@@ -297,6 +298,15 @@ public:
              }
 
              blk->invalidate();
+             
+             int req_cpu = cache->system->getCpuId(master_id);
+             int blk_cpu = cache->system->getCpuId(blk->srcMasterId);
+             
+             if (!cache->getIsTopLevel() && req_cpu != blk_cpu)
+             {
+                DPRINTF(CacheCont, "req:%s req_cpu_id:%d blk:%s blk_cpu_id:%d way:%d\n", cache->system->getMasterName(master_id).c_str(), req_cpu,
+                    cache->system->getMasterName(blk->srcMasterId).c_str(), blk_cpu, blk->way);
+             }
          }
 
          blk->isTouched = true;

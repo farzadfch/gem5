@@ -68,7 +68,7 @@ const int REG_PC_64 = 32;
 const int REG_CPSR_64 = 33;
 const int REG_V0 = 34;
 
-const int MAX_NUMREGS = NUMREGS_64;
+const int MAX_NUMREGS = NUMREGS;
 
 class RemoteGDB : public BaseRemoteGDB
 {

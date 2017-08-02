@@ -1489,12 +1489,13 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
     {
         std::string masterName = system->getMasterName(masterId);
         //DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
-        if (system->getWayPartMode() == 2 && system->getCpuId(masterId) == 0)
+        /*if (system->getWayPartMode() == 2 && system->getCpuId(masterId) == 0)
         {
             DPRINTF(WayPart, "CPU_ID:%d Master:%d %s Way_No:%d DM_Blk:%d DM_Req:%d\n", id, masterId, masterName.c_str(), blk->way, blk->isDeterministic(), isDetermReq);
             if (isDetermReq)
                 assert(blk->way >= 0 && blk->way <= 3);
-        }
+        }*/
+        DPRINTF(WayPart, "master:%s cpu:%d way:%d\n", masterName.c_str(), system->getCpuId(masterId), blk->way);
     }
 
     if (blk->isValid()) {

@@ -249,7 +249,7 @@ def makeArmSystem(mem_mode, machine_type, mdesc = None,
         # Ensure that writes to the UART actually go out early in the boot
         boot_flags = 'earlyprintk=pl011,0x1c090000 console=ttyAMA0 ' + \
                      'lpj=19988480 norandmaps rw loglevel=8 ' + \
-                     'mem=%s root=/dev/sda1 isolcpus=0' % mdesc.mem()
+                     'mem=%s root=/dev/sda1 isolcpus=0,1,2,3' % mdesc.mem()
 
         self.mem_ranges = []
         size_remain = long(Addr(mdesc.mem()))

@@ -39,3 +39,4 @@ Source('random_repl.cc')
 Source('fa_lru.cc')
 
 DebugFlag('ClearDm')
+DebugFlag('CacheCont')

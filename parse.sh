@@ -86,14 +86,38 @@ CONFIG=$2
 #declare -a arr=("disparity-itr2-sqcif-3b1365-dm" "localization-itr2-sqcif-3b1365-dm" "mser-itr2-sqcif-3b1365-dm" "multi_ncut-itr2-sqcif-3b1365-dm" "sift-itr2-sqcif-3b1365-dm" "stitch-itr2-sqcif-3b1365-dm" "svm-itr2-sqcif-3b1365-dm" "texture_synthesis-itr2-sqcif-3b1365-dm" "tracking-itr2-sqcif-3b1365-dm")
 #declare -a arr=("disparity-itr2-sqcif-3b1365-dm-all" "localization-itr2-sqcif-3b1365-dm-all" "mser-itr2-sqcif-3b1365-dm-all" "multi_ncut-itr2-sqcif-3b1365-dm-all" "sift-itr2-sqcif-3b1365-dm-all" "stitch-itr2-sqcif-3b1365-dm-all" "svm-itr2-sqcif-3b1365-dm-all" "texture_synthesis-itr2-sqcif-3b1365-dm-all" "tracking-itr2-sqcif-3b1365-dm-all")
 
-
-#declare -a arr=("disparity-itr2-sim" "Ddisparity-itr2-sim" "disparity-itr2-sim-dm" "disparity-itr2-sim-dm-all" "mser-itr2-sim" "Dmser-itr2-sim" "mser-itr2-sim-dm" "mser-itr2-sim-dm-all" "sift-itr2-sim" "Dsift-itr2-sim" "sift-itr2-sim-dm" "sift-itr2-sim-dm-all" "svm-itr2-sim" "Dsvm-itr2-sim" "svm-itr2-sim-dm" "svm-itr2-sim-dm-all" "texture_synthesis-itr2-sim" "Dtexture_synthesis-itr2-sim" "texture_synthesis-itr2-sim-dm" "texture_synthesis-itr2-sim-dm-all" "aifftr01" "Daifftr01" "aifftr01-dm" "aifftr01-dm-all" "aiifft01" "Daiifft01" "aiifft01-dm" "aiifft01-dm-all" "matrix01" "Dmatrix01" "matrix01-dm" "matrix01-dm-all")
-
 #declare -a arr=("disparity-itr2-sim" "mser-itr2-sim" "sift-itr2-sim" "svm-itr2-sim" "texture_synthesis-itr2-sim" "aifftr01" "aiifft01" "matrix01")
-declare -a arr=("Ddisparity-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim" "Daifftr01" "Daiifft01" "Dmatrix01")
+#declare -a arr=("Ddisparity-itr2-sim" "Dmser-itr2-sim" "Dsift-itr2-sim" "Dsvm-itr2-sim" "Dtexture_synthesis-itr2-sim" "Daifftr01" "Daiifft01" "Dmatrix01")
 #declare -a arr=("disparity-itr2-sim-dm" "mser-itr2-sim-dm" "sift-itr2-sim-dm" "svm-itr2-sim-dm" "texture_synthesis-itr2-sim-dm" "aifftr01-dm" "aiifft01-dm" "matrix01-dm")
 #declare -a arr=("disparity-itr2-sim-dm-all" "mser-itr2-sim-dm-all" "sift-itr2-sim-dm-all" "svm-itr2-sim-dm-all" "texture_synthesis-itr2-sim-dm-all" "aifftr01-dm-all" "aiifft01-dm-all" "matrix01-dm-all")
 
+#declare -a arr=("Ddisparity-itr2-mlock-sim" "Dmser-itr2-mlock-sim" "Dsift-itr2-mlock-sim" "Dsvm-itr2-mlock-sim" "Dtexture_synthesis-itr2-mlock-sim" "Daifftr01-mlock" "Daiifft01-mlock" "Dmatrix01-mlock")
+#declare -a arr=("disparity-itr2-mlock-sim-3b683" "mser-itr2-mlock-sim-3b683" "sift-itr2-mlock-sim-3b683" "svm-itr2-mlock-sim-3b683" "texture_synthesis-itr2-mlock-sim-3b683" "aifftr01-mlock-3b683" "aiifft01-mlock-3b683" "matrix01-mlock-3b683")
+#declare -a arr=("disparity-itr2-mlock-sim-3b683-wp" "mser-itr2-mlock-sim-3b683-wp" "sift-itr2-mlock-sim-3b683-wp" "svm-itr2-mlock-sim-3b683-wp" "texture_synthesis-itr2-mlock-sim-3b683-wp" "aifftr01-mlock-3b683-wp" "aiifft01-mlock-3b683-wp" "matrix01-mlock-3b683-wp")
+#declare -a arr=("disparity-itr2-mlock-sim-3b683-dm" "mser-itr2-mlock-sim-3b683-dm" "sift-itr2-mlock-sim-3b683-dm" "svm-itr2-mlock-sim-3b683-dm" "texture_synthesis-itr2-mlock-sim-3b683-dm" "aifftr01-mlock-3b683-dm" "aiifft01-mlock-3b683-dm" "matrix01-mlock-3b683-dm")
+#declare -a arr=("disparity-itr2-mlock-sim-3b683-dm-all" "mser-itr2-mlock-sim-3b683-dm-all" "sift-itr2-mlock-sim-3b683-dm-all" "svm-itr2-mlock-sim-3b683-dm-all" "texture_synthesis-itr2-mlock-sim-3b683-dm-all" "aifftr01-mlock-3b683-dm-all" "aiifft01-mlock-3b683-dm-all" "matrix01-mlock-3b683-dm-all")
+
+#declare -a arr=("Ddisparity-itr2-mlock-sim" "Dmser-itr2-mlock-sim" "Dsift-itr2-mlock-sim" "Dsvm-itr2-mlock-sim" "Dtexture_synthesis-itr2-mlock-sim" "Daifftr01-mlock" "Daiifft01-mlock" "Dmatrix01-mlock")
+#declare -a arr=("disparity-itr2-mlock-sim-3brnd" "mser-itr2-mlock-sim-3brnd" "sift-itr2-mlock-sim-3brnd" "svm-itr2-mlock-sim-3brnd" "texture_synthesis-itr2-mlock-sim-3brnd" "aifftr01-mlock-3brnd" "aiifft01-mlock-3brnd" "matrix01-mlock-3brnd")
+#declare -a arr=("disparity-itr2-mlock-sim-3brnd-wp" "mser-itr2-mlock-sim-3brnd-wp" "sift-itr2-mlock-sim-3brnd-wp" "svm-itr2-mlock-sim-3brnd-wp" "texture_synthesis-itr2-mlock-sim-3brnd-wp" "aifftr01-mlock-3brnd-wp" "aiifft01-mlock-3brnd-wp" "matrix01-mlock-3brnd-wp")
+#declare -a arr=("disparity-itr2-mlock-sim-3brnd-dm" "mser-itr2-mlock-sim-3brnd-dm" "sift-itr2-mlock-sim-3brnd-dm" "svm-itr2-mlock-sim-3brnd-dm" "texture_synthesis-itr2-mlock-sim-3brnd-dm" "aifftr01-mlock-3brnd-dm" "aiifft01-mlock-3brnd-dm" "matrix01-mlock-3brnd-dm")
+#declare -a arr=("disparity-itr2-mlock-sim-3brnd-dm-all" "mser-itr2-mlock-sim-3brnd-dm-all" "sift-itr2-mlock-sim-3brnd-dm-all" "svm-itr2-mlock-sim-3brnd-dm-all" "texture_synthesis-itr2-mlock-sim-3brnd-dm-all" "aifftr01-mlock-3brnd-dm-all" "aiifft01-mlock-3brnd-dm-all" "matrix01-mlock-3brnd-dm-all")
+
+#declare -a arr=("Ddisparity-itr2-mlock-sim" "Dmser-itr2-mlock-sim" "Dsift-itr2-mlock-sim" "Dsvm-itr2-mlock-sim" "Dtexture_synthesis-itr2-mlock-sim" "Daifftr01-mlock" "Daiifft01-mlock" "Dmatrix01-mlock")
+#declare -a arr=("disparity-itr2-mlock-sim-3b1365" "mser-itr2-mlock-sim-3b1365" "sift-itr2-mlock-sim-3b1365" "svm-itr2-mlock-sim-3b1365" "texture_synthesis-itr2-mlock-sim-3b1365" "aifftr01-mlock-3b1365" "aiifft01-mlock-3b1365" "matrix01-mlock-3b1365")
+#declare -a arr=("disparity-itr2-mlock-sim-3b1365-wp" "mser-itr2-mlock-sim-3b1365-wp" "sift-itr2-mlock-sim-3b1365-wp" "svm-itr2-mlock-sim-3b1365-wp" "texture_synthesis-itr2-mlock-sim-3b1365-wp" "aifftr01-mlock-3b1365-wp" "aiifft01-mlock-3b1365-wp" "matrix01-mlock-3b1365-wp")
+#declare -a arr=("disparity-itr2-mlock-sim-3b1365-dm" "mser-itr2-mlock-sim-3b1365-dm" "sift-itr2-mlock-sim-3b1365-dm" "svm-itr2-mlock-sim-3b1365-dm" "texture_synthesis-itr2-mlock-sim-3b1365-dm" "aifftr01-mlock-3b1365-dm" "aiifft01-mlock-3b1365-dm" "matrix01-mlock-3b1365-dm")
+#declare -a arr=("disparity-itr2-mlock-sim-3b1365-dm-all" "mser-itr2-mlock-sim-3b1365-dm-all" "sift-itr2-mlock-sim-3b1365-dm-all" "svm-itr2-mlock-sim-3b1365-dm-all" "texture_synthesis-itr2-mlock-sim-3b1365-dm-all" "aifftr01-mlock-3b1365-dm-all" "aiifft01-mlock-3b1365-dm-all" "matrix01-mlock-3b1365-dm-all")
+
+#declare -a arr=("disparity-itr2-mlock-sim-3b683-dm-h" "mser-itr2-mlock-sim-3b683-dm-h" "sift-itr2-mlock-sim-3b683-dm-h" "svm-itr2-mlock-sim-3b683-dm-h" "texture_synthesis-itr2-mlock-sim-3b683-dm-h" "aifftr01-mlock-3b683-dm-h" "aiifft01-mlock-3b683-dm-h" "matrix01-mlock-3b683-dm-h")
+
+#declare -a arr=("disparity-itr2-mlock-sim-3b683-dm-h" "mser-itr2-mlock-sim-3b683-dm-h" "sift-itr2-mlock-sim-3b683-dm-h" "svm-itr2-mlock-sim-3b683-dm-h" "texture_synthesis-itr2-mlock-sim-3b683-dm-h" "aifftr01-mlock-3b683-dm-h" "aiifft01-mlock-3b683-dm-h" "matrix01-mlock-3b683-dm-h" "cacheb01-mlock-3b683-dm-h" "pntrch01-mlock-3b683-dm-h" "ttsprk01-mlock-3b683-dm-h")
+
+#declare -a arr=("Dcacheb01-mlock" "Dpntrch01-mlock" "Dttsprk01-mlock")
+#declare -a arr=("cacheb01-mlock-3b683" "pntrch01-mlock-3b683" "ttsprk01-mlock-3b683")
+#declare -a arr=("cacheb01-mlock-3b683-wp" "pntrch01-mlock-3b683-wp" "ttsprk01-mlock-3b683-wp")
+#declare -a arr=("cacheb01-mlock-3b683-dm-h" "pntrch01-mlock-3b683-dm-h" "ttsprk01-mlock-3b683-dm-h")
+declare -a arr=("cacheb01-mlock-3b683-dm-all" "pntrch01-mlock-3b683-dm-all" "ttsprk01-mlock-3b683-dm-all")
 
 if false; then
 for i in "${arr[@]}"
@@ -162,7 +186,7 @@ do
 done
 fi
 
-if false; then
+if true; then
 for i in "${arr[@]}"
 do
   file_name=${i}-${CONFIG}".txt"
@@ -198,4 +222,19 @@ do
 done
 fi
 
+# RTA profiling
+if false; then
+for i in "${arr[@]}"
+do
+  file_name=${i}-${CONFIG}".txt"
+  grep "system.l2.dm_overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.cpu0.icache.overall_misses::switch_cpu0.inst" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.cpu0.dcache.overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo -n ","
+  grep "system.cpu0.dcache.dm_overall_misses::switch_cpu0.data" ${file_name} | sed -n 2p | awk '{ printf $2 }'
+  echo ""
+done
+fi
 

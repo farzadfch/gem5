@@ -79,28 +79,28 @@ LRU::findVictim(Addr addr) const
     BlkType *blk = NULL;
     
     if (cache->getIsTopLevel())
-	blk = sets[set].blks[assoc - 1];
+        blk = sets[set].blks[assoc - 1];
     else
     {
-	for (int i = assoc - 1; i >= 0; i--) {
-	    BlkType *b = sets[set].blks[i];
-	    if (((dmAssoc && b->way >= lowerWayNum && b->way <= upperWayNum) || !dmAssoc ) && !b->isDeterministic()) {
-		blk = b;
-		break;
-	    }
-	}
-	if (dmAssoc && blk == NULL)
-	{
-	    for (int i = assoc - 1; i >= 0; i--) {
-		BlkType *b = sets[set].blks[i];
-		if (b->way >= lowerWayNum && b->way <= upperWayNum) {
-		    blk = b;
-		    break;
-		}
-	    }
-	}
+        for (int i = assoc - 1; i >= 0; i--) {
+            BlkType *b = sets[set].blks[i];
+            if (((dmAssoc && b->way >= lowerWayNum && b->way <= upperWayNum) || !dmAssoc ) && !b->isDeterministic()) {
+            blk = b;
+            break;
+            }
+        }
+        if (dmAssoc && blk == NULL)
+        {
+            for (int i = assoc - 1; i >= 0; i--) {
+            BlkType *b = sets[set].blks[i];
+                if (b->way >= lowerWayNum && b->way <= upperWayNum) {
+                    blk = b;
+                    break;
+                }
+            }
+        }
     }
-	
+
     // assert(!blk || blk->way < allocAssoc);
     assert(blk != NULL);
 

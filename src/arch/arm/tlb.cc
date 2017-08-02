@@ -61,6 +61,7 @@
 #include "debug/Checkpoint.hh"
 #include "debug/TLB.hh"
 #include "debug/TLBVerbose.hh"
+#include "debug/TLBMy.hh"
 #include "mem/page_table.hh"
 #include "params/ArmTLB.hh"
 #include "sim/full_system.hh"
@@ -1062,6 +1063,9 @@ TLB::translateFs(RequestPtr req, ThreadContext *tc, Mode mode,
             req->setFlags(Request::UNCACHEABLE);
         }
 
+        if (te->deterministic == false && (name().compare("system.switch_cpus0.itb") == 0 || name().compare("system.switch_cpus0.dtb") == 0))
+            DPRINTF(TLBMy, "asid:%d pc:%08x vpn:%05x size:%x\n", asid, req->getPC(), te->vpn, te->size);
+        
         if (te->deterministic)
             req->setFlags(Request::DETERMINISTIC);
 
