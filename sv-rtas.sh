@@ -63,11 +63,27 @@ CONFIG=$1
 #declare -a arr=("Dlocalization-itr2-mlock-sim" "localization-itr2-mlock-sim-3b683" "localization-itr2-mlock-sim-3b683-wp" "localization-itr2-mlock-sim-3b683-dm-h" "localization-itr2-mlock-sim-3b683-dm-all")
 
 #declare -a arr=("aifftr01-inf-1mcf" "aiifft01-inf-1mcf" "matrix01-inf-1mcf")
-declare -a arr=("aifftr01-inf-1mcf-dm-all" "aiifft01-inf-1mcf-dm-all" "matrix01-inf-1mcf-dm-all")
+#declare -a arr=("aifftr01-inf-1mcf-dm-all" "aiifft01-inf-1mcf-dm-all" "matrix01-inf-1mcf-dm-all")
+
+# mcf dump stat
+#declare -a arr=("disparity-inf-1mcf-ds" "mser-inf-1mcf-ds" "sift-inf-1mcf-ds" "svm-inf-1mcf-ds" "texture_synthesis-inf-1mcf-ds" "aifftr01-inf-1mcf-ds" "aiifft01-inf-1mcf-ds" "matrix01-inf-1mcf-ds")
+#declare -a arr=("disparity-inf-1mcf-ds-dm-all" "mser-inf-1mcf-ds-dm-all" "sift-inf-1mcf-ds-dm-all" "svm-inf-1mcf-ds-dm-all" "texture_synthesis-inf-1mcf-ds-dm-all" "aifftr01-inf-1mcf-ds-dm-all" "aiifft01-inf-1mcf-ds-dm-all" "matrix01-inf-1mcf-ds-dm-all")
+
+#declare -a arr=("3disparity-inf-1mcf-ds-wp" "3mser-inf-1mcf-ds-wp" "3sift-inf-1mcf-ds-wp" "3svm-inf-1mcf-ds-wp" "3texture_synthesis-inf-1mcf-ds-wp" "3aifftr01-inf-1mcf-ds-wp" "3aiifft01-inf-1mcf-ds-wp" "3matrix01-inf-1mcf-ds-wp")
+#declare -a arr=("3disparity-inf-1mcf-ds-dm-all" "3mser-inf-1mcf-ds-dm-all" "3sift-inf-1mcf-ds-dm-all" "3svm-inf-1mcf-ds-dm-all" "3texture_synthesis-inf-1mcf-ds-dm-all" "3aifftr01-inf-1mcf-ds-dm-all" "3aiifft01-inf-1mcf-ds-dm-all" "3matrix01-inf-1mcf-ds-dm-all")
+#declare -a arr=("3disparity-inf-1mcf-ds-dm-h" "3mser-inf-1mcf-ds-dm-h" "3sift-inf-1mcf-ds-dm-h" "3svm-inf-1mcf-ds-dm-h" "3texture_synthesis-inf-1mcf-ds-dm-h" "3aifftr01-inf-1mcf-ds-dm-h" "3aiifft01-inf-1mcf-ds-dm-h" "3matrix01-inf-1mcf-ds-dm-h")
+
+#declare -a arr=("disparity-inf-3mcf-ds-wp" "mser-inf-3mcf-ds-wp" "sift-inf-3mcf-ds-wp" "svm-inf-3mcf-ds-wp" "texture_synthesis-inf-3mcf-ds-wp" "aifftr01-inf-3mcf-ds-wp" "aiifft01-inf-3mcf-ds-wp" "matrix01-inf-3mcf-ds-wp")
+#declare -a arr=("disparity-inf-3mcf-ds-dm-all" "mser-inf-3mcf-ds-dm-all" "sift-inf-3mcf-ds-dm-all" "svm-inf-3mcf-ds-dm-all" "texture_synthesis-inf-3mcf-ds-dm-all" "aifftr01-inf-3mcf-ds-dm-all" "aiifft01-inf-3mcf-ds-dm-all" "matrix01-inf-3mcf-ds-dm-all")
+#declare -a arr=("disparity-inf-3mcf-ds-dm-h" "mser-inf-3mcf-ds-dm-h" "sift-inf-3mcf-ds-dm-h" "svm-inf-3mcf-ds-dm-h" "texture_synthesis-inf-3mcf-ds-dm-h" "aifftr01-inf-3mcf-ds-dm-h" "aiifft01-inf-3mcf-ds-dm-h" "matrix01-inf-3mcf-ds-dm-h")
+
+declare -a arr=("3disparity-inf-1bzip2-ds-wp" "3mser-inf-1bzip2-ds-wp" "3sift-inf-1bzip2-ds-wp" "3svm-inf-1bzip2-ds-wp" "3texture_synthesis-inf-1bzip2-ds-wp" "3aifftr01-inf-1bzip2-ds-wp" "3aiifft01-inf-1bzip2-ds-wp" "3matrix01-inf-1bzip2-ds-wp" "3disparity-inf-1bzip2-ds-dm-all" "3mser-inf-1bzip2-ds-dm-all" "3sift-inf-1bzip2-ds-dm-all" "3svm-inf-1bzip2-ds-dm-all" "3texture_synthesis-inf-1bzip2-ds-dm-all" "3aifftr01-inf-1bzip2-ds-dm-all" "3aiifft01-inf-1bzip2-ds-dm-all" "3matrix01-inf-1bzip2-ds-dm-all" "3disparity-inf-1bzip2-ds-dm-h" "3mser-inf-1bzip2-ds-dm-h" "3sift-inf-1bzip2-ds-dm-h" "3svm-inf-1bzip2-ds-dm-h" "3texture_synthesis-inf-1bzip2-ds-dm-h" "3aifftr01-inf-1bzip2-ds-dm-h" "3aiifft01-inf-1bzip2-ds-dm-h" "3matrix01-inf-1bzip2-ds-dm-h")
+
+#declare -a arr=("disparity-inf-3bzip2-ds-wp" "mser-inf-3bzip2-ds-wp" "sift-inf-3bzip2-ds-wp" "svm-inf-3bzip2-ds-wp" "texture_synthesis-inf-3bzip2-ds-wp" "aifftr01-inf-3bzip2-ds-wp" "aiifft01-inf-3bzip2-ds-wp" "matrix01-inf-3bzip2-ds-wp" "disparity-inf-3bzip2-ds-dm-all" "mser-inf-3bzip2-ds-dm-all" "sift-inf-3bzip2-ds-dm-all" "svm-inf-3bzip2-ds-dm-all" "texture_synthesis-inf-3bzip2-ds-dm-all" "aifftr01-inf-3bzip2-ds-dm-all" "aiifft01-inf-3bzip2-ds-dm-all" "matrix01-inf-3bzip2-ds-dm-all" "disparity-inf-3bzip2-ds-dm-h" "mser-inf-3bzip2-ds-dm-h" "sift-inf-3bzip2-ds-dm-h" "svm-inf-3bzip2-ds-dm-h" "texture_synthesis-inf-3bzip2-ds-dm-h" "aifftr01-inf-3bzip2-ds-dm-h" "aiifft01-inf-3bzip2-ds-dm-h" "matrix01-inf-3bzip2-ds-dm-h")
 
 for i in "${arr[@]}"
 do
-     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/7-eembc/dm-all --stats-file=${i}-${CONFIG}.txt  configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-inf/cpt.87106599662500 -I 13000000000 && sleep 8d"
+     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/11-3rt-1bzip2 --stats-file=${i}-${CONFIG}.txt  configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-dm-h/cpt.147105947774000 -I 1000000000 && sleep 8d"
 done
 
 #for i in "${arr[@]}"

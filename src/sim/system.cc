@@ -88,7 +88,7 @@ System::System(Params *p)
       memoryMode(p->mem_mode),
       mshrCount{-1,-1,-1,-1},
       _cacheLineSize(p->cache_line_size),
-      wayPartMode(0),
+      wayPartMode(1),
       workItemsBegin(0),
       workItemsEnd(0),
       numWorkIds(p->num_work_ids),
@@ -254,7 +254,7 @@ System::setWayPartMode(int use) {
 
 int
 System::getWayPartMode() {
-    return 2;
+    return wayPartMode;
 }
 
 void

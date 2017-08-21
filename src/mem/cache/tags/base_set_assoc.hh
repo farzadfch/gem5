@@ -162,6 +162,7 @@ public:
         tagsInUse--;
         assert(blk->srcMasterId < cache->system->maxMasters());
         occupancies[blk->srcMasterId]--;
+        occupanciesReset[blk->srcMasterId]--;
         if (blk->isDeterministic())
         {
             avg_determ_blks[blk->srcMasterId]--;
@@ -290,6 +291,7 @@ public:
              // deal with evicted block
              assert(blk->srcMasterId < cache->system->maxMasters());
              occupancies[blk->srcMasterId]--;
+             occupanciesReset[blk->srcMasterId]--;
              if (blk->isDeterministic())
              {
                  determ_blks[blk->srcMasterId]--;
@@ -317,6 +319,7 @@ public:
          // deal with what we are bringing in
          assert(master_id < cache->system->maxMasters());
          occupancies[master_id]++;
+         occupanciesReset[master_id]++;
          if (pkt->req->isDeterministic() && cache->system->getWayPartMode() == 2)
          {
             determ_blks[master_id]++;

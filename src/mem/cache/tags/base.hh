@@ -131,6 +131,12 @@ class BaseTags : public ClockedObject
 
     /** Average occ % of each requestor using the cache */
     Stats::Formula avgOccs;
+    
+    /** Occupancy of each requestor using the cache requested after the stat reset */
+    Stats::Vector occupanciesReset;
+
+    /** Occ % of each requestor using the cache requested after the stat reset */
+    Stats::Formula occsReset;
 
     /** Occupancy of each context/cpu using the cache */
     Stats::Vector occupanciesTaskId;

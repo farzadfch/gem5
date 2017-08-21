@@ -79,7 +79,7 @@ BaseTags::regStats()
         .flags(total)
         ;
 
-    
+
     assert(cache->system->maxMasters() <= MAX_NUM_MASTER);
     
     for (int j = 0; j < cache->system->maxMasters(); j++)
@@ -95,15 +95,15 @@ BaseTags::regStats()
 	}
     }
     for (int j = cache->system->maxMasters(); j < MAX_NUM_MASTER; j++)
-    {  
-	string j_str = to_string(j);
-	
-	replacements_detail[j]
-	    .init(1)
-	    .name(name() + ".replacements_detail_dummy" + j_str)
-	    .desc("dummy")
-	    .flags(total | nozero | nonan)
-	    ;
+    {
+        string j_str = to_string(j);
+
+        replacements_detail[j]
+            .init(1)
+            .name(name() + ".replacements_detail_dummy" + j_str)
+            .desc("dummy")
+            .flags(total | nozero | nonan)
+            ;
     }
 
     determ_replacements
@@ -115,7 +115,7 @@ BaseTags::regStats()
     for (int i = 0; i < cache->system->maxMasters(); i++) {
         determ_replacements.subname(i, cache->system->getMasterName(i));
     }
-    
+
     determ_blks
         .init(cache->system->maxMasters())
         .name(name() + ".determ_blks")
@@ -184,6 +184,27 @@ BaseTags::regStats()
 
     avgOccs = occupancies / Stats::constant(numBlocks);
 
+    occupanciesReset
+        .init(cache->system->maxMasters())
+        .name(name() + ".occ_blocks_reset")
+        .desc("Occupied blocks per requestor requested after the stat reset")
+        .flags(nozero | nonan)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        occupanciesReset.subname(i, cache->system->getMasterName(i));
+    }
+
+    occsReset
+        .name(name() + ".occ_percent_reset")
+        .desc("Percentage of cache occupancy requested after the stat reset")
+        .flags(nozero | total)
+        ;
+    for (int i = 0; i < cache->system->maxMasters(); i++) {
+        occsReset.subname(i, cache->system->getMasterName(i));
+    }
+
+    occsReset = occupanciesReset / Stats::constant(numBlocks);
+    
     occupanciesTaskId
         .init(ContextSwitchTaskId::NumTaskId)
         .name(name() + ".occ_task_id_blocks")

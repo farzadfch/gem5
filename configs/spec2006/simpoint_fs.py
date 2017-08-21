@@ -266,7 +266,7 @@ if options.simpoint_mode == "simulate" or options.simpoint_mode == "fastfwd" or 
         simulate_cpu[i].workload = test_sys.cpu[i].workload
         if options.max_insts:
             #test_sys.cpu[i].max_insts_all_threads = options.max_insts
-            simulate_cpu[i].max_insts_all_threads = options.max_insts
+            simulate_cpu[0].max_insts_all_threads = options.max_insts
 
     switch_cpu_list = [(test_sys.cpu[i], simulate_cpu[i]) for i in xrange(np)]
     test_sys.switch_cpu = simulate_cpu

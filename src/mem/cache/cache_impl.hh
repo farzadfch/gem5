@@ -1465,7 +1465,8 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
                 tags->setWayAllocation(12, 15);
                 break;
             default:
-                panic("Invalid CPU ID");
+                std::string masterName = system->getMasterName(masterId);
+                panic("Could not find CPU ID: %s", masterName.c_str());
          }
        }
        else
