@@ -53,19 +53,53 @@ RandomRepl::accessBlock(Addr addr, bool is_secure, Cycles &lat, int master_id, P
 BaseSetAssoc::BlkType*
 RandomRepl::findVictim(Addr addr) const
 {
-    BlkType *blk = BaseSetAssoc::findVictim(addr);
+    BlkType *blk = NULL;
 
-    // if all blocks are valid, pick a replacement at random
-    if (blk->isValid()) {
-        // find a random index within the bounds of the set
-        int idx = random_mt.random<int>(0, assoc - 1);
-        assert(idx < assoc);
-        assert(idx >= 0);
-        blk = sets[extractSet(addr)].blks[idx];
-
-        DPRINTF(CacheRepl, "set %x: selecting blk %x for replacement\n",
-                blk->set, regenerateBlkAddr(blk->tag, blk->set));
+    if (cache->getIsTopLevel() || cache->system->getWayPartMode() != 2) {
+        blk = BaseSetAssoc::findVictim(addr);
+        // if all blocks are valid, pick a replacement at random
+        if (blk->isValid()) {
+            int idx = random_mt.random<int>(lowerWayNum, upperWayNum);
+            blk = sets[extractSet(addr)].blks[idx];
+        }
+    } 
+    else {
+        int set = extractSet(addr);
+        // prefer to evict an invalid block
+        for (int i = 0; i < assoc; ++i) {
+            BlkType *b = sets[set].blks[i];
+            if (!b->isValid() && ((dmAssoc && i >= lowerWayNum && i <= upperWayNum) || !dmAssoc)) {
+                blk = b;
+                break;
+            }
+        }
+        // could not find an invalid block; looking to non-DM blocks to evict
+        if (blk == NULL) {
+            BlkType **available_blks = new BlkType*[assoc];
+            int num_available_blks = 0;
+            
+            for (int i = 0; i < assoc; ++i) {
+                BlkType *b = sets[set].blks[i];
+                if (!b->isDeterministic() && ((dmAssoc && i >= lowerWayNum && i <= upperWayNum) || !dmAssoc)) {
+                    available_blks[num_available_blks++] = b;
+                }
+            }
+            if (num_available_blks != 0) {
+                int idx = random_mt.random<int>(0, num_available_blks - 1);
+                blk = available_blks[idx];
+            }
+        }
+        // could not find a non-DM block and the request is DM
+        if (blk == NULL && dmAssoc) {
+            int idx = random_mt.random<int>(lowerWayNum, upperWayNum);
+            blk = sets[set].blks[idx];
+        }
     }
+    
+    assert(blk != NULL);
+    
+    DPRINTF(CacheRepl, "set %x: selecting blk %x for replacement\n",
+            blk->set, regenerateBlkAddr(blk->tag, blk->set));
 
     return blk;
 }
