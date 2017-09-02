@@ -78,21 +78,24 @@ LRU::findVictim(Addr addr) const
     // grab a replacement candidate
     BlkType *blk = NULL;
     
-    if (cache->getIsTopLevel())
+    // return the LRU block if it is L1 cache or neither partitioning nor DM are enabled
+    if (cache->getIsTopLevel() || cache->system->getWayPartMode() == 0)
         blk = sets[set].blks[assoc - 1];
-    else
-    {
+    else if (cache->system->getWayPartMode() == 1) {
+        goto way_part;
+    }
+    else {
         for (int i = assoc - 1; i >= 0; i--) {
             BlkType *b = sets[set].blks[i];
             if (((dmAssoc && b->way >= lowerWayNum && b->way <= upperWayNum) || !dmAssoc ) && !b->isDeterministic()) {
-            blk = b;
-            break;
+                blk = b;
+                break;
             }
         }
-        if (dmAssoc && blk == NULL)
-        {
+        if (dmAssoc && blk == NULL) {
+way_part:
             for (int i = assoc - 1; i >= 0; i--) {
-            BlkType *b = sets[set].blks[i];
+                BlkType *b = sets[set].blks[i];
                 if (b->way >= lowerWayNum && b->way <= upperWayNum) {
                     blk = b;
                     break;

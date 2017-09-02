@@ -1467,21 +1467,12 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
             default:
                 std::string masterName = system->getMasterName(masterId);
                 panic("Could not find CPU ID: %s", masterName.c_str());
-         }
+        }
+        if (system->getWayPartMode() == 2)
+            tags->setDmAssoc(isDetermReq);
        }
        else
          tags->setWayAllocation(0, 15);
-       
-       if (system->getWayPartMode() == 2)
-         tags->setDmAssoc(isDetermReq);
-       else
-         tags->setDmAssoc(true);
-#if 0
-       if (system->getWayPartMode() == 2 && system->getCpuId(masterId) == 0)
-          tags->setDmAssoc(true);
-       else
-          tags->setDmAssoc(false);
-#endif
     }
 
     BlkType *blk = tags->findVictim(addr);
