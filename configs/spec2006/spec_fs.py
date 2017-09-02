@@ -1066,6 +1066,8 @@ spec_fs_cmd["aifftr01-inf-3bzip2-ds-dm-h"]              = fsBench("taskset -c 0 
 spec_fs_cmd["aiifft01-inf-3bzip2-ds-dm-h"]              = fsBench("taskset -c 0 ./set_wp_mode 2;taskset -c 0 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg -s &taskset -c 1 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg &taskset -c 2 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg &taskset -c 3 ./eembc-dm/stat-opt/aiifft01_determ_heap -d -s -i 200000 &")
 spec_fs_cmd["matrix01-inf-3bzip2-ds-dm-h"]              = fsBench("taskset -c 0 ./set_wp_mode 2;taskset -c 0 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg -s &taskset -c 1 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg &taskset -c 2 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg &taskset -c 3 ./eembc-dm/stat-opt/matrix01_determ_heap -d -s -i 200000 &")
 
+spec_fs_cmd["bzip2-ds-wp"]                              = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 0 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg -s &")
+
 
 #vision
 spec_fs_cmd["disparity"] = fsBench("/root/vision.sh disparity-sqcif")
