@@ -17,3 +17,9 @@ ext/mcpat/regression/*/*.ouit
 *.terminal
 *.csv
 .hgignore
+*.pdf
+*.svg
+*.pmem
+*.cow
+*.cpt
+*.dot

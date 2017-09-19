@@ -1958,7 +1958,7 @@ TableWalker::insertTableEntry(DescriptorBase &descriptor, bool longDescriptor)
     }
     
 #if 0
-    if (te.deterministic == false && te.size == 0xfff && te.vpn < 0x80000
+    if (te.deterministic == false && te.size == 0xfff && te.vpn >= 0x80000
             && name().compare("system.switch_cpus0.dtb.walker") == 0 && te.asid == 49) {
         te.deterministic = true;
         DPRINTF(TLBInsertMy, "vpn:%05x asid:%d\n", te.vpn, te.asid);

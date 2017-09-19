@@ -1063,12 +1063,24 @@ TLB::translateFs(RequestPtr req, ThreadContext *tc, Mode mode,
             req->setFlags(Request::UNCACHEABLE);
         }
 
-        if (te->deterministic == false && (name().compare("system.switch_cpus0.itb") == 0 || name().compare("system.switch_cpus0.dtb") == 0))
-            DPRINTF(TLBMy, "asid:%d pc:%08x vpn:%05x size:%x\n", asid, req->getPC(), te->vpn, te->size);
-        
         if (te->deterministic)
             req->setFlags(Request::DETERMINISTIC);
-
+#if 0
+        if (te->deterministic == false && (
+               name().compare("system.cpu1.dtb") == 0 || name().compare("system.cpu1.itb") == 0
+            || name().compare("system.cpu2.dtb") == 0 || name().compare("system.cpu2.itb") == 0
+            || name().compare("system.cpu3.dtb") == 0 || name().compare("system.cpu3.itb") == 0
+            || name().compare("system.switch_cpus1.dtb") == 0 || name().compare("system.switch_cpus1.itb") == 0
+            || name().compare("system.switch_cpus2.dtb") == 0 || name().compare("system.switch_cpus2.itb") == 0
+            || name().compare("system.switch_cpus3.dtb") == 0 || name().compare("system.switch_cpus3.itb") == 0
+            )
+//            && (asid == 57 || asid == 54 || asid == 52)
+        )
+        {
+//            req->setFlags(Request::DETERMINISTIC);
+            DPRINTF(TLBMy, "asid:%d pc:%08x vpn:%05x size:%x\n", asid, req->getPC(), te->vpn, te->size);
+        }
+#endif        
         if (!bootUncacheability &&
             ((ArmSystem*)tc->getSystemPtr())->adderBootUncacheable(vaddr)) {
             req->setFlags(Request::UNCACHEABLE);

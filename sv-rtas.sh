@@ -83,11 +83,14 @@ CONFIG=$1
 
 #declare -a arr=("bzip2-ds-wp")
 
-declare -a arr=("3svm-inf-1bzip2-ds-wp" "3svm-inf-1bzip2-ds-dm-h" "3svm-inf-1bzip2-ds-dm-all" "svm-inf-3bzip2-ds-wp" "svm-inf-3bzip2-ds-dm-h" "svm-inf-3bzip2-ds-dm-all")
+#declare -a arr=("3svm-inf-1bzip2-ds-wp" "3svm-inf-1bzip2-ds-dm-h" "3svm-inf-1bzip2-ds-dm-all" "svm-inf-3bzip2-ds-wp" "svm-inf-3bzip2-ds-dm-h" "svm-inf-3bzip2-ds-dm-all")
+
+#declare -a arr=("3sift-inf-1mcf-ds-wp" "3sift-inf-1mcf-ds-dm-h" "3sift-inf-1mcf-ds-dm-all")
+declare -a arr=("matrix01-core3-3b683-dm-all")
 
 for i in "${arr[@]}"
 do
-     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/svm-bzip2 --stats-file=${i}-${CONFIG}.txt  configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-init-exit-bzip/cpt.157105842995500 -I 1000000000 && sleep 8d"
+     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mlock-dm/2mb-no-hz --stats-file=${i}-${CONFIG}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-no_hz-fast_rcu-2/cpt.5446726445500 && sleep 8d"
 done
 
 #for i in "${arr[@]}"

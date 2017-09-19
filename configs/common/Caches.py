@@ -61,6 +61,7 @@ class L2Cache(BaseCache):
     mshrs = 20
     tgts_per_mshr = 12
     write_buffers = 8
+#    tags = RandomRepl()
 
 class IOCache(BaseCache):
     assoc = 8

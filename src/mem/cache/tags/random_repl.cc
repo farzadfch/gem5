@@ -73,7 +73,7 @@ RandomRepl::findVictim(Addr addr) const
                 break;
             }
         }
-        // could not find an invalid block; looking to non-DM blocks to evict
+        // could not find an invalid block; looking into non-DM blocks to evict
         if (blk == NULL) {
             BlkType **available_blks = new BlkType*[assoc];
             int num_available_blks = 0;
@@ -88,6 +88,7 @@ RandomRepl::findVictim(Addr addr) const
                 int idx = random_mt.random<int>(0, num_available_blks - 1);
                 blk = available_blks[idx];
             }
+            delete available_blks;
         }
         // could not find a non-DM block and the request is DM
         if (blk == NULL && dmAssoc) {
