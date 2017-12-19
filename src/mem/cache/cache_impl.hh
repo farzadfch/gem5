@@ -325,9 +325,9 @@ Cache<TagStore>::access(PacketPtr pkt, BlkType *&blk,
             pkt->getAddr(), pkt->isSecure() ? "s" : "ns",
             blk ? "hit" : "miss", blk ? blk->print() : "");
 
-    // Print all accesses to CPU 0 L1 I & D
-    if (name().compare("system.cpu0.dcache") == 0 || name().compare("system.cpu0.icache") == 0)
-       DPRINTF(CacheMy, "VA:%08x %s DM:%d ASID:%d\n", pkt->req->getVaddr(), blk ? "H" : "M", pkt->req->isDeterministic(), pkt->req->getAsid());
+    // Print all accesses to CPU 3 L1 I & D
+    if (name().compare("system.cpu3.dcache") == 0 || name().compare("system.cpu3.icache") == 0)
+       DPRINTF(CacheMy, "VA:%08x PA:%08x %s DM:%d ASID:%d\n", pkt->req->getVaddr(), pkt->getAddr(), blk ? "H" : "M", pkt->req->isDeterministic(), pkt->req->getAsid());
 
     // Writeback handling is special case.  We can write the block
     // into the cache without having a writeable copy (or any copy at
@@ -1448,31 +1448,31 @@ Cache<TagStore>::allocateBlock(Addr addr, bool is_secure,
 {
     if (!isTopLevel)
     {
-       if (system->getWayPartMode() != 0)
-       {
-         switch (system->getCpuId(masterId))
-         {
-            case 0:
-                tags->setWayAllocation(0, 3);
-                break;
-            case 1:
-                tags->setWayAllocation(4, 7);
-                break;
-            case 2:
-                tags->setWayAllocation(8, 11);
-                break;
-            case 3:
-                tags->setWayAllocation(12, 15);
-                break;
-            default:
-                std::string masterName = system->getMasterName(masterId);
-                panic("Could not find CPU ID: %s", masterName.c_str());
+        if (system->getWayPartMode() != 0)
+        {
+            switch (system->getCpuId(masterId))
+            {
+                case 0:
+                    tags->setWayAllocation(0, 3);
+                    break;
+                case 1:
+                    tags->setWayAllocation(4, 7);
+                    break;
+                case 2:
+                    tags->setWayAllocation(8, 11);
+                    break;
+                case 3:
+                    tags->setWayAllocation(12, 15);
+                    break;
+                default:
+                    std::string masterName = system->getMasterName(masterId);
+                    panic("Could not find CPU ID: %s", masterName.c_str());
+            }
+            if (system->getWayPartMode() == 2)
+                tags->setDmAssoc(isDetermReq);
         }
-        if (system->getWayPartMode() == 2)
-            tags->setDmAssoc(isDetermReq);
-       }
-       else
-         tags->setWayAllocation(0, 15);
+        else
+            tags->setWayAllocation(0, 15);
     }
 
     BlkType *blk = tags->findVictim(addr);

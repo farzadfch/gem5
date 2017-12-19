@@ -358,7 +358,7 @@ class System : public MemObject
         else if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos)
             return 3;
         else
-                return -1;
+            return -1;
     }
 
     virtual void regStats();

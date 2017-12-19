@@ -753,6 +753,14 @@ spec_fs_cmd["cacheb01-vma"]                     = fsBench("taskset -c 0 ./vma.sh
 spec_fs_cmd["matrix01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/matrix01")
 spec_fs_cmd["ttsprk01-vma"]                     = fsBench("taskset -c 0 ./vma.sh 0.003 ./eembc-dm/ttsprk01")
 
+spec_fs_cmd["disparity-itr2-core3-sim-vma"]             = fsBench("taskset -c 3 ./vma.sh 0 ./sd-vbs/stat-opt/sim/disparity ./sd-vbs/sim/disparity/data/sim -m 2")
+spec_fs_cmd["mser-itr2-core3-sim-vma"]                  = fsBench("taskset -c 3 ./vma.sh 0 ./sd-vbs/stat-opt/sim/mser ./sd-vbs/sim/mser/data/sim -m 2")
+spec_fs_cmd["sift-itr2-core3-sim-vma"]                  = fsBench("taskset -c 3 ./vma.sh 0 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 2")
+spec_fs_cmd["svm-itr2-core3-sim-vma"]                   = fsBench("taskset -c 3 ./vma.sh 0 ./sd-vbs/stat-opt/sim/svm ./sd-vbs/sim/svm/data/sim -m 2")
+spec_fs_cmd["texture_synthesis-itr2-core3-sim-vma"]     = fsBench("taskset -c 3 ./vma.sh 0 ./sd-vbs/stat-opt/sim/texture_synthesis ./sd-vbs/sim/texture_synthesis/data/sim -m 2")
+spec_fs_cmd["aifftr01-core3-vma"]                       = fsBench("taskset -c 3 ./vma.sh 0 ./eembc-dm/stat-opt/aifftr01")
+spec_fs_cmd["aiifft01-core3-vma"]                       = fsBench("taskset -c 3 ./vma.sh 0 ./eembc-dm/stat-opt/aiifft01")
+spec_fs_cmd["matrix01-core3-vma"]                       = fsBench("taskset -c 3 ./vma.sh 0 ./eembc-dm/stat-opt/matrix01")
 
 spec_fs_cmd["disparity-itr2-sim"]      = fsBench("taskset -c 0 ./sd-vbs/itr/disparity/data/sim/disparity ./sd-vbs/itr/disparity/data/sim 2")
 spec_fs_cmd["mser-itr2-sim"]           = fsBench("taskset -c 0 ./sd-vbs/itr/mser/data/sim/mser ./sd-vbs/itr/mser/data/sim 2")
@@ -1068,7 +1076,56 @@ spec_fs_cmd["matrix01-inf-3bzip2-ds-dm-h"]              = fsBench("taskset -c 0 
 
 spec_fs_cmd["bzip2-ds-wp"]                              = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 0 ./spec/init_exit/bzip2 ./spec/data/chicken.jpg -s &")
 
-spec_fs_cmd["matrix01-core3-3b683-dm-all"] = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/mlock/matrix01_deterministic -d")
+# real-time on core 3
+spec_fs_cmd["Ddisparity-itr2-core3-sim"]             = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/disparity ./sd-vbs/sim/disparity/data/sim -m 2")
+spec_fs_cmd["Dmser-itr2-core3-sim"]                  = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/mser ./sd-vbs/sim/mser/data/sim -m 2")
+spec_fs_cmd["Dsift-itr2-core3-sim"]                  = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 2")
+spec_fs_cmd["Dsvm-itr2-core3-sim"]                   = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/svm ./sd-vbs/sim/svm/data/sim -m 2")
+spec_fs_cmd["Dtexture_synthesis-itr2-core3-sim"]     = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/texture_synthesis ./sd-vbs/sim/texture_synthesis/data/sim -m 2")
+spec_fs_cmd["Daifftr01-core3"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./eembc-dm/stat-opt/aifftr01")
+spec_fs_cmd["Daiifft01-core3"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./eembc-dm/stat-opt/aiifft01")
+spec_fs_cmd["Dmatrix01-core3"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./eembc-dm/stat-opt/matrix01")
+
+spec_fs_cmd["disparity-itr2-core3-sim-3b683"]             = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/disparity ./sd-vbs/sim/disparity/data/sim -m 2")
+spec_fs_cmd["mser-itr2-core3-sim-3b683"]                  = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/mser ./sd-vbs/sim/mser/data/sim -m 2")
+spec_fs_cmd["sift-itr2-core3-sim-3b683"]                  = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 2")
+spec_fs_cmd["svm-itr2-core3-sim-3b683"]                   = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/svm ./sd-vbs/sim/svm/data/sim -m 2")
+spec_fs_cmd["texture_synthesis-itr2-core3-sim-3b683"]     = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/texture_synthesis ./sd-vbs/sim/texture_synthesis/data/sim -m 2")
+spec_fs_cmd["aifftr01-core3-3b683"]                       = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aifftr01")
+spec_fs_cmd["aiifft01-core3-3b683"]                       = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aiifft01")
+spec_fs_cmd["matrix01-core3-3b683"]                       = fsBench("taskset -c 0 ./set_wp_mode 0;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/matrix01")
+
+spec_fs_cmd["disparity-itr2-core3-sim-3b683-wp"]             = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/disparity ./sd-vbs/sim/disparity/data/sim -m 2")
+spec_fs_cmd["mser-itr2-core3-sim-3b683-wp"]                  = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/mser ./sd-vbs/sim/mser/data/sim -m 2")
+spec_fs_cmd["sift-itr2-core3-sim-3b683-wp"]                  = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 2")
+spec_fs_cmd["svm-itr2-core3-sim-3b683-wp"]                   = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/svm ./sd-vbs/sim/svm/data/sim -m 2")
+spec_fs_cmd["texture_synthesis-itr2-core3-sim-3b683-wp"]     = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/texture_synthesis ./sd-vbs/sim/texture_synthesis/data/sim -m 2")
+spec_fs_cmd["aifftr01-core3-3b683-wp"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aifftr01")
+spec_fs_cmd["aiifft01-core3-3b683-wp"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aiifft01")
+spec_fs_cmd["matrix01-core3-3b683-wp"]                       = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/matrix01")
+
+spec_fs_cmd["disparity-itr2-core3-sim-3b683-dm-h"]             = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/disparity_determ_heap ./sd-vbs/sim/disparity/data/sim -m -d 2")
+spec_fs_cmd["mser-itr2-core3-sim-3b683-dm-h"]                  = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/mser_determ_heap ./sd-vbs/sim/mser/data/sim -m -d 2")
+spec_fs_cmd["sift-itr2-core3-sim-3b683-dm-h"]                  = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/sift_determ_heap ./sd-vbs/sim/sift/data/sim -m -d 2")
+spec_fs_cmd["svm-itr2-core3-sim-3b683-dm-h"]                   = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/svm_determ_heap ./sd-vbs/sim/svm/data/sim -m -d 2")
+spec_fs_cmd["texture_synthesis-itr2-core3-sim-3b683-dm-h"]     = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/texture_synthesis_determ_heap ./sd-vbs/sim/texture_synthesis/data/sim -m -d 2")
+spec_fs_cmd["aifftr01-core3-3b683-dm-h"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aifftr01_determ_heap -d")
+spec_fs_cmd["aiifft01-core3-3b683-dm-h"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aiifft01_determ_heap -d")
+spec_fs_cmd["matrix01-core3-3b683-dm-h"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/matrix01_determ_heap -d")
+
+spec_fs_cmd["disparity-itr2-core3-sim-3b683-dm-all"]             = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/disparity_deterministic ./sd-vbs/sim/disparity/data/sim -m -d 2")
+spec_fs_cmd["mser-itr2-core3-sim-3b683-dm-all"]                  = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/mser_deterministic ./sd-vbs/sim/mser/data/sim -m -d 2")
+spec_fs_cmd["sift-itr2-core3-sim-3b683-dm-all"]                  = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/sift_deterministic ./sd-vbs/sim/sift/data/sim -m -d 2")
+spec_fs_cmd["svm-itr2-core3-sim-3b683-dm-all"]                   = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/svm_deterministic ./sd-vbs/sim/svm/data/sim -m -d 2")
+spec_fs_cmd["texture_synthesis-itr2-core3-sim-3b683-dm-all"]     = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/texture_synthesis_deterministic ./sd-vbs/sim/texture_synthesis/data/sim -m -d 2")
+spec_fs_cmd["aifftr01-core3-3b683-dm-all"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aifftr01_deterministic -d")
+spec_fs_cmd["aiifft01-core3-3b683-dm-all"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/aiifft01_deterministic -d")
+spec_fs_cmd["matrix01-core3-3b683-dm-all"]                       = fsBench("taskset -c 0 ./set_wp_mode 2;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./eembc-dm/stat-opt/matrix01_deterministic -d")
+
+# sift itr4
+spec_fs_cmd["Dsift-itr4-core3-sim"]                = fsBench("taskset -c 0 ./set_wp_mode 1;taskset -c 3 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 4")
+spec_fs_cmd["sift-itr4-core3-sim-3b683-wp"]        = fsBench("taskset -c 0 ./set_wp_mode 1;./bandwidth -m 683 -a write -t 0 -c 0 &./bandwidth -m 683 -a write -t 0 -c 1 &./bandwidth -m 683 -a write -t 0 -c 2 &taskset -c 3 ./sd-vbs/stat-opt/sim/sift ./sd-vbs/sim/sift/data/sim -m 4")
+
 
 #vision
 spec_fs_cmd["disparity"] = fsBench("/root/vision.sh disparity-sqcif")
