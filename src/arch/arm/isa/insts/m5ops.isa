@@ -684,4 +684,28 @@ let {{
     header_output += BasicDeclare.subst(m5cleardmIop)
     decoder_output += BasicConstructor.subst(m5cleardmIop)
     exec_output += PredOpExecute.subst(m5cleardmIop)
+    
+    m5exitinst_code = '''
+        PseudoInst::m5exitinst(xc->tcBase(), join32to64(R1, R0));
+    '''
+
+    m5exitinst_code64 = '''
+        PseudoInst::m5exitinst(xc->tcBase(), X0);
+    '''
+
+    m5exitinstIop = InstObjParams("m5exitinst", "M5exitinst", "PredOp",
+                                   { "code":  m5exitinst_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5exitinstIop)
+    decoder_output += BasicConstructor.subst(m5exitinstIop)
+    exec_output += PredOpExecute.subst(m5exitinstIop)
+
+    m5exitinstIop = InstObjParams("m5exitinst", "M5exitinst64", "PredOp",
+                                   { "code":  m5exitinst_code64,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5exitinstIop)
+    decoder_output += BasicConstructor.subst(m5exitinstIop)
+    exec_output += PredOpExecute.subst(m5exitinstIop)
 }};

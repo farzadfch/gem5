@@ -66,6 +66,7 @@ void m5_setmembudget(uint8_t cpu_id, uint64_t mshrcount);
 void m5_enablememguard(int use);
 void m5_enablewaypart(int use);
 void m5_cleardm(int use);
+void m5_exit_inst(uint64_t n_inst);
 
 // These operations are for critical path annotation
 void m5a_bsm(char *sm, const void *id, int flags);

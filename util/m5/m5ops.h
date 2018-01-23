@@ -41,6 +41,7 @@
 #define deprecated3_func        0x20 // deprecated exit function
 #define exit_func               0x21
 #define fail_func               0x22
+#define exit_inst_func          0x23
 #define initparam_func          0x30
 #define loadsymbol_func         0x31
 #define resetstats_func         0x40

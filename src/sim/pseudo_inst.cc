@@ -208,6 +208,9 @@ pseudoInst(ThreadContext *tc, uint8_t func, uint8_t subfunc)
       case 0x5c:
         cleardm(tc, args[0]);
         break;
+      case 0x23: // exit_insts_func
+        m5exitinst(tc, args[0]);
+        break;
 
       default:
         warn("Unhandled m5 op: 0x%x\n", func);
@@ -749,6 +752,23 @@ void cleardm(ThreadContext *tc, int use)
     DPRINTF(WayPartInst, "PseudoInst::cleardm(%i)\n", use);
     System *sys = tc->getSystemPtr();
     sys->clearDM(use);
+}
+
+void
+m5exitinst(ThreadContext *tc, uint64_t n_inst)
+{
+    DPRINTF(PseudoInst, "PseudoInst::m5exitinst(%i)\n", n_inst);
+    
+    const char *cause = "all threads reached the max instruction count";
+    BaseCPU* cpuPtr = tc->getCpuPtr();
+    ThreadID numThreads = cpuPtr->numThreads;
+    int *counter = new int;
+    *counter = numThreads;
+    for (ThreadID tid = 0; tid < numThreads; ++tid) {
+        Event *event = new CountedExitEvent(cause, *counter);
+        Tick when = cpuPtr->comInstEventQueue[tid]->getCurTick() + n_inst;
+        cpuPtr->comInstEventQueue[tid]->schedule(event, when);
+    }
 }
 
 } // namespace PseudoInst

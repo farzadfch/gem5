@@ -93,6 +93,7 @@ void setmembudget(ThreadContext *tc, uint8_t cpuid, uint64_t budget);
 void enablememguard(ThreadContext *tc, int use);
 void enablewaypart(ThreadContext *tc, int use);
 void cleardm(ThreadContext *tc, int use);
+void m5exitinst(ThreadContext *tc, uint64_t n_inst);
 
 } // namespace PseudoInst
 
