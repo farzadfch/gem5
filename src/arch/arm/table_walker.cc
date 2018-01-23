@@ -1957,6 +1957,11 @@ TableWalker::insertTableEntry(DescriptorBase &descriptor, bool longDescriptor)
                  descriptor.shareable());
     }
     
+# if 1
+    if (name().compare("system.cpu3.dtb.walker") == 0 || name().compare("system.cpu3.itb.walker") == 0) {
+        DPRINTF(TLBInsertMy, "vpn:%05x pfn:%05x asid:%d DM:%d\n", te.vpn, te.pfn, te.asid, te.deterministic);
+    }
+#endif
 #if 0
     if (te.deterministic == false && te.size == 0xfff && te.vpn >= 0x80000
             && name().compare("system.switch_cpus0.dtb.walker") == 0 && te.asid == 49) {

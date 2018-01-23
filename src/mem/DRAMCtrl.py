@@ -52,7 +52,7 @@ class MemSched(Enum): vals = ['fcfs', 'frfcfs']
 # suitable for an open-page policy, optimising for sequential accesses
 # hitting in the open row. For a closed-page policy, RoCoRaBaCh
 # maximises parallelism.
-class AddrMap(Enum): vals = ['RoRaBaChCo', 'RoRaBaCoCh', 'RoCoRaBaCh']
+class AddrMap(Enum): vals = ['RoRaBaChCo', 'RoRaBaRoChCo', 'RoRaBaCoCh', 'RoCoRaBaCh']
 
 # Enum for the page policy, either open, open_adaptive, close, or
 # close_adaptive.
@@ -91,7 +91,9 @@ class DRAMCtrl(AbstractMemory):
 
     # scheduler, address map and page policy
     mem_sched_policy = Param.MemSched('frfcfs', "Memory scheduling policy")
-    addr_mapping = Param.AddrMap('RoRaBaChCo', "Address mapping policy")
+    addr_mapping = Param.AddrMap('RoRaBaRoChCo', "Address mapping policy")
+    rows_1 = Param.Unsigned('32', "Number of rows comes first (LSB) in the"\
+                                "mapping for RoRaBaRoChCo")
     page_policy = Param.PageManage('open_adaptive', "Page management policy")
 #    page_policy = Param.PageManage('open', "Page management policy")
 

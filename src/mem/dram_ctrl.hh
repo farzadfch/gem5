@@ -494,6 +494,8 @@ class DRAMCtrl : public AbstractMemory
     const uint32_t banksPerRank;
     const uint32_t channels;
     uint32_t rowsPerBank;
+    uint32_t rowsFirstPart;
+    uint32_t rowsSecondPart;
     const uint32_t readBufferSize;
     const uint32_t writeBufferSize;
     const uint32_t writeHighThreshold;

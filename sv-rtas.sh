@@ -84,7 +84,30 @@ CONFIG=$1
 # declare -a arr=("disparity-itr2-core3-sim-vma" "mser-itr2-core3-sim-vma" "sift-itr2-core3-sim-vma" "svm-itr2-core3-sim-vma" "texture_synthesis-itr2-core3-sim-vma" "aifftr01-core3-vma" "aiifft01-core3-vma" "matrix01-core3-vma")
 
 #declare -a arr=("Dsift-itr2-core3-sim" "sift-itr2-core3-sim-3b683-wp" "sift-itr2-core3-sim-3b683-dm-h" "sift-itr2-core3-sim-3b683-dm-all")
-declare -a arr=("Dsift-itr4-core3-sim" "sift-itr4-core3-sim-3b683-wp")
+# declare -a arr=("Dsift-itr4-core3-sim" "sift-itr4-core3-sim-3b683-wp")
+# declare -a arr=("l4m11-3bw4m")
+# declare -a arr=("l4m11")
+# declare -a arr=("l4m2-p4")
+# declare -a arr=("aifftr01-palloc-p4-dm-h")
+
+# SD-VBS CIF
+# declare -a arr=("disparity-cif-solo" "mser-cif-solo" "sift-cif-solo" "svm-cif-solo" "texture_synthesis-cif-solo")
+# declare -a arr=("disparity-cif-3b683" "mser-cif-3b683" "sift-cif-3b683" "svm-cif-3b683" "texture_synthesis-cif-3b683")
+# declare -a arr=("disparity-cif-3b683-part" "mser-cif-3b683-part" "sift-cif-3b683-part" "svm-cif-3b683-part" "texture_synthesis-cif-3b683-part")
+# declare -a arr=("disparity-cif-3b683-dmh" "mser-cif-3b683-dmh" "sift-cif-3b683-dmh" "svm-cif-3b683-dmh" "texture_synthesis-cif-3b683-dmh")
+# declare -a arr=("disparity-cif-3b683-dma" "mser-cif-3b683-dma" "sift-cif-3b683-dma" "svm-cif-3b683-dma" "texture_synthesis-cif-3b683-dma")
+# declare -a arr=("disparity-cif-3b683-dma-dmac" "mser-cif-3b683-dma-dmac" "sift-cif-3b683-dma-dmac" "svm-cif-3b683-dma-dmac" "texture_synthesis-cif-3b683-dma-dmac")
+# declare -a arr=("disparity-cif-3b683-dma-nopc" "mser-cif-3b683-dma-nopc" "sift-cif-3b683-dma-nopc" "svm-cif-3b683-dma-nopc" "texture_synthesis-cif-3b683-dma-nopc")
+
+# declare -a arr=("disparity-itr2-core3-sim-3b683-dmt" "mser-itr2-core3-sim-3b683-dmt" "sift-itr2-core3-sim-3b683-dmt" "svm-itr2-core3-sim-3b683-dmt" "texture_synthesis-itr2-core3-sim-3b683-dmt" "aifftr01-core3-3b683-dmt" "aiifft01-core3-3b683-dmt" "matrix01-core3-3b683-dmt")
+
+# declare -a arr=("3disparity-inf-1bzip2-ds-dmt" "3mser-inf-1bzip2-ds-dmt" "3sift-inf-1bzip2-ds-dmt" "3svm-inf-1bzip2-ds-dmt" "3texture_synthesis-inf-1bzip2-ds-dmt" "3aifftr01-inf-1bzip2-ds-dmt" "3aiifft01-inf-1bzip2-ds-dmt" "3matrix01-inf-1bzip2-ds-dmt")
+
+declare -a arr=("disparity-itr2-core3-sim-3b683-dmt-mdu" "mser-itr2-core3-sim-3b683-dmt-mdu" "sift-itr2-core3-sim-3b683-dmt-mdu" "svm-itr2-core3-sim-3b683-dmt-mdu" "texture_synthesis-itr2-core3-sim-3b683-dmt-mdu" "aifftr01-core3-3b683-dmt-mdu" "aiifft01-core3-3b683-dmt-mdu" "matrix01-core3-3b683-dmt-mdu")
+
+# declare -a arr=("3disparity-inf-1bzip2-ds-dmt-mdu" "3mser-inf-1bzip2-ds-dmt-mdu" "3sift-inf-1bzip2-ds-dmt-mdu" "3svm-inf-1bzip2-ds-dmt-mdu" "3texture_synthesis-inf-1bzip2-ds-dmt-mdu" "3aifftr01-inf-1bzip2-ds-dmt-mdu" "3aiifft01-inf-1bzip2-ds-dmt-mdu" "3matrix01-inf-1bzip2-ds-dmt-mdu")
+
+# declare -a arr=("3disparity-inf-1bzip2-ds-nop" "3mser-inf-1bzip2-ds-nop" "3sift-inf-1bzip2-ds-nop" "3svm-inf-1bzip2-ds-nop" "3texture_synthesis-inf-1bzip2-ds-nop" "3aifftr01-inf-1bzip2-ds-nop" "3aiifft01-inf-1bzip2-ds-nop" "3matrix01-inf-1bzip2-ds-nop")
 
 # for i in "${arr[@]}"
 # do
@@ -98,11 +121,16 @@ declare -a arr=("Dsift-itr4-core3-sim" "sift-itr4-core3-sim-3b683-wp")
 
 for i in "${arr[@]}"
 do
-     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mlock-dm/2mb-no-hz/3.sift-4itr-rcu3-4way/${i} --stats-file=${i}-${CONFIG}.txt --debug-file=debug.txt --debug-flags=CacheMy configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-no_hz-fast_rcu-3/cpt.8607885758000 && sleep 8d"
+     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mlock-dm/7.top-pages-98top-mdu --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux_98top --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/12.top-pages-98-palloc/cpt.6216768382500 && sleep 8d"
 done
 
 # for i in "${arr[@]}"
 # do
-#      gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/31-3rt-1mcf --stats-file=${i}-${CONFIG}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/mcf-expr-no_hz-fast_rcu-2/cpt.5446726445500 -I 1000000000 && sleep 8d"
+#      gnome-terminal -x bash -c "./build/ARM/gem5.opt -d medusa-expr/latency-test-p4 --stats-file=${i}.txt --debug-file=debug.txt --debug-flags=CacheMy configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/2.palloc/cpt.8436696771500 && sleep 8d"
+# done
+
+# for i in "${arr[@]}"
+# do
+#      gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/33-3rt-1bzip2-nop/try2 --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux_98top --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/12.top-pages-98-palloc/cpt.6216768382500 -I 1000000000 && sleep 8d"
 # done
 

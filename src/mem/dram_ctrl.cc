@@ -55,7 +55,7 @@
 #include "mem/dram_ctrl.hh"
 #include "sim/system.hh"
 #include <string>
-//#define MEDUSA
+#define MEDUSA
 //#define MEDUSA_NO_SWITCH
 //#define DCMC
 using namespace std;
@@ -82,6 +82,7 @@ DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
     bankGroupsPerRank(p->bank_groups_per_rank),
     bankGroupArch(p->bank_groups_per_rank > 0),
     banksPerRank(p->banks_per_rank), channels(p->channels), rowsPerBank(0),
+    rowsFirstPart(p->rows_1),
     readBufferSize(p->read_buffer_size),
     writeBufferSize(p->write_buffer_size),
     writeHighThreshold(writeBufferSize * p->write_high_thresh_perc / 100.0),
@@ -148,7 +149,8 @@ DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
             rowBufferSize, columnsPerRowBuffer);
 
     rowsPerBank = capacity / (rowBufferSize * banksPerRank * ranksPerChannel);
-
+    rowsSecondPart = rowsPerBank / rowsFirstPart;
+    
     // a bit of sanity checks on the interleaving
     if (range.interleaved()) {
         if (channels != range.stripes())
@@ -300,6 +302,7 @@ DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
     // use a 64-bit unsigned during the computations as the row is
     // always the top bits, and check before creating the DRAMPacket
     uint64_t row;
+    uint64_t row_1, row_2;
 
     // truncate the address to a DRAM burst, which makes it unique to
     // a specific column, row, bank, rank and channel
@@ -328,6 +331,32 @@ DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
         // lastly, get the row bits
         row = addr % rowsPerBank;
         addr = addr / rowsPerBank;
+    } else if (addrMapping == Enums::RoRaBaRoChCo) {
+        // the lowest order bits denote the column to ensure that
+        // sequential cache lines occupy the same row
+        addr = addr / columnsPerRowBuffer;
+
+        // take out the channel part of the address
+        addr = addr / channels;
+        
+        // Get the first part of row bits
+        row_1 = addr % rowsFirstPart;
+        addr = addr / rowsFirstPart;
+
+        // after the channel bits, get the bank bits to interleave
+        // over the banks
+        bank = addr % banksPerRank;
+        addr = addr / banksPerRank;
+
+        // after the bank, we get the rank bits which thus interleaves
+        // over the ranks
+        rank = addr % ranksPerChannel;
+        addr = addr / ranksPerChannel;
+
+        // lastly, get the row bits
+        row_2 = addr % rowsSecondPart;
+        addr = addr / rowsSecondPart;
+        row = row_2 * rowsFirstPart + row_1;
     } else if (addrMapping == Enums::RoRaBaCoCh) {
         // take out the lower-order column bits
         addr = addr / columnsPerStripe;
@@ -386,7 +415,7 @@ DRAMCtrl::decodeAddr(PacketPtr pkt, Addr dramPktAddr, unsigned size,
     assert(row < rowsPerBank);
     assert(row < Bank::NO_ROW);
 
-    DPRINTF(DRAM, "Address: %lld Rank %d Bank %d Row %d\n",
+    DPRINTF(DRAM, "Address: %lx Rank %x Bank %x Row %x\n",
             dramPktAddr, rank, bank, row);
 
     // create the corresponding DRAM packet with the entry time and
