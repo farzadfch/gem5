@@ -331,6 +331,7 @@ class System : public MemObject
     bool clearDmFlag;
     int clearDmCpuId;
     MasterID getMasterId(std::string req_name);
+    uint64_t medusaReservedBankMask;
 
     /** Get the name of an object for a given request id.
      */

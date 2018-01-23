@@ -211,6 +211,9 @@ pseudoInst(ThreadContext *tc, uint8_t func, uint8_t subfunc)
       case 0x23: // exit_insts_func
         m5exitinst(tc, args[0]);
         break;
+      case 0x5d:
+        medusa(tc, args[0]);
+        break;
 
       default:
         warn("Unhandled m5 op: 0x%x\n", func);
@@ -742,14 +745,14 @@ void enablememguard(ThreadContext *tc, int use)
 
 void enablewaypart(ThreadContext *tc, int use)
 {
-    DPRINTF(WayPartInst, "PseudoInst::enablewaypart(%i)\n", use);
+    DPRINTF(PseudoInst, "PseudoInst::enablewaypart(%i)\n", use);
     System *sys = tc->getSystemPtr();
     sys->setWayPartMode(use);
 }
 
 void cleardm(ThreadContext *tc, int use)
 {
-    DPRINTF(WayPartInst, "PseudoInst::cleardm(%i)\n", use);
+    DPRINTF(PseudoInst, "PseudoInst::cleardm(%i)\n", use);
     System *sys = tc->getSystemPtr();
     sys->clearDM(use);
 }
@@ -769,6 +772,13 @@ m5exitinst(ThreadContext *tc, uint64_t n_inst)
         Tick when = cpuPtr->comInstEventQueue[tid]->getCurTick() + n_inst;
         cpuPtr->comInstEventQueue[tid]->schedule(event, when);
     }
+}
+
+void medusa(ThreadContext *tc, uint64_t use)
+{
+    DPRINTF(PseudoInst, "PseudoInst::medusa(%i)\n", use);
+    System *sys = tc->getSystemPtr();
+    sys->medusaReservedBankMask = (uint64_t(1) << use) - 1;
 }
 
 } // namespace PseudoInst

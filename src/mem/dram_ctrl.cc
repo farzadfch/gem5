@@ -55,13 +55,13 @@
 #include "mem/dram_ctrl.hh"
 #include "sim/system.hh"
 #include <string>
-#define MEDUSA
+// #define MEDUSA
 //#define MEDUSA_NO_SWITCH
 //#define DCMC
 using namespace std;
 
-uint64_t reservedBanks = 4;
-uint64_t reservedBankMask = (uint64_t(1) << reservedBanks) - 1;
+// uint64_t reservedBanks = 4;
+// uint64_t reservedBankMask = (uint64_t(1) << reservedBanks) - 1;
 
 DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
     AbstractMemory(p),
@@ -865,10 +865,13 @@ DRAMCtrl::chooseNext(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     if (memSchedPolicy == Enums::fcfs) {
         // Do nothing, since the correct request is already head
     } else if (memSchedPolicy == Enums::frfcfs) {
-#if defined(MEDUSA) || defined(MEDUSA_NO_SWITCH) || defined(DCMC)
+#if defined(MEDUSA_NO_SWITCH) || defined(DCMC)
             reorderQueue(queue, switched_cmd_type);
 #else
-            reorderQueueFrfcfs(queue, switched_cmd_type);
+            if (system()->medusaReservedBankMask != 0)
+                reorderQueue(queue, switched_cmd_type);
+            else
+                reorderQueueFrfcfs(queue, switched_cmd_type);
 #endif
     } else
         panic("No scheduling policy chosen\n");
@@ -962,8 +965,10 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     bool found_row_hit = false;
     bool found_reserved_diff_bank = false;
     bool found_reserved_same_bank = false;
-    static uint64_t bankmaskSaved = reservedBankMask;
+    static uint64_t bankmaskSaved = system()->medusaReservedBankMask;
     auto selected_pkt_it = queue.begin();
+    
+    // printf("ReservedBankMask: %lx\n", system()->medusaReservedBankMask);
 
     //overlapRequest(queue, banksPerRank);
     //Arbitrate Requests in the DRAM queue using two-level
@@ -974,7 +979,7 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
         // RR scheduler on reserved banks
         //resrevedBankMask, stores the mask bits for reserved Banks.
         //Check if the packet in the DRAM queue targets any of the reserved bank.
-        if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
+        if( system()->medusaReservedBankMask & (0x01 << dram_pkt->bank) ) {
         //bankmaskSaved initially has the reservedBankMask bits.
             if( bankmaskSaved & (0x01 << dram_pkt->bank) ) {
                 selected_pkt_it = i;
@@ -988,7 +993,7 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
             //Reset the bankmaskSaved to reservedBankMask to start
             //next round.
                 if(!bankmaskSaved)
-                    bankmaskSaved = reservedBankMask;
+                    bankmaskSaved = system()->medusaReservedBankMask;
 
                 break;
             }
@@ -1044,7 +1049,7 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     DRAMPacket* selected_pkt = *selected_pkt_it;
     //Reset round robin bank mask, if the queue doesn't have anymore requests from different banks
     if (!found_reserved_diff_bank & found_reserved_same_bank)
-            bankmaskSaved = (reservedBankMask) & ~(0x01 << selected_pkt->bank);
+            bankmaskSaved = (system()->medusaReservedBankMask) & ~(0x01 << selected_pkt->bank);
     queue.erase(selected_pkt_it);
     queue.push_front(selected_pkt);
 }
@@ -1584,7 +1589,7 @@ DRAMCtrl::isRequestToReservedBank(std::deque<DRAMPacket*>& queue)
 {
     for (auto i = queue.begin(); i != queue.end() ; ++i) {
         DRAMPacket* dram_pkt = *i;
-            if( reservedBankMask & (0x01 << dram_pkt->bank) ) {
+            if( system()->medusaReservedBankMask & (0x01 << dram_pkt->bank) ) {
                 return true;
             }
     }
@@ -1698,15 +1703,15 @@ DRAMCtrl::processNextReqEvent()
             // we have so many writes that we have to transition
             //	Fixme: issue commands to reserved banks
             if (writeQueue.size() > writeHighThreshold) {
-//#if defined(MEDUSA) || defined(DCMC)
-#if defined(MEDUSA)
-                    if (!isRequestToReservedBank(readQueue))
-                            switch_to_writes = true;
-#elif defined(DCMC)
+#if defined(DCMC)
                     if ( (!isRequestToReservedBank(readQueue)) || (isRequestToReservedBank(writeQueue)) )
                             switch_to_writes = true;
 #else
-                    switch_to_writes = true;
+                    if (system()->medusaReservedBankMask != 0) {
+                        if (!isRequestToReservedBank(readQueue))
+                            switch_to_writes = true;
+                    } else
+                        switch_to_writes = true;
 #endif
             }
         }
@@ -1745,33 +1750,32 @@ DRAMCtrl::processNextReqEvent()
         // threshold (using the minWritesPerSwitch as the hysteresis) and
         // are not draining, or we have reads waiting and have done enough
         // writes, then switch to reads.
-#ifdef MEDUSA
-        if (writeQueue.empty() ||
-            (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
-             !drainManager) ||
-            (!readQueue.empty() && writesThisTime >= minWritesPerSwitch) ||
-                isRequestToReservedBank(readQueue)) {
-            // turn the bus back around for reads again
-            busState = WRITE_TO_READ;
-            // note that the we switch back to reads also in the idle
-            // case, which eventually will check for any draining and
-            // also pause any further scheduling if there is really
-            // nothing to do
+        if (system()->medusaReservedBankMask != 0) {
+            if (writeQueue.empty() ||
+                (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
+                !drainManager) ||
+                (!readQueue.empty() && writesThisTime >= minWritesPerSwitch) ||
+                    isRequestToReservedBank(readQueue)) {
+                // turn the bus back around for reads again
+                busState = WRITE_TO_READ;
+                // note that the we switch back to reads also in the idle
+                // case, which eventually will check for any draining and
+                // also pause any further scheduling if there is really
+                // nothing to do
+            }
+        } else {
+            if (writeQueue.empty() ||
+                (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
+                !drainManager) ||
+                (!readQueue.empty() && writesThisTime >= minWritesPerSwitch)){
+                // turn the bus back around for reads again
+                busState = WRITE_TO_READ;
+                // note that the we switch back to reads also in the idle
+                // case, which eventually will check for any draining and
+                // also pause any further scheduling if there is really
+                // nothing to do
+            }
         }
-#else
-        if (writeQueue.empty() ||
-            (writeQueue.size() + minWritesPerSwitch < writeLowThreshold &&
-             !drainManager) ||
-            (!readQueue.empty() && writesThisTime >= minWritesPerSwitch)){
-            // turn the bus back around for reads again
-            busState = WRITE_TO_READ;
-            // note that the we switch back to reads also in the idle
-            // case, which eventually will check for any draining and
-            // also pause any further scheduling if there is really
-            // nothing to do
-        }
-#endif
-
     }
 
     schedule(nextReqEvent, std::max(nextReqTime, curTick()));

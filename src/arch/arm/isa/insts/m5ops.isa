@@ -708,4 +708,28 @@ let {{
     header_output += BasicDeclare.subst(m5exitinstIop)
     decoder_output += BasicConstructor.subst(m5exitinstIop)
     exec_output += PredOpExecute.subst(m5exitinstIop)
+    
+    m5medusa_code = '''
+        PseudoInst::medusa(xc->tcBase(), join32to64(R1, R0));
+    '''
+
+    m5medusa_code64 = '''
+        PseudoInst::medusa(xc->tcBase(), X0);
+    '''
+
+    m5medusaIop = InstObjParams("m5medusa", "M5medusa", "PredOp",
+                                   { "code":  m5medusa_code,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5medusaIop)
+    decoder_output += BasicConstructor.subst(m5medusaIop)
+    exec_output += PredOpExecute.subst(m5medusaIop)
+
+    m5medusaIop = InstObjParams("m5medusa", "M5medusa64", "PredOp",
+                                   { "code":  m5medusa_code64,
+                                     "predicate_test": predicateTest },
+                                     ["IsNonSpeculative", "IsUnverifiable"])
+    header_output += BasicDeclare.subst(m5medusaIop)
+    decoder_output += BasicConstructor.subst(m5medusaIop)
+    exec_output += PredOpExecute.subst(m5medusaIop)
 }};

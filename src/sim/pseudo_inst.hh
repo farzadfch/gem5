@@ -94,6 +94,7 @@ void enablememguard(ThreadContext *tc, int use);
 void enablewaypart(ThreadContext *tc, int use);
 void cleardm(ThreadContext *tc, int use);
 void m5exitinst(ThreadContext *tc, uint64_t n_inst);
+void medusa(ThreadContext *tc, uint64_t use);
 
 } // namespace PseudoInst
 

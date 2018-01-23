@@ -95,6 +95,7 @@ SIMPLE_OP(m5_enablememguard, enablememguard_func, 0)
 SIMPLE_OP(m5_enablewaypart, enablewaypart_func, 0)
 SIMPLE_OP(m5_cleardm, cleardm_func, 0)
 SIMPLE_OP(m5_exit_inst, exit_inst_func, 0)
+SIMPLE_OP(m5_medusa, medusa_func, 0)
 
 SIMPLE_OP(m5a_bsm, annotate_func, an_bsm)
 SIMPLE_OP(m5a_esm, annotate_func, an_esm)

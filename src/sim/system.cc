@@ -100,6 +100,7 @@ System::System(Params *p)
       use_memguard(0),
       switched_mshr_count{false, false, false, false},
       clearDmFlag(0),
+      medusaReservedBankMask(0),
       _params(p),
       totalNumInsts(0),
       instEventQueue("system instruction-based event queue")

@@ -68,6 +68,7 @@
 #define work_end_func            0x5b
 
 #define cleardm_func            0x5c
+#define medusa_func             0x5d
 
 // These operations are for critical path annotation
 #define annotate_func     0x55
