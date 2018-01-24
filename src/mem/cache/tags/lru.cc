@@ -112,7 +112,7 @@ way_part:
                 set, blk->way, blk->isDeterministic(), regenerateBlkAddr(blk->tag, set), dmAssoc, lowerWayNum, upperWayNum);
     }
 
-    if ( blk && blk->isDeterministic() && !cache->getIsTopLevel() )
+    /* if ( blk && blk->isDeterministic() && !cache->getIsTopLevel() )
     {
         DPRINTF(CacheRepl, "DM Repl:");
         for (int i = assoc - 1; i >= 0; i--) {
@@ -120,7 +120,7 @@ way_part:
             DPRINTF(CacheRepl, "%d:%d,%d ", i, b->way, b->isDeterministic());
         }
         DPRINTF(CacheRepl, "\n");
-    }
+    } */
 
 
     return blk;

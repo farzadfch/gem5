@@ -103,11 +103,18 @@ CONFIG=$1
 
 # declare -a arr=("3disparity-inf-1bzip2-ds-dmt" "3mser-inf-1bzip2-ds-dmt" "3sift-inf-1bzip2-ds-dmt" "3svm-inf-1bzip2-ds-dmt" "3texture_synthesis-inf-1bzip2-ds-dmt" "3aifftr01-inf-1bzip2-ds-dmt" "3aiifft01-inf-1bzip2-ds-dmt" "3matrix01-inf-1bzip2-ds-dmt")
 
-declare -a arr=("disparity-itr2-core3-sim-3b683-dmt-mdu" "mser-itr2-core3-sim-3b683-dmt-mdu" "sift-itr2-core3-sim-3b683-dmt-mdu" "svm-itr2-core3-sim-3b683-dmt-mdu" "texture_synthesis-itr2-core3-sim-3b683-dmt-mdu" "aifftr01-core3-3b683-dmt-mdu" "aiifft01-core3-3b683-dmt-mdu" "matrix01-core3-3b683-dmt-mdu")
+# declare -a arr=("disparity-itr2-core3-sim-3b683-dmt-mdu" "mser-itr2-core3-sim-3b683-dmt-mdu" "sift-itr2-core3-sim-3b683-dmt-mdu" "svm-itr2-core3-sim-3b683-dmt-mdu" "texture_synthesis-itr2-core3-sim-3b683-dmt-mdu" "aifftr01-core3-3b683-dmt-mdu" "aiifft01-core3-3b683-dmt-mdu" "matrix01-core3-3b683-dmt-mdu")
 
 # declare -a arr=("3disparity-inf-1bzip2-ds-dmt-mdu" "3mser-inf-1bzip2-ds-dmt-mdu" "3sift-inf-1bzip2-ds-dmt-mdu" "3svm-inf-1bzip2-ds-dmt-mdu" "3texture_synthesis-inf-1bzip2-ds-dmt-mdu" "3aifftr01-inf-1bzip2-ds-dmt-mdu" "3aiifft01-inf-1bzip2-ds-dmt-mdu" "3matrix01-inf-1bzip2-ds-dmt-mdu")
 
 # declare -a arr=("3disparity-inf-1bzip2-ds-nop" "3mser-inf-1bzip2-ds-nop" "3sift-inf-1bzip2-ds-nop" "3svm-inf-1bzip2-ds-nop" "3texture_synthesis-inf-1bzip2-ds-nop" "3aifftr01-inf-1bzip2-ds-nop" "3aiifft01-inf-1bzip2-ds-nop" "3matrix01-inf-1bzip2-ds-nop")
+
+# declare -a arr=("3disparity-inf-1bzip2-ei-dmt98" "3mser-inf-1bzip2-ei-dmt98" "3sift-inf-1bzip2-ei-dmt98" "3svm-inf-1bzip2-ei-dmt98" "3texture_synthesis-inf-1bzip2-ei-dmt98" "3aifftr01-inf-1bzip2-ei-dmt98" "3aiifft01-inf-1bzip2-ei-dmt98" "3matrix01-inf-1bzip2-ei-dmt98")
+# declare -a arr=("3disparity-inf-1bzip2-ei-dmt90" "3mser-inf-1bzip2-ei-dmt90" "3sift-inf-1bzip2-ei-dmt90" "3svm-inf-1bzip2-ei-dmt90" "3texture_synthesis-inf-1bzip2-ei-dmt90" "3aifftr01-inf-1bzip2-ei-dmt90" "3aiifft01-inf-1bzip2-ei-dmt90" "3matrix01-inf-1bzip2-ei-dmt90")
+# declare -a arr=("3disparity-inf-1bzip2-ei-dma" "3mser-inf-1bzip2-ei-dma" "3sift-inf-1bzip2-ei-dma" "3svm-inf-1bzip2-ei-dma" "3texture_synthesis-inf-1bzip2-ei-dma" "3aifftr01-inf-1bzip2-ei-dma" "3aiifft01-inf-1bzip2-ei-dma" "3matrix01-inf-1bzip2-ei-dma")
+# declare -a arr=("3disparity-inf-1bzip2-ei-dmh" "3mser-inf-1bzip2-ei-dmh" "3sift-inf-1bzip2-ei-dmh" "3svm-inf-1bzip2-ei-dmh" "3texture_synthesis-inf-1bzip2-ei-dmh" "3aifftr01-inf-1bzip2-ei-dmh" "3aiifft01-inf-1bzip2-ei-dmh" "3matrix01-inf-1bzip2-ei-dmh")
+# declare -a arr=("3disparity-inf-1bzip2-ei-wp" "3mser-inf-1bzip2-ei-wp" "3sift-inf-1bzip2-ei-wp" "3svm-inf-1bzip2-ei-wp" "3texture_synthesis-inf-1bzip2-ei-wp" "3aifftr01-inf-1bzip2-ei-wp" "3aiifft01-inf-1bzip2-ei-wp" "3matrix01-inf-1bzip2-ei-wp")
+declare -a arr=("3disparity-inf-1bzip2-ei-nop" "3mser-inf-1bzip2-ei-nop" "3sift-inf-1bzip2-ei-nop" "3svm-inf-1bzip2-ei-nop" "3texture_synthesis-inf-1bzip2-ei-nop" "3aifftr01-inf-1bzip2-ei-nop" "3aiifft01-inf-1bzip2-ei-nop" "3matrix01-inf-1bzip2-ei-nop")
 
 # for i in "${arr[@]}"
 # do
@@ -121,7 +128,7 @@ declare -a arr=("disparity-itr2-core3-sim-3b683-dmt-mdu" "mser-itr2-core3-sim-3b
 
 for i in "${arr[@]}"
 do
-     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mlock-dm/7.top-pages-98top-mdu --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux_98top --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/12.top-pages-98-palloc/cpt.6216768382500 && sleep 8d"
+     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/36-3rt-1bzip2-ei500 --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/14.n_dm_pages/cpt.6906782790500 && sleep 8d"
 done
 
 # for i in "${arr[@]}"
