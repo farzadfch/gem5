@@ -114,7 +114,7 @@ CONFIG=$1
 # declare -a arr=("3disparity-inf-1bzip2-ei-dma" "3mser-inf-1bzip2-ei-dma" "3sift-inf-1bzip2-ei-dma" "3svm-inf-1bzip2-ei-dma" "3texture_synthesis-inf-1bzip2-ei-dma" "3aifftr01-inf-1bzip2-ei-dma" "3aiifft01-inf-1bzip2-ei-dma" "3matrix01-inf-1bzip2-ei-dma")
 # declare -a arr=("3disparity-inf-1bzip2-ei-dmh" "3mser-inf-1bzip2-ei-dmh" "3sift-inf-1bzip2-ei-dmh" "3svm-inf-1bzip2-ei-dmh" "3texture_synthesis-inf-1bzip2-ei-dmh" "3aifftr01-inf-1bzip2-ei-dmh" "3aiifft01-inf-1bzip2-ei-dmh" "3matrix01-inf-1bzip2-ei-dmh")
 # declare -a arr=("3disparity-inf-1bzip2-ei-wp" "3mser-inf-1bzip2-ei-wp" "3sift-inf-1bzip2-ei-wp" "3svm-inf-1bzip2-ei-wp" "3texture_synthesis-inf-1bzip2-ei-wp" "3aifftr01-inf-1bzip2-ei-wp" "3aiifft01-inf-1bzip2-ei-wp" "3matrix01-inf-1bzip2-ei-wp")
-declare -a arr=("3disparity-inf-1bzip2-ei-nop" "3mser-inf-1bzip2-ei-nop" "3sift-inf-1bzip2-ei-nop" "3svm-inf-1bzip2-ei-nop" "3texture_synthesis-inf-1bzip2-ei-nop" "3aifftr01-inf-1bzip2-ei-nop" "3aiifft01-inf-1bzip2-ei-nop" "3matrix01-inf-1bzip2-ei-nop")
+# declare -a arr=("3disparity-inf-1bzip2-ei-nop" "3mser-inf-1bzip2-ei-nop" "3sift-inf-1bzip2-ei-nop" "3svm-inf-1bzip2-ei-nop" "3texture_synthesis-inf-1bzip2-ei-nop" "3aifftr01-inf-1bzip2-ei-nop" "3aiifft01-inf-1bzip2-ei-nop" "3matrix01-inf-1bzip2-ei-nop")
 
 # for i in "${arr[@]}"
 # do
@@ -128,7 +128,7 @@ declare -a arr=("3disparity-inf-1bzip2-ei-nop" "3mser-inf-1bzip2-ei-nop" "3sift-
 
 for i in "${arr[@]}"
 do
-     gnome-terminal -x bash -c "./build/ARM/gem5.opt -d mcf-expr/36-3rt-1bzip2-ei500 --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/14.n_dm_pages/cpt.6906782790500 && sleep 8d"
+     gnome-terminal -x bash -c "./build/ARM/gem5.fast -d ../results/mcf-expr/36-3rt-1bzip2-ei500 --stats-file=${i}.txt configs/spec2006/simpoint_fs.py --cfg=configs/spec2006/arm.cfg --disk-image=/home/farshchi/projects/gem5/full_system_images/disks/linux-arm-ael.img --num-cpus=4 --mem-size=2048MB --kernel=/home/farshchi/projects/gem5/gem5-linux/vmlinux --machine-type=VExpress_EMM --dtb-file=/home/farshchi/projects/gem5/gem5-linux/arch/arm/boot/dts/vexpress-v2p-ca15-tc1-gem5_4cpus.dtb --mem-type=lpddr2_s4_1066_x32 --simpoint-mode=batch --benchmark=$i --checkpoint-dir=m5out/1.n_dm_pages/cpt.5576797169500 && sleep 8d"
 done
 
 # for i in "${arr[@]}"
