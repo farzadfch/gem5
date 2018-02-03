@@ -62,6 +62,7 @@ using namespace std;
 
 // uint64_t reservedBanks = 4;
 // uint64_t reservedBankMask = (uint64_t(1) << reservedBanks) - 1;
+uint64_t dm_req_srv_thresh = 30;
 
 DRAMCtrl::DRAMCtrl(const DRAMCtrlParams* p) :
     AbstractMemory(p),
@@ -512,8 +513,8 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
             DRAMPacket* dram_pkt;
 
 #if 0
-	    string cpu0("cpu0"), cpus0("cpus0");
-	    string masterName = system()->getMasterName(pkt->req->masterId());
+            string cpu0("cpu0"), cpus0("cpus0");
+            string masterName = system()->getMasterName(pkt->req->masterId());
 
             if(masterName.find(cpu0) != string::npos || masterName.find(cpus0) != string::npos)
                 dram_pkt = decodeAddr(pkt, addr, size, true, true);
@@ -534,20 +535,31 @@ DRAMCtrl::addToReadQueue(PacketPtr pkt, unsigned int pktCount)
                 memGuard(cpu_id);
             }
 
-                if (dram_pkt->bank == 0) {
-                    //DPRINTF(PK, "Bank0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
-                    readBurstsBank0++;
-                }
-                //if (system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data")
-                if (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0){
-                //    DPRINTF(PK, "Core0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
-                    readBurstsCore0++;
-                }
-                //if ((system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data") && (dram_pkt->bank!=0))
-                if ( (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0) && (dram_pkt->bank!=0) ) {
-                //    DPRINTF(PK, "Other %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
-                    readBurstsCore0Other++;
-                }
+            if (dram_pkt->bank == 0) {
+                //DPRINTF(PK, "Bank0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
+                readBurstsBank0++;
+            }
+            //if (system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data")
+            if (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0){
+            //    DPRINTF(PK, "Core0 %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
+                readBurstsCore0++;
+            }
+            //if ((system()->getMasterName(dram_pkt->pkt->req->masterId()) == "switch_cpus0.data") && (dram_pkt->bank!=0))
+            if ( (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0) && (dram_pkt->bank!=0) ) {
+            //    DPRINTF(PK, "Other %s 0X%x\n",system()->getMasterName(dram_pkt->pkt->req->masterId()),addr);
+                readBurstsCore0Other++;
+            }
+            
+            string cpu3("cpu3"), cpus3("cpus3");
+            string masterName = system()->getMasterName(dram_pkt->pkt->req->masterId());
+
+            if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos) {
+                readBurstsCore3++;
+                if (dram_pkt->bank != 3)
+                    readBurstsCore3Other++;
+            }
+            if (dram_pkt->bank == 3)
+                readBurstsBank3++;           
 
             dram_pkt->burstHelper = burst_helper;
 
@@ -966,10 +978,23 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     bool found_reserved_diff_bank = false;
     bool found_reserved_same_bank = false;
     static uint64_t bankmaskSaved = system()->medusaReservedBankMask;
+    static uint64_t dm_req_srv_count = 0;
+    bool be_req_exist = false;
     auto selected_pkt_it = queue.begin();
     
     // printf("ReservedBankMask: %lx\n", system()->medusaReservedBankMask);
+    
+    if(!bankmaskSaved)
+        bankmaskSaved = system()->medusaReservedBankMask;
 
+    for (auto i = queue.begin(); i != queue.end() ; ++i) {
+        DRAMPacket* dram_pkt = *i;
+        if (~(system()->medusaReservedBankMask) & (0x01 << dram_pkt->bank)) {
+            be_req_exist = true;
+            break;
+        }
+    }
+    
     //overlapRequest(queue, banksPerRank);
     //Arbitrate Requests in the DRAM queue using two-level
     //hierarchical scheduler.
@@ -979,8 +1004,10 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
         // RR scheduler on reserved banks
         //resrevedBankMask, stores the mask bits for reserved Banks.
         //Check if the packet in the DRAM queue targets any of the reserved bank.
-        if( system()->medusaReservedBankMask & (0x01 << dram_pkt->bank) ) {
-        //bankmaskSaved initially has the reservedBankMask bits.
+        if ((system()->medusaReservedBankMask & (0x01 << dram_pkt->bank)) &&
+            !(be_req_exist && dm_req_srv_count >= dm_req_srv_thresh)) {
+            
+            //bankmaskSaved initially has the reservedBankMask bits.
             if( bankmaskSaved & (0x01 << dram_pkt->bank) ) {
                 selected_pkt_it = i;
                 found_reserved_diff_bank = true;
@@ -1050,6 +1077,7 @@ DRAMCtrl::reorderQueue(std::deque<DRAMPacket*>& queue, bool switched_cmd_type)
     //Reset round robin bank mask, if the queue doesn't have anymore requests from different banks
     if (!found_reserved_diff_bank & found_reserved_same_bank)
             bankmaskSaved = (system()->medusaReservedBankMask) & ~(0x01 << selected_pkt->bank);
+    dm_req_srv_count = system()->medusaReservedBankMask & (0x01 << selected_pkt->bank) ? dm_req_srv_count + 1 : 0;
     queue.erase(selected_pkt_it);
     queue.push_front(selected_pkt);
 }
@@ -1574,6 +1602,17 @@ DRAMCtrl::doDRAMAccess(DRAMPacket* dram_pkt)
         }
         if ( (system()->getMasterName(dram_pkt->pkt->req->masterId()).compare(7,4,"cpu0") == 0) && (dram_pkt->bank!=0) )
             totMemAccLatCore0Other += dram_pkt->readyTime - dram_pkt->entryTime;
+        
+        string cpu3("cpu3"), cpus3("cpus3");
+        string masterName = system()->getMasterName(dram_pkt->pkt->req->masterId());
+
+        if (masterName.find(cpu3) != string::npos || masterName.find(cpus3) != string::npos) {
+            totMemAccLatCore3 += dram_pkt->readyTime - dram_pkt->entryTime;
+            if (dram_pkt->bank != 3)
+                totMemAccLatCore3Other += dram_pkt->readyTime - dram_pkt->entryTime;
+        }
+        if (dram_pkt->bank == 3)
+            totMemAccLatBank3 += dram_pkt->readyTime - dram_pkt->entryTime;
 
     } else {
         ++writesThisTime;
@@ -2099,6 +2138,7 @@ DRAMCtrl::regStats()
         .name(name() + ".readBursts")
         .desc("Number of DRAM read bursts, "
               "including those serviced by the write queue");
+
     readBurstsCore0
         .name(name() + ".readBurstsCore0")
         .desc("Number of DRAM read bursts, "
@@ -2106,6 +2146,21 @@ DRAMCtrl::regStats()
 
     readBurstsCore0Other
         .name(name() + ".readBurstsCore0Other")
+        .desc("Number of DRAM read bursts, "
+              "including those serviced by the write queue");
+
+    readBurstsBank3
+        .name(name() + ".readBurstsBank3")
+        .desc("Number of DRAM read bursts, "
+              "including those serviced by the write queue");
+        
+    readBurstsCore3
+        .name(name() + ".readBurstsCore3")
+        .desc("Number of DRAM read bursts, "
+              "including those serviced by the write queue");
+
+    readBurstsCore3Other
+        .name(name() + ".readBurstsCore3Other")
         .desc("Number of DRAM read bursts, "
               "including those serviced by the write queue");
 
@@ -2179,6 +2234,21 @@ DRAMCtrl::regStats()
         .desc("Total ticks spent from burst creation until serviced "
               "by the DRAM");
 
+    totMemAccLatBank3
+        .name(name() + ".totMemAccLatBank3")
+        .desc("Total ticks spent from burst creation until serviced "
+              "by the DRAM");
+
+    totMemAccLatCore3
+        .name(name() + ".totMemAccLatCore3")
+        .desc("Total ticks spent from burst creation until serviced "
+              "by the DRAM");
+        
+    totMemAccLatCore3Other
+        .name(name() + ".totMemAccLatCore3Other")
+        .desc("Total ticks spent from burst creation until serviced "
+              "by the DRAM");
+        
     avgQLat
         .name(name() + ".avgQLat")
         .desc("Average queueing delay per DRAM burst")
@@ -2221,6 +2291,27 @@ DRAMCtrl::regStats()
         .precision(2);
 
     avgMemAccLatCore0Other = totMemAccLatCore0Other / (readBurstsCore0Other);
+    
+    avgMemAccLatBank3
+        .name(name() + ".avgMemAccLatBank3")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatBank3 = totMemAccLatBank3 / (readBurstsBank3);
+
+    avgMemAccLatCore3
+        .name(name() + ".avgMemAccLatCore3")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatCore3 = totMemAccLatCore3 / (readBurstsCore3);
+
+    avgMemAccLatCore3Other
+        .name(name() + ".avgMemAccLatCore3Other")
+        .desc("Average memory access latency per DRAM burst")
+        .precision(2);
+
+    avgMemAccLatCore3Other = totMemAccLatCore3Other / (readBurstsCore3Other);
 
     numRdRetry
         .name(name() + ".numRdRetry")

@@ -622,9 +622,11 @@ class BaseCache : public MemObject
             if (missCount == 0)
                 exitSimLoop("A cache reached the maximum miss count");
         }
-        if (isTopLevel == 0 && system->getCpuId(pkt->req->masterId()) == 0)
+        /* if (isTopLevel == 0 && system->getCpuId(pkt->req->masterId()) == 0)
             DPRINTF(CacheMiss, "%s VA:%08x DM:%d ASID:%d\n", system->getMasterName(pkt->req->masterId()), pkt->req->hasVaddr() ? pkt->req->getVaddr() : 0,
-                    pkt->req->isDeterministic(), pkt->req->hasVaddr() ? pkt->req->getAsid() : -1);
+                    pkt->req->isDeterministic(), pkt->req->hasVaddr() ? pkt->req->getAsid() : -1); */
+        if (name().compare("system.cpu3.dcache") == 0 || name().compare("system.cpu3.icache") == 0)
+            DPRINTF(CacheMiss, "VA:%08x PA:%08x M DM:%d ASID:%d\n", pkt->req->getVaddr(), pkt->getAddr(), pkt->req->isDeterministic(), pkt->req->getAsid());
     }
     void incHitCount(PacketPtr pkt)
     {

@@ -643,6 +643,9 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar readBurstsBank0;
     Stats::Scalar readBurstsCore0;
     Stats::Scalar readBurstsCore0Other;
+    Stats::Scalar readBurstsBank3;
+    Stats::Scalar readBurstsCore3;
+    Stats::Scalar readBurstsCore3Other;
     Stats::Scalar writeBursts;
     Stats::Scalar bytesReadDRAM;
     Stats::Scalar bytesReadWrQ;
@@ -671,6 +674,9 @@ class DRAMCtrl : public AbstractMemory
     Stats::Scalar totMemAccLatBank0;
     Stats::Scalar totMemAccLatCore0;
     Stats::Scalar totMemAccLatCore0Other;
+    Stats::Scalar totMemAccLatBank3;
+    Stats::Scalar totMemAccLatCore3;
+    Stats::Scalar totMemAccLatCore3Other;
     Stats::Scalar totBusLat;
 
     // Average latencies per request
@@ -680,6 +686,9 @@ class DRAMCtrl : public AbstractMemory
     Stats::Formula avgMemAccLatBank0;
     Stats::Formula avgMemAccLatCore0;
     Stats::Formula avgMemAccLatCore0Other;
+    Stats::Formula avgMemAccLatBank3;
+    Stats::Formula avgMemAccLatCore3;
+    Stats::Formula avgMemAccLatCore3Other;
 
     // Average bandwidth
     Stats::Formula avgRdBW;
